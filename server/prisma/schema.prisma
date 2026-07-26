@@ -1,0 +1,70 @@
+// Prisma Schema for LOGIN 2K26: "The Last Human Standing"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================================================
+// FUTURE MODELS PLACEHOLDER
+// =========================================================
+
+// // User Model Placeholder
+// // Includes authentication details, roles (STUDENT, ADMIN, ORGANIZER), profile links.
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   name      String
+//   password  String?
+//   googleId  String?  @unique
+//   role      Role     @default(STUDENT)
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// // Event Model Placeholder
+// // Technical event details, team size, venue, rules, timeline.
+// model Event {
+//   id          String   @id @default(uuid())
+//   title       String
+//   slug        String   @unique
+//   description String
+//   category    String
+//   teamSizeMax Int      @default(1)
+//   createdAt   DateTime @default(now())
+// }
+
+// // Registration Model Placeholder
+// // Connects Users with Events and tracks registration state.
+// model Registration {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   eventId   String
+//   status    String   @default("PENDING")
+//   createdAt DateTime @default(now())
+// }
+
+// // Payment Model Placeholder
+// // Razorpay transaction logs, order IDs, verification signatures.
+// model Payment {
+//   id            String   @id @default(uuid())
+//   razorpayOrderId String @unique
+//   razorpayPaymentId String?
+//   amount        Int
+//   currency      String   @default("INR")
+//   status        String
+//   createdAt     DateTime @default(now())
+// }
+
+// // Pass Model Placeholder
+// // Dynamic encrypted QR codes for venue check-in.
+// model Pass {
+//   id        String   @id @default(uuid())
+//   qrCode    String   @unique
+//   isScanned Boolean  @default(false)
+//   createdAt DateTime @default(now())
+// }
