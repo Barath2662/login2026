@@ -1,0 +1,287 @@
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { Menu, X, User as UserIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AuthModal } from './AuthModal';
+import { supabase } from '../lib/supabase';
+
+export const GlitchNavbar = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
+  const { isAuthenticated, survivor, resetAuth } = useAuthStore();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (location.pathname !== '/app') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
+    );
+
+    let sections: NodeListOf<HTMLElement>;
+    const timeout = setTimeout(() => {
+      sections = document.querySelectorAll('section[id]');
+      sections.forEach((section) => observer.observe(section));
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+      if (sections) {
+        sections.forEach((section) => observer.unobserve(section));
+      }
+    };
+  }, [location.pathname]);
+
+  const navLinks = [
+    { name: 'Home', path: '#home' },
+    { name: 'Enter the Multiverse', path: '#worlds' },
+    { name: 'About', path: '#about' },
+    { name: 'Legacy', path: '#legacy' },
+    { name: 'Contact', path: '#contact' },
+  ];
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    if (path.startsWith('#')) {
+      if (location.pathname !== '/app' && location.pathname !== '/') {
+        navigate(`/app${path}`);
+        return;
+      }
+      const id = path.substring(1);
+      if (id === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+      resetAuth();
+      setIsDropdownOpen(false);
+      // Fast route transition without waiting for full reload
+      navigate('/app', { replace: true });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-bg-primary/90 backdrop-blur-md border-b border-border-color shadow-[0_4px_30px_rgba(217,4,41,0.1)]'
+          : 'bg-transparent border-b border-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <Link to="/" onClick={(e) => handleNavClick(e, '#home')} className="flex items-center space-x-2 group">
+            <span className="font-mono font-bold text-2xl tracking-tighter text-white group-hover:text-color-red transition-colors">
+              LOGIN<span className="text-color-red group-hover:text-color-silver transition-colors">2K26</span>
+            </span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === '/app' ? activeSection === link.path.substring(1) : false;
+              return (
+                <a
+                  key={link.name}
+                  href={link.path}
+                  onClick={(e) => handleNavClick(e, link.path)}
+                  className={`text-sm font-medium transition-colors hover:text-color-red ${
+                    isActive ? 'text-color-red' : 'text-text-secondary'
+                  }`}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
+            
+            {isAuthenticated && survivor ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 w-10 h-10 rounded-full border border-color-red bg-bg-card justify-center text-color-red hover:bg-color-red/10 transition-colors shadow-[0_0_15px_rgba(217,4,41,0.2)] focus:outline-none"
+                >
+                  <UserIcon size={20} />
+                </button>
+
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-4 w-56 rounded-sm bg-[#111420] border border-[var(--color-red)] shadow-2xl overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-[var(--color-red)]/30">
+                        <p className="text-sm font-bold text-white truncate">{survivor.fullName}</p>
+                        <p className="text-xs text-text-muted font-mono">{survivor.role}</p>
+                      </div>
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                        >
+                          SURVIVOR DOSSIER
+                        </Link>
+                        <Link
+                          to="/hub"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                        >
+                          MULTIVERSE HUB
+                        </Link>
+                        <Link
+                          to="/profile#combat-log"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                        >
+                          COMBAT LOG
+                        </Link>
+                        {survivor.role === 'ADMIN' && (
+                          <Link
+                            to="/admin/id-records"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
+                          >
+                            ID RECORDS
+                          </Link>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          disabled={isLoggingOut}
+                          className="block w-full text-left px-4 py-2 text-sm text-color-danger hover:bg-color-danger/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isLoggingOut ? 'DISCONNECTING...' : 'ABORT CONNECTION'}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-5 py-2 text-sm font-medium rounded-sm bg-color-red text-black hover:bg-color-red/90 transition-colors shadow-[0_0_15px_rgba(239,35,60,0.3)] hover:shadow-[0_0_25px_rgba(239,35,60,0.5)] tracking-wider"
+              >
+                SURVIVOR LOGIN
+              </button>
+            )}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 text-text-secondary hover:text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-bg-secondary border-b border-border-color absolute top-20 left-0 right-0 shadow-xl">
+          <div className="px-4 pt-2 pb-6 space-y-1">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === '/app' ? activeSection === link.path.substring(1) : false;
+              return (
+                <a
+                  key={link.name}
+                  href={link.path}
+                  onClick={(e) => handleNavClick(e, link.path)}
+                  className={`block px-3 py-3 rounded-md text-base font-medium transition-colors ${
+                    isActive ? 'text-color-red bg-bg-card' : 'text-text-secondary hover:text-color-red hover:bg-bg-card'
+                  }`}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
+            <div className="pt-4 space-y-2">
+              {isAuthenticated && survivor ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    SURVIVOR DOSSIER
+                  </Link>
+                  <Link
+                    to="/hub"
+                    className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    MULTIVERSE HUB
+                  </Link>
+                  {survivor.role === 'ADMIN' && (
+                    <Link
+                      to="/admin/id-records"
+                      className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-color-silver hover:border-color-silver transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      ID RECORDS
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }}
+                    className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm bg-color-danger/20 text-color-danger hover:bg-color-danger/30 transition-colors"
+                  >
+                    ABORT CONNECTION
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => { setIsMobileMenuOpen(false); setIsAuthModalOpen(true); }}
+                  className="block w-full text-center px-5 py-3 text-base font-medium rounded-sm bg-color-red text-black hover:bg-color-red/90 transition-colors shadow-[0_0_15px_rgba(239,35,60,0.3)] tracking-wider"
+                >
+                  SURVIVOR LOGIN
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+    </header>
+  );
+};

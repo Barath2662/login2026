@@ -1,0 +1,21 @@
+:root {
+  --bg-primary: #050505;
+  --bg-secondary: #111111;
+  --bg-card: #111111;
+  
+  --color-red: #EF233C;
+  --color-red-dim: #D90429;
+  --color-danger: #FF0033;
+  --color-silver: #E5E5E5;
+  --color-silver-dim: #A8A9AD;
+  
+  --text-primary: #E5E5E5;
+  --text-secondary: #A8A9AD;
+  --text-muted: #8A8A8A;
+  
+  --border-color: #A8A9AD;
+  --border-highlight: var(--color-red);
+  
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}

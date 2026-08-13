@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+@import "./variables.css";
+@import "./fonts.css";
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  
+  --color-color-red: var(--color-red);
+  --color-color-red-dim: var(--color-red-dim);
+  --color-color-danger: var(--color-danger);
+  
+  --color-color-silver: var(--color-silver);
+  --color-color-silver-dim: var(--color-silver-dim);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  
+  --color-border-color: var(--border-color);
+  --color-border-highlight: var(--border-highlight);
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6, .glitch-text {
+    font-family: 'Orbitron', sans-serif !important;
+  }
+  
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-2px, -2px) rotate(-1deg); }
+    20% { transform: translate(2px, -1px) rotate(1deg); }
+    30% { transform: translate(-3px, 2px) rotate(0deg); }
+    40% { transform: translate(3px, -2px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(2px, 1px) rotate(0deg); }
+    70% { transform: translate(-2px, -1px) rotate(1deg); }
+    80% { transform: translate(1px, 2px) rotate(-1deg); }
+    90% { transform: translate(-3px, -2px) rotate(0deg); }
+  }
+}
