@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
@@ -29,13 +29,13 @@ const WORLD_POSITIONS = RIFT_COORDS_DESKTOP.map(getWorldPosition);
 const curve = new THREE.CatmullRomCurve3(WORLD_POSITIONS.slice(0, 10)); // Exclude finale initially
 const finaleCurve = new THREE.CatmullRomCurve3([WORLD_POSITIONS[9], WORLD_POSITIONS[10]]);
 
-const AnimatedRiftLine: React.FC<{ scrollRef: React.MutableRefObject<number>, isFinaleEligible: boolean }> = ({ scrollRef, isFinaleEligible }) => {
+const AnimatedRiftLine: React.FC<{ isFinaleEligible: boolean }> = ({ isFinaleEligible }) => {
   const lineRef = useRef<any>(null);
   const finaleLineRef = useRef<any>(null);
   const points = curve.getPoints(200);
   const finalePoints = finaleCurve.getPoints(50);
   
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     // The Line material from drei is exposed as meshLineMaterial
     if (lineRef.current?.material) {
       lineRef.current.material.dashOffset -= delta * 0.5;
@@ -77,9 +77,7 @@ const AnimatedRiftLine: React.FC<{ scrollRef: React.MutableRefObject<number>, is
 };
 
 const Scene: React.FC<{ scrollRef: React.MutableRefObject<number>, isFinaleEligible: boolean }> = ({ scrollRef, isFinaleEligible }) => {
-  const { viewport } = useThree();
-  
-  useFrame((state) => {
+    useFrame((state) => {
     const p = scrollRef.current;
     
     // We have 100 units of X. We want to pan so the camera follows the path.
@@ -99,7 +97,7 @@ const Scene: React.FC<{ scrollRef: React.MutableRefObject<number>, isFinaleEligi
       <ambientLight intensity={0.4} />
       <directionalLight position={[10, 10, 20]} intensity={1.5} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-      <AnimatedRiftLine scrollRef={scrollRef} isFinaleEligible={isFinaleEligible} />
+      <AnimatedRiftLine isFinaleEligible={isFinaleEligible} />
     </>
   );
 };
@@ -114,7 +112,7 @@ export const ConstellationTimeline3D = () => {
     queryKey: ['events'],
     queryFn: async () => {
       const res = await api.get('/events');
-      return res.data.events;
+      return Array.isArray(res.data) ? res.data : (res.data.events || []);
     },
     retry: 2
   });

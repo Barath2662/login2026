@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const LEGACY_YEARS = [
   { year: '2025', theme: 'The Awakening', description: 'The first signs of the AI anomaly.' },

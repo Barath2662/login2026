@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { WORLD_LORE, WorldLore } from '../../constants/worlds';
+import { WORLD_LORE } from '../../constants/worlds';
 import { useUserStore } from '../../store/userStore';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -52,7 +52,7 @@ export const ConstellationTimeline = () => {
     queryKey: ['events'],
     queryFn: async () => {
       const res = await api.get('/events');
-      return res.data.events;
+      return Array.isArray(res.data) ? res.data : (res.data.events || []);
     },
     retry: 2
   });

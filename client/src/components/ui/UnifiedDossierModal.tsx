@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { WORLD_LORE } from '../../constants/worlds';
-import { GlitchText } from './GlitchText';
 import { Button } from './Button';
 import { 
   X, Skull, TerminalSquare, AlertTriangle, ShieldAlert, 
-  ChevronLeft, ChevronRight, Clock, Lock, CheckCircle2, 
+  Clock, Lock, CheckCircle2, 
   Loader2, Info, Target, Cpu 
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -53,7 +52,7 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
     queryKey: ['events'],
     queryFn: async () => {
       const res = await api.get('/events');
-      return res.data.events;
+      return Array.isArray(res.data) ? res.data : (res.data.events || []);
     },
     enabled: isOpen && !propEvent,
     staleTime: 5 * 60 * 1000,
@@ -81,53 +80,32 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
           type: 'world_pass'
         });
       }
-      navigate('/armory');
+      navigate('/payment');
       return;
     }
 
     setIsRegistering(true);
     try {
-      // In the real backend plan, this might be api.post('/events/register')
-      // but matching the existing WorldDetailModal logic here:
-      const response = await api.post('/payment/create-cart-order', { worldIds: [eventData.id] });
-      if (response.data.bypassedPayment) {
-        setRegistrationSuccess(true);
-        const profileRes = await api.get('/users/me');
-        if (profileRes.data?.profile) {
-          setSurvivor(profileRes.data.profile);
-        }
-      } else {
-         // Fallback if the legacy route /events/register was actually implemented
-         await api.post('/events/register', { eventId: eventData.id });
-         setRegistrationSuccess(true);
+      await api.post('/registrations/', { event_id: eventData.id });
+      setRegistrationSuccess(true);
+      const profileRes = await api.get('/users/profile');
+      if (profileRes.data) {
+        setSurvivor(profileRes.data);
       }
     } catch (err: any) {
       console.error(err);
-      if (err.response?.status === 404 || err.response?.status === 400) {
-        // Fallback for new backend route
-        try {
-           await api.post('/events/register', { eventId: eventData.id });
-           setRegistrationSuccess(true);
-        } catch(fallbackErr) {
-           alert("Failed to establish secure link to Vanguard servers.");
-        }
+      if (err.response?.status === 403) {
+         alert(err.response.data?.message || "Complete the one-time payment first before registering.");
+      } else if (err.response?.status === 409) {
+         alert(err.response.data?.message || "Conflict with an existing registration.");
       } else {
-        alert("Failed to establish secure link to Vanguard servers.");
+         alert(err.response?.data?.message || "Failed to establish secure link to Vanguard servers.");
       }
     } finally {
       setIsRegistering(false);
     }
   };
 
-  const goToPrev = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (prevWorld) navigate(`?world=${prevWorld.id}`);
-  };
-
-  const goToNext = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (nextWorld) navigate(`?world=${nextWorld.id}`);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDialogElement>) => {
     if (e.key === 'ArrowLeft' && prevWorld) navigate(`?world=${prevWorld.id}`);
@@ -150,16 +128,21 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
 
   if (!eventData) return null;
 
-  const lore = WORLD_LORE[eventData.worldNumber] || {
-    name: eventData.title,
+  const worldNum = eventData.worldNumber || eventData.id;
+  
+  // Ensure the world number maps to an existing image/lore (1-11)
+  const normalizedWorldNum = ((worldNum - 1) % 11) + 1;
+  const paddedNum = normalizedWorldNum < 10 ? `0${normalizedWorldNum}` : normalizedWorldNum;
+
+  const lore = WORLD_LORE[normalizedWorldNum] || {
+    name: eventData.title || eventData.name,
     theme: eventData.category || 'Unknown',
     villainName: eventData.invaderName || 'NULL_SECTOR',
     villainQuote: '"Your firewalls are built on fragile logic. My chaos is absolute."'
   };
 
-  const isFinale = eventData.worldNumber === 11;
+  const isFinale = normalizedWorldNum === 11;
   const primaryColor = isFinale ? 'text-color-danger' : 'text-color-red';
-  const bgColor = isFinale ? 'bg-color-danger/5' : 'bg-color-red/5';
   const borderColor = isFinale ? 'border-color-danger/30' : 'border-color-red/30';
   const glowShadow = isFinale ? 'shadow-[0_0_50px_rgba(239,68,68,0.15)]' : 'shadow-[0_0_50px_rgba(217,4,41,0.15)]';
 
@@ -209,7 +192,7 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
               <div className={`w-20 h-20 md:w-24 md:h-24 rounded-lg border-2 flex items-center justify-center flex-shrink-0
                 ${isFinale ? 'border-color-danger bg-color-danger/10 text-color-danger shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'border-color-red bg-color-red/10 text-color-red shadow-[0_0_20px_rgba(217,4,41,0.2)]'}
               `}>
-                <span className="font-mono text-4xl md:text-5xl font-bold">{eventData.worldNumber < 10 ? `0${eventData.worldNumber}` : eventData.worldNumber}</span>
+                <span className="font-mono text-4xl md:text-5xl font-bold">{paddedNum}</span>
               </div>
 
               <div className="space-y-1">
@@ -313,7 +296,7 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
                   <div className={`w-full sm:w-2/3 md:w-1/3 mx-auto aspect-square rounded-md border overflow-hidden flex-shrink-0 relative bg-[#050505] ${isFinale ? 'border-color-danger shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'border-color-red shadow-[0_0_20px_rgba(217,4,41,0.2)]'}`}>
                     <div className="absolute inset-0 bg-[url('/scanlines.png')] opacity-20 mix-blend-overlay pointer-events-none z-10" />
                     <img
-                      src={`/src/assets/villains/${eventData.id}.png`}
+                      src={`/src/assets/villains/world-${paddedNum}.png`}
                       alt={lore.villainName}
                       className="w-full h-full object-cover relative z-0 mix-blend-hard-light grayscale sepia hue-rotate-[320deg] saturate-[300%] brightness-75"
                       onError={(e) => {

@@ -4,12 +4,11 @@ import { useAuthStore } from '../store/authStore';
 import { Menu, X, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthModal } from './AuthModal';
-import { supabase } from '../lib/supabase';
+import { api } from '../services/api';
 
 export const GlitchNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
@@ -25,72 +24,28 @@ export const GlitchNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (location.pathname !== '/app') return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
-    );
-
-    let sections: NodeListOf<HTMLElement>;
-    const timeout = setTimeout(() => {
-      sections = document.querySelectorAll('section[id]');
-      sections.forEach((section) => observer.observe(section));
-    }, 500);
-
-    return () => {
-      clearTimeout(timeout);
-      if (sections) {
-        sections.forEach((section) => observer.unobserve(section));
-      }
-    };
-  }, [location.pathname]);
-
   const navLinks = [
-    { name: 'Home', path: '#home' },
-    { name: 'Enter the Multiverse', path: '#worlds' },
-    { name: 'About', path: '#about' },
-    { name: 'Legacy', path: '#legacy' },
-    { name: 'Contact', path: '#contact' },
+    { name: 'Home', path: '/home' },
+    { name: 'Enter the Multiverse', path: '/events' },
+    { name: 'About', path: '/about' },
+    { name: 'Legacy', path: '/legacy' },
+    { name: 'Contact', path: '/contact' },
   ];
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    e.preventDefault();
-    if (path.startsWith('#')) {
-      if (location.pathname !== '/app' && location.pathname !== '/') {
-        navigate(`/app${path}`);
-        return;
-      }
-      const id = path.substring(1);
-      if (id === 'home') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
-      setIsMobileMenuOpen(false);
-    }
-  };
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await supabase.auth.signOut();
+      await api.auth.logout();
       resetAuth();
       setIsDropdownOpen(false);
-      // Fast route transition without waiting for full reload
-      navigate('/app', { replace: true });
+      window.location.href = '/';
+    } catch (err) {
+      console.error(err);
+      resetAuth();
+      setIsDropdownOpen(false);
+      window.location.href = '/';
     } finally {
       setIsLoggingOut(false);
     }
@@ -107,7 +62,7 @@ export const GlitchNavbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" onClick={(e) => handleNavClick(e, '#home')} className="flex items-center space-x-2 group">
+          <Link to="/home" className="flex items-center space-x-2 group">
             <span className="font-mono font-bold text-2xl tracking-tighter text-white group-hover:text-color-red transition-colors">
               LOGIN<span className="text-color-red group-hover:text-color-silver transition-colors">2K26</span>
             </span>
@@ -115,19 +70,18 @@ export const GlitchNavbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => {
-              const isActive = location.pathname === '/app' ? activeSection === link.path.substring(1) : false;
+            {(!isAuthenticated || !survivor || survivor.role === 'student') && navLinks.map((link) => {
+              const isActive = location.pathname.startsWith(link.path);
               return (
-                <a
+                <Link
                   key={link.name}
-                  href={link.path}
-                  onClick={(e) => handleNavClick(e, link.path)}
+                  to={link.path}
                   className={`text-sm font-medium transition-colors hover:text-color-red ${
                     isActive ? 'text-color-red' : 'text-text-secondary'
                   }`}
                 >
                   {link.name}
-                </a>
+                </Link>
               );
             })}
             
@@ -150,38 +104,76 @@ export const GlitchNavbar = () => {
                       className="absolute right-0 mt-4 w-56 rounded-sm bg-[#111420] border border-[var(--color-red)] shadow-2xl overflow-hidden"
                     >
                       <div className="px-4 py-3 border-b border-[var(--color-red)]/30">
-                        <p className="text-sm font-bold text-white truncate">{survivor.fullName}</p>
+                        <p className="text-sm font-bold text-white truncate">{survivor.name}</p>
                         <p className="text-xs text-text-muted font-mono">{survivor.role}</p>
                       </div>
                       <div className="py-1">
-                        <Link
-                          to="/profile"
-                          onClick={() => setIsDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
-                        >
-                          SURVIVOR DOSSIER
-                        </Link>
-                        <Link
-                          to="/hub"
-                          onClick={() => setIsDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
-                        >
-                          MULTIVERSE HUB
-                        </Link>
-                        <Link
-                          to="/profile#combat-log"
-                          onClick={() => setIsDropdownOpen(false)}
-                          className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
-                        >
-                          COMBAT LOG
-                        </Link>
-                        {survivor.role === 'ADMIN' && (
+                        {survivor.role === 'student' && (
+                          <>
+                            <Link
+                              to="/profile"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                            >
+                              SURVIVOR DOSSIER
+                            </Link>
+                            <Link
+                              to="/dashboard"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                            >
+                              MULTIVERSE HUB
+                            </Link>
+                            <Link
+                              to="/registered-events"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                            >
+                              REGISTERED EVENTS
+                            </Link>
+                            <Link
+                              to="/team"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="block px-4 py-2 text-sm text-text-secondary hover:bg-[var(--color-red)]/10 hover:text-[var(--color-red)] transition-colors"
+                            >
+                              SQUAD / TEAM
+                            </Link>
+                          </>
+                        )}
+                        {survivor.role === 'event_coordinator' && (
                           <Link
-                            to="/admin/id-records"
+                            to="/event-dashboard"
                             onClick={() => setIsDropdownOpen(false)}
                             className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
                           >
-                            ID RECORDS
+                            EVENT DASHBOARD
+                          </Link>
+                        )}
+                        {survivor.role === 'admin' && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
+                          >
+                            ADMIN DASHBOARD
+                          </Link>
+                        )}
+                        {survivor.role === 'special_user' && (
+                          <Link
+                            to="/special-user"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
+                          >
+                            SPECIAL DASHBOARD
+                          </Link>
+                        )}
+                        {survivor.role === 'junior_attendance' && (
+                          <Link
+                            to="/junior-attendance"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
+                          >
+                            JUNIOR ATTENDANCE
                           </Link>
                         )}
                         <button
@@ -220,45 +212,90 @@ export const GlitchNavbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-bg-secondary border-b border-border-color absolute top-20 left-0 right-0 shadow-xl">
           <div className="px-4 pt-2 pb-6 space-y-1">
-            {navLinks.map((link) => {
-              const isActive = location.pathname === '/app' ? activeSection === link.path.substring(1) : false;
+            {(!isAuthenticated || !survivor || survivor.role === 'student') && navLinks.map((link) => {
+              const isActive = location.pathname.startsWith(link.path);
               return (
-                <a
+                <Link
                   key={link.name}
-                  href={link.path}
-                  onClick={(e) => handleNavClick(e, link.path)}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`block px-3 py-3 rounded-md text-base font-medium transition-colors ${
                     isActive ? 'text-color-red bg-bg-card' : 'text-text-secondary hover:text-color-red hover:bg-bg-card'
                   }`}
                 >
                   {link.name}
-                </a>
+                </Link>
               );
             })}
             <div className="pt-4 space-y-2">
               {isAuthenticated && survivor ? (
                 <>
-                  <Link
-                    to="/profile"
-                    className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    SURVIVOR DOSSIER
-                  </Link>
-                  <Link
-                    to="/hub"
-                    className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    MULTIVERSE HUB
-                  </Link>
-                  {survivor.role === 'ADMIN' && (
+                  {survivor.role === 'student' && (
+                    <>
+                      <Link
+                        to="/profile"
+                        className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        SURVIVOR DOSSIER
+                      </Link>
+                      <Link
+                        to="/dashboard"
+                        className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        MULTIVERSE HUB
+                      </Link>
+                      <Link
+                        to="/registered-events"
+                        className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        REGISTERED EVENTS
+                      </Link>
+                      <Link
+                        to="/team"
+                        className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-text-secondary hover:text-[var(--color-red)] hover:border-[var(--color-red)] transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        SQUAD / TEAM
+                      </Link>
+                    </>
+                  )}
+                  {survivor.role === 'event_coordinator' && (
                     <Link
-                      to="/admin/id-records"
+                      to="/event-dashboard"
                       className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-color-silver hover:border-color-silver transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      ID RECORDS
+                      EVENT DASHBOARD
+                    </Link>
+                  )}
+                  {survivor.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-color-silver hover:border-color-silver transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      ADMIN DASHBOARD
+                    </Link>
+                  )}
+                  {survivor.role === 'special_user' && (
+                    <Link
+                      to="/special-user"
+                      className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-color-silver hover:border-color-silver transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      SPECIAL DASHBOARD
+                    </Link>
+                  )}
+                  {survivor.role === 'junior_attendance' && (
+                    <Link
+                      to="/junior-attendance"
+                      className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-color-silver hover:border-color-silver transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      JUNIOR ATTENDANCE
                     </Link>
                   )}
                   <button

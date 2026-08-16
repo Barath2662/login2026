@@ -2,8 +2,7 @@ import { FC, useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import imageCompression from 'browser-image-compression';
 import { api } from '../services/api';
-import { supabase } from '../lib/supabase';
-import { UploadCloud, CheckCircle2, Loader2, FileText, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileCompletionModalProps {
@@ -12,7 +11,7 @@ interface ProfileCompletionModalProps {
 }
 
 export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen, onClose }) => {
-  const { session, setSurvivor } = useAuthStore();
+  const { survivor, setSurvivor } = useAuthStore();
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -22,10 +21,6 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
     department: '',
   });
 
-  const [idFront, setIdFront] = useState<File | null>(null);
-  const [idBack, setIdBack] = useState<File | null>(null);
-  
-  // Bonafide state
   const [bonafideUrl, setBonafideUrl] = useState<string | null>(null);
   const [isUploadingBonafide, setIsUploadingBonafide] = useState(false);
   
@@ -36,9 +31,9 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (session?.user) {
-      const defaultName = session.user.user_metadata?.full_name || '';
-      const email = session.user.email || '';
+    if (survivor) {
+      const defaultName = survivor.name || '';
+      const email = survivor.email || '';
       
       if (email.endsWith('@psgtech.ac.in')) {
         const roll = email.split('@')[0].toUpperCase();
@@ -47,19 +42,9 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
         setFormData(prev => ({ ...prev, fullName: defaultName, rollNo: '', college: '' }));
       }
     }
-  }, [session]);
+  }, [survivor]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, setFile: React.Dispatch<React.SetStateAction<File | null>>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        setError('Only JPEG and PNG images are allowed for ID cards.');
-        return;
-      }
-      setFile(file);
-      setError(null);
-    }
-  };
+
 
   const handleBonafideUpload = async (file: File) => {
     if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
@@ -74,24 +59,22 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
     setIsUploadingBonafide(true);
     setError(null);
     try {
-      const { data: urlData } = await api.post('/storage/upload-url', {
-        side: 'bonafide',
-        contentType: file.type
-      });
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'login2k26_preset');
 
-      const uploadRes = await fetch(urlData.signedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
-      });
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'login2k26'}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
       if (!uploadRes.ok) throw new Error('Upload failed');
+      const data = await uploadRes.json();
 
-      const { data: publicUrlData } = supabase.storage
-        .from('survivor-documents')
-        .getPublicUrl(urlData.path);
-
-      setBonafideUrl(publicUrlData.publicUrl);
+      setBonafideUrl(data.secure_url);
     } catch (err: any) {
       console.error('Error uploading Bonafide:', err);
       setError('Failed to upload Bonafide Certificate. Please try again.');
@@ -100,52 +83,29 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
     }
   };
 
-  const compressAndUpload = async (file: File, side: 'front' | 'back') => {
-    const options = { maxSizeMB: 5, maxWidthOrHeight: 1920, useWebWorker: true };
-    const compressedFile = await imageCompression(file, options);
 
-    const { data: urlData } = await api.post('/storage/upload-url', {
-      side,
-      contentType: compressedFile.type
-    });
-
-    const uploadRes = await fetch(urlData.signedUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': compressedFile.type },
-      body: compressedFile
-    });
-
-    if (!uploadRes.ok) throw new Error(`Failed to upload ${side} ID card`);
-    return urlData.path;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!idFront || !idBack) {
-      setError('Both front and back ID card images are required.');
-      return;
-    }
-    if (!bonafideUrl) {
-      setError('Bonafide Certificate upload is required.');
-      return;
-    }
-
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const frontPath = await compressAndUpload(idFront, 'front');
-      const backPath = await compressAndUpload(idBack, 'back');
+      // 1. Submit Bonafide URL if provided
+      if (bonafideUrl) {
+        await api.post('/bonafides/', { file_url: bonafideUrl });
+      }
 
-      const { data } = await api.post('/users/complete-profile', {
-        ...formData,
-        fullName: formData.fullName || session?.user?.user_metadata?.full_name || 'Unknown Survivor',
-        idCardFrontUrl: frontPath,
-        idCardBackUrl: backPath,
-        bonafideUrl
+      // 2. Update Profile
+      const { data } = await api.put('/users/profile', {
+        name: formData.fullName || survivor?.name || 'Unknown Survivor',
+        phone: formData.mobileNo,
+        college_name: formData.college,
+        department: formData.department,
+        roll_no: formData.rollNo
       });
 
-      setSurvivor(data);
+      setSurvivor(data.user || data);
       onClose();
     } catch (err: any) {
       console.error('Profile completion error:', err);
@@ -201,7 +161,7 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
                   <input
                     type="email"
                     readOnly
-                    value={session?.user?.email || ''}
+                    value={survivor?.email || ''}
                     className="w-full bg-transparent border-0 border-b border-[#A8A9AD]/50 px-0 py-1 text-white/50 font-mono text-sm outline-none cursor-not-allowed"
                   />
                 </div>
@@ -251,40 +211,18 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
                 </div>
               </div>
 
-              {/* ID Cards Section */}
-              <div className="pt-4 border-t border-[#A8A9AD]/30 space-y-3">
-                <h3 className="text-xs font-bold text-[#D90429] uppercase tracking-widest font-mono">
-                  College ID Verification
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-[#A8A9AD] font-mono mb-2">FRONT SIDE (JPG/PNG) *</label>
-                    <input 
-                      type="file" 
-                      accept="image/jpeg, image/png"
-                      onChange={(e) => handleImageChange(e, setIdFront)}
-                      className="w-full text-[10px] sm:text-xs text-[#A8A9AD] file:mr-2 file:py-1 file:px-2 sm:file:mr-4 sm:file:py-1.5 sm:file:px-4 file:border-0 file:text-xs file:font-mono file:bg-[#D90429]/10 file:text-[#D90429] hover:file:bg-[#D90429]/20 cursor-pointer"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-[#A8A9AD] font-mono mb-2">BACK SIDE (JPG/PNG) *</label>
-                    <input 
-                      type="file" 
-                      accept="image/jpeg, image/png"
-                      onChange={(e) => handleImageChange(e, setIdBack)}
-                      className="w-full text-[10px] sm:text-xs text-[#A8A9AD] file:mr-2 file:py-1 file:px-2 sm:file:mr-4 sm:file:py-1.5 sm:file:px-4 file:border-0 file:text-xs file:font-mono file:bg-[#D90429]/10 file:text-[#D90429] hover:file:bg-[#D90429]/20 cursor-pointer"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+
 
               {/* Bonafide Dropzone */}
               <div className="pt-4 border-t border-[#A8A9AD]/30 space-y-3">
-                <h3 className="text-xs font-bold text-[#D90429] uppercase tracking-widest font-mono">
-                  Bonafide Certificate *
-                </h3>
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-xs font-bold text-[#D90429] uppercase tracking-widest font-mono">
+                    Bonafide Certificate (Optional)
+                  </h3>
+                  <p className="text-[#A8A9AD] text-[10px] font-mono leading-tight">
+                    * You may skip this now, but you MUST upload your Bonafide Certificate within 2 days of registration to verify your identity.
+                  </p>
+                </div>
                 
                 <div 
                   className={`relative w-full border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center transition-all cursor-pointer overflow-hidden
@@ -351,7 +289,7 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
                   onClick={async () => {
                     setIsDisconnecting(true);
                     try {
-                      await supabase.auth.signOut();
+                      await api.auth.logout();
                       useAuthStore.getState().resetAuth();
                       onClose();
                     } finally {

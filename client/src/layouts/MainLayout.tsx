@@ -6,14 +6,13 @@ import { useThemeStore } from '../store/themeStore';
 import { ProfileCompletionModal } from '../components/ProfileCompletionModal';
 import { useAuthStore } from '../store/authStore';
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { api } from '../services/api';
 import { CinematicIntro } from '../components/CinematicIntro';
 
 export const MainLayout = () => {
   const location = useLocation();
   const { reduceMotion } = useThemeStore();
-  const { session, survivor, setSession, setSurvivor, resetAuth, setInitialized } = useAuthStore();
+  const { token, survivor, setSurvivor, resetAuth, setInitialized } = useAuthStore();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('intro_seen'));
 
@@ -23,52 +22,34 @@ export const MainLayout = () => {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
-        setInitialized(true);
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
-        setInitialized(true);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setSession, setInitialized]);
-
-  useEffect(() => {
     const fetchProfile = async () => {
-      if (session && !survivor) {
+      if (token && !survivor) {
         try {
-          const { data } = await api.get('/users/me');
-          if (data.exists) {
-            setSurvivor(data.profile);
+          const { data } = await api.users.profile();
+          if (data && data.college_name && data.phone) {
+            setSurvivor(data);
             setShowProfileModal(false);
           } else {
+            setSurvivor(data);
             setShowProfileModal(true);
           }
         } catch (error) {
           console.error("Error fetching user profile", error);
+          resetAuth();
         } finally {
           setInitialized(true);
         }
-      } else if (!session) {
+      } else if (!token) {
         resetAuth();
         setShowProfileModal(false);
         setInitialized(true);
-      } else if (session && survivor) {
+      } else if (token && survivor) {
         setInitialized(true);
       }
     };
     
     fetchProfile();
-  }, [session, survivor, setSurvivor, resetAuth, setInitialized]);
+  }, [token, survivor, setSurvivor, resetAuth, setInitialized]);
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-primary text-text-primary overflow-x-hidden">

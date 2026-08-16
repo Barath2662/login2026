@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Html, Torus } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { easing } from 'maath';
 import { getPlanetConfig } from '../../config/planetConfigs';
@@ -51,7 +51,7 @@ export const LevelPortalNode: React.FC<LevelPortalNodeProps> = ({
     baseColor.set('#222222'); // Graphite
   }
 
-  useFrame((stateObj, delta) => {
+  useFrame((_, delta) => {
     // Rotation
     if (ringRef.current && state.isFinale) {
       ringRef.current.rotation.z -= delta * 0.5;

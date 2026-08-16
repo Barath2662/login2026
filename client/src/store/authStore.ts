@@ -1,47 +1,46 @@
 import { create } from 'zustand';
-import { Session } from '@supabase/supabase-js';
 
-interface SurvivorProfile {
-  id: string;
+export interface SurvivorProfile {
+  id: number;
+  name: string;
   email: string;
-  fullName: string;
-  college: string | null;
-  rollNo: string | null;
-  mobileNo: string | null;
+  phone: string | null;
+  college_name: string | null;
   department: string | null;
-  idUploadStatus: 'MISSING' | 'UPLOADED';
-  hasPaidFee: boolean;
-  role: 'USER' | 'ADMIN' | 'MODERATOR' | 'SURVIVOR' | 'GATE_VOLUNTEER';
-  registrations: any[];
-  squads: any[];
+  roll_no: string | null;
+  role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin';
+  is_active: boolean;
+  hasPaidFee?: boolean;
 }
 
 interface AuthState {
   isInitialized: boolean;
   isAuthenticated: boolean;
   token: string | null;
-  session: Session | null;
   survivor: SurvivorProfile | null;
   setInitialized: (isInitialized: boolean) => void;
   setAuth: (isAuthenticated: boolean, token: string | null) => void;
-  setSession: (session: Session | null) => void;
   setSurvivor: (survivor: SurvivorProfile | null) => void;
-  updatePaidStatus: () => void;
   resetAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   isInitialized: false,
-  isAuthenticated: false,
-  token: null,
-  session: null,
+  isAuthenticated: !!localStorage.getItem('token'),
+  token: localStorage.getItem('token'),
   survivor: null,
   setInitialized: (isInitialized) => set({ isInitialized }),
-  setAuth: (isAuthenticated, token) => set({ isAuthenticated, token }),
-  setSession: (session) => set({ session, token: session?.access_token || null, isAuthenticated: !!session }),
+  setAuth: (isAuthenticated, token) => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+    set({ isAuthenticated, token });
+  },
   setSurvivor: (survivor) => set({ survivor }),
-  updatePaidStatus: () => set((state) => ({
-    survivor: state.survivor ? { ...state.survivor, hasPaidFee: true } : null
-  })),
-  resetAuth: () => set({ isAuthenticated: false, token: null, session: null, survivor: null }), // Don't reset isInitialized
+  resetAuth: () => {
+    localStorage.removeItem('token');
+    set({ isAuthenticated: false, token: null, survivor: null });
+  },
 }));

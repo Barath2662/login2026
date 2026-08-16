@@ -2,6 +2,8 @@ import React from 'react';
 import { Lock, Unlock, Users, MapPin, Clock } from 'lucide-react';
 import { Button } from './Button';
 
+import { WORLD_LORE } from '../../constants/worlds';
+
 interface EventCardProps {
   event: any;
   isRegistered: boolean;
@@ -21,46 +23,54 @@ export const EventCard: React.FC<EventCardProps> = ({
   const closesAt = new Date(event.registrationClosesAt);
   const isClosed = now > closesAt;
 
+  const worldNum = event.worldNumber || event.id;
+  const normalizedWorldNum = ((worldNum - 1) % 11) + 1;
+  const paddedNum = normalizedWorldNum < 10 ? `0${normalizedWorldNum}` : normalizedWorldNum;
+  
+  const lore = WORLD_LORE[normalizedWorldNum] || { theme: 'Unknown' };
+  const title = event.title || event.name;
+  const category = event.category || lore.theme;
+
   return (
     <div 
-      className={`w-full p-6 bg-bg-primary border border-border-color rounded-sm transition-all duration-300 hover:border-color-red hover:shadow-[0_0_20px_rgba(239,35,60,0.15)] group ${className}`}
+      className={`w-full p-4 md:p-5 bg-bg-primary border border-border-color rounded-sm transition-all duration-300 hover:border-color-red hover:shadow-[0_0_20px_rgba(239,35,60,0.15)] group ${className}`}
     >
-      <div className={`flex flex-col gap-4 ${isLeftAligned ? 'md:text-right' : 'md:text-left'}`}>
+      <div className={`flex flex-col gap-2 md:gap-3 ${isLeftAligned ? 'md:text-right' : 'md:text-left'}`}>
         
         <div>
-          <span className="font-mono text-xs text-text-secondary uppercase tracking-widest block mb-2">
-            WORLD {event.worldNumber < 10 ? `0${event.worldNumber}` : event.worldNumber} // {event.category}
+          <span className="font-mono text-[10px] text-text-secondary uppercase tracking-widest block mb-1">
+            WORLD {paddedNum} // {category}
           </span>
-          <h3 className="text-2xl md:text-3xl font-black text-text-primary uppercase group-hover:text-color-silver transition-colors">
-            {event.title}
+          <h3 className="text-xl md:text-2xl font-black text-text-primary uppercase group-hover:text-color-silver transition-colors">
+            {title}
           </h3>
         </div>
 
-        <p className="text-sm text-text-secondary line-clamp-3 text-left md:text-inherit">
+        <p className="text-xs md:text-sm text-text-secondary line-clamp-2 text-left md:text-inherit leading-relaxed">
           {event.description}
         </p>
 
         {/* Tactical Mini-Specs */}
-        <div className={`flex flex-wrap gap-4 mt-2 ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
-          <div className="flex items-center text-xs text-text-muted font-mono">
+        <div className={`flex flex-wrap gap-3 mt-1 ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
+          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <Users size={12} className="mr-1 text-color-red" />
             {event.isTeam ? `${event.minTeamSize}-${event.maxTeamSize} OP` : 'SOLO'}
           </div>
-          <div className="flex items-center text-xs text-text-muted font-mono">
+          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <MapPin size={12} className="mr-1 text-color-silver" />
             {event.venue || 'TBA'}
           </div>
-          <div className="flex items-center text-xs text-text-muted font-mono">
+          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <Clock size={12} className="mr-1 text-color-silver" />
             {event.time || 'TBA'}
           </div>
         </div>
 
-        <div className={`mt-4 flex ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
+        <div className={`mt-2 flex ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
           <Button
             onClick={() => onClick(event)}
             aria-label={`View dossier for ${event.title}`}
-            className={`active:scale-95 cursor-pointer font-mono tracking-wider w-full md:w-auto ${
+            className={`active:scale-95 cursor-pointer font-mono tracking-wider w-full md:w-auto text-xs py-2 px-4 ${
               isRegistered 
                 ? 'bg-color-red/20 text-color-red border border-color-red hover:bg-color-red hover:text-black' 
                 : isClosed 

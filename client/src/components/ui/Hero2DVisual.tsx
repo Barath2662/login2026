@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 export const Hero2DVisual = () => {
   const ref = useRef<HTMLDivElement>(null);

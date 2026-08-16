@@ -14,7 +14,7 @@ export const HubNodeGraph = () => {
     queryKey: ['events'],
     queryFn: async () => {
       const res = await api.get('/events');
-      return res.data.events;
+      return Array.isArray(res.data) ? res.data : (res.data.events || []);
     }
   });
 
