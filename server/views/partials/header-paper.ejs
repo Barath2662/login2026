@@ -1,0 +1,50 @@
+<header style="background-color: var(--paper-2); border-bottom: 1px solid var(--on-paper-muted); padding: 16px 24px;">
+  <div style="max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+    
+    <!-- Brand Mark -->
+    <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--on-paper);" class="misregister-hover">
+      <img src="/assets/logo.svg" alt="LOGIN 2026" style="height: 36px; width: auto;" />
+      <div>
+        <div style="font-family: var(--font-poster); font-weight: 800; font-size: 20px;">
+          LOGIN <span style="color: var(--red);">2026</span>
+        </div>
+        <div style="font-family: var(--font-data); font-size: 9px; color: var(--on-paper-muted); letter-spacing: 0.14em;">
+          FIELD MANUAL · DESK
+        </div>
+      </div>
+    </a>
+
+    <!-- Nav Links (Role-Aware) -->
+    <nav style="display: flex; gap: 24px; font-family: var(--font-text); font-size: 14px; font-weight: 600;">
+      <% if (user && (user.role === 'admin' || user.role === 'admin_power')) { %>
+        <a href="/admin" style="color: var(--red); text-decoration: none; font-weight: 800;">ADMIN CONTROL SURFACE</a>
+        <a href="/events" style="color: var(--on-paper); text-decoration: none;">EVENTS (11)</a>
+        <a href="/legacy" style="color: var(--on-paper); text-decoration: none;">LEGACY</a>
+      <% } else if (user && user.role === 'event_coordinator') { %>
+        <a href="/coordinator" style="color: var(--red); text-decoration: none; font-weight: 800;">COORDINATOR DESK</a>
+        <a href="/events" style="color: var(--on-paper); text-decoration: none;">EVENTS (11)</a>
+      <% } else { %>
+        <a href="/dashboard" style="color: var(--on-paper); text-decoration: none;">DOSSIER</a>
+        <a href="/profile" style="color: var(--on-paper); text-decoration: none;">PROFILE & PAYMENT</a>
+        <a href="/events" style="color: var(--on-paper); text-decoration: none;">EVENTS INDEX</a>
+      <% } %>
+    </nav>
+
+    <!-- Auth User Info -->
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <% if (user) { %>
+        <span style="font-family: var(--font-data); font-size: 11px; font-weight: 700; color: var(--on-paper);">
+          <%= user.role.toUpperCase() %>: <%= user.name %>
+        </span>
+        <form action="/logout" method="post" style="display: inline;">
+          <button type="submit" style="background: transparent; color: var(--red); border: 1px solid var(--red); padding: 6px 12px; font-family: var(--font-data); font-size: 11px; font-weight: 700; cursor: pointer;">
+            LOGOUT
+          </button>
+        </form>
+      <% } else { %>
+        <a href="/login" style="color: var(--on-paper); text-decoration: none; font-family: var(--font-data); font-size: 12px; font-weight: 700;">SIGN IN</a>
+      <% } %>
+    </div>
+
+  </div>
+</header>

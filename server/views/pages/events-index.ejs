@@ -1,0 +1,68 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px;">
+  
+  <!-- Filter Bar -->
+  <div style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <span style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 800;">CATEGORY FILTER:</span>
+      <a href="/events" style="background: <%= activeCategory === 'ALL' ? 'var(--red)' : 'transparent' %>; color: #FFF; border: 1px solid var(--red-40); padding: 6px 16px; font-family: var(--font-data); font-size: 11px; text-decoration: none; font-weight: 700;">
+        ALL ARENAS
+      </a>
+      <a href="/events?category=technical" style="background: <%= activeCategory === 'TECHNICAL' ? 'var(--red)' : 'transparent' %>; color: #FFF; border: 1px solid var(--red-40); padding: 6px 16px; font-family: var(--font-data); font-size: 11px; text-decoration: none; font-weight: 700;">
+        TECHNICAL
+      </a>
+      <a href="/events?category=non_technical" style="background: <%= activeCategory === 'NON_TECHNICAL' ? 'var(--red)' : 'transparent' %>; color: #FFF; border: 1px solid var(--red-40); padding: 6px 16px; font-family: var(--font-data); font-size: 11px; text-decoration: none; font-weight: 700;">
+        NON-TECHNICAL
+      </a>
+    </div>
+
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">
+      SHOWING <%= events.length %> OF 11 EVENTS
+    </div>
+  </div>
+
+  <!-- Events Printed Index List -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
+    <% events.forEach(function(evt, idx) { %>
+      <div style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 24px; display: flex; flex-col; justify-content: space-between;" class="registration-mark">
+        
+        <div>
+          <!-- Header Row -->
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-data); font-size: 11px; color: var(--red-100); margin-bottom: 12px;">
+            <span>0<%= idx + 1 %></span>
+            <span><%= evt.category %> · DAY <%= evt.day %></span>
+          </div>
+
+          <!-- Guardian Poster Frame -->
+          <div style="background: var(--ink); border: 1px solid var(--red-40); padding: 16px; text-align: center; margin-bottom: 16px;" class="halftone-25">
+            <img src="<%= evt.guardian_asset || '/assets/logo.svg' %>" alt="<%= evt.name %>" style="max-height: 120px; width: auto;" />
+          </div>
+
+          <h2 class="poster-m" style="color: var(--on-ink); margin: 0 0 8px 0;"><%= evt.name %></h2>
+          
+          <div style="font-family: var(--font-voice); font-size: 16px; color: var(--red-100); font-style: italic; margin-bottom: 12px;">
+            "<%= evt.guardian.voice %>"
+          </div>
+
+          <p style="font-family: var(--font-text); font-size: 13px; color: var(--on-ink-muted); line-height: 1.5; margin-bottom: 16px;">
+            <%= evt.description %>
+          </p>
+        </div>
+
+        <div style="border-top: 1px solid var(--red-40); pt: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">
+            <%= evt.team_type === 'TEAM' ? 'TEAM' : 'INDIVIDUAL' %> · <%= evt.start_time.slice(0, 5) %> IST
+          </span>
+          <a href="/events/<%= evt.slug %>" style="background: var(--red); color: #FFF; text-decoration: none; padding: 6px 14px; font-family: var(--font-data); font-size: 11px; font-weight: 800; text-transform: uppercase;" class="misregister-hover">
+            <% if (user && (user.role === 'admin' || user.role === 'admin_power' || user.role === 'event_coordinator')) { %>
+              VIEW EVENT DETAILS →
+            <% } else { %>
+              DOSSIER & REGISTER →
+            <% } %>
+          </a>
+        </div>
+
+      </div>
+    <% }); %>
+  </div>
+
+</div>

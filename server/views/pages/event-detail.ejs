@@ -1,0 +1,104 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px; display: grid; grid-template-columns: 5fr 7fr; gap: 48px; align-items: start;">
+  
+  <!-- Left Guardian Poster (Sticky) -->
+  <div style="position: sticky; top: 96px; background: var(--ink-2); border: 1px solid var(--red-40); padding: 32px; text-align: center;" class="halftone-25 registration-mark">
+    <img src="<%= event.guardian_asset || '/assets/logo.svg' %>" alt="<%= guardian.name %> Poster" style="max-height: 320px; width: auto; margin-bottom: 24px;" />
+    
+    <div style="font-family: var(--font-data); font-size: 12px; color: var(--red-100); font-weight: 800; tracking-widest;">
+      GUARDIAN POSTER // <%= guardian.name %>
+    </div>
+  </div>
+
+  <!-- Right Content Column -->
+  <div style="space-y: 24px;">
+    
+    <div>
+      <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 800; text-transform: uppercase;">
+        <%= event.category %> · DAY <%= event.day %> 18 SEP 2026
+      </div>
+      <h1 class="poster-l" style="color: var(--on-ink); margin: 8px 0;"><%= event.name %></h1>
+    </div>
+
+    <!-- Guardian Voice Dialogue Briefing -->
+    <div style="background: var(--ink-2); border-left: 3px solid var(--red-100); padding: 24px; margin: 24px 0;">
+      <div style="font-family: var(--font-data); font-size: 10px; color: var(--on-ink-muted); text-transform: uppercase; margin-bottom: 8px;">
+        GUARDIAN TACTICAL VOICE BRIEFING
+      </div>
+      <div class="voice-italic">
+        "<%= guardian.voice %>"
+      </div>
+    </div>
+
+    <!-- Specs Strip in Mono -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; background: var(--ink-2); border: 1px solid var(--red-40); padding: 16px; font-family: var(--font-data); font-size: 11px; text-align: center;">
+      <div>
+        <span style="color: var(--on-ink-muted); block;">FORMAT</span>
+        <strong style="color: var(--red-100); block; font-size: 13px;"><%= event.team_type %></strong>
+      </div>
+      <div>
+        <span style="color: var(--on-ink-muted); block;">TEAM SIZE</span>
+        <strong style="color: var(--on-ink); block; font-size: 13px;"><%= event.min_team_size %>-<%= event.max_team_size %></strong>
+      </div>
+      <div>
+        <span style="color: var(--on-ink-muted); block;">VENUE</span>
+        <strong style="color: var(--on-ink); block; font-size: 13px;"><%= event.venue || 'TBA' %></strong>
+      </div>
+      <div>
+        <span style="color: var(--on-ink-muted); block;">FEE</span>
+        <strong style="color: var(--on-ink); block; font-size: 13px;">₹<%= event.entry_fee || '150' %></strong>
+      </div>
+    </div>
+
+    <!-- Overview & Rules -->
+    <div style="font-family: var(--font-text); font-size: 14px; color: var(--on-ink-muted); line-height: 1.6; space-y: 16px;">
+      <h3 class="poster-m" style="color: var(--on-ink); margin: 24px 0 12px 0;">OVERVIEW & SPECIFICATIONS</h3>
+      <p><%= event.description %></p>
+
+      <h3 class="poster-m" style="color: var(--on-ink); margin: 24px 0 12px 0;">RULES & REGULATIONS</h3>
+      <p>
+        Participants must bring their official LGN26 Student ID card and college identity proof. Strict adherence to time limits is enforced by the event desk.
+      </p>
+    </div>
+
+    <!-- Registration Actions (Restricted for Participants only) -->
+    <div style="border-top: 1px solid var(--red-40); padding-top: 24px; margin-top: 32px;">
+      <% if (user && (user.role === 'admin' || user.role === 'admin_power' || user.role === 'event_coordinator')) { %>
+        <div style="background: var(--ink-2); border: 1px solid var(--red-40); color: var(--red-100); padding: 14px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 800;">
+          DESK MODE: <%= user.role.toUpperCase() %> VIEW (Participant Registration Desk Only)
+        </div>
+      <% } else if (!user) { %>
+        <a href="/login" style="background: var(--red); color: #FFF; text-decoration: none; padding: 14px 28px; font-family: var(--font-data); font-size: 12px; font-weight: 800; display: inline-block;" class="misregister-hover">
+          SIGN IN TO REGISTER FOR ARENA →
+        </a>
+      <% } else if (isRegistered) { %>
+        <div style="background: var(--paper-2); color: var(--red); padding: 14px 24px; font-family: var(--font-data); font-size: 12px; font-weight: 800; border: 1px solid var(--red); display: inline-block;">
+          ENROLLED ✓ REGISTERED FOR ARENA
+        </div>
+      <% } else if (!paymentVerified) { %>
+        <div style="background: var(--ink-2); border: 1px dashed var(--red-100); color: var(--red-100); padding: 16px; font-family: var(--font-data); font-size: 12px; space-y: 8px;">
+          <strong style="block;">PAYMENT VERIFICATION REQUIRED</strong>
+          <p style="margin: 4px 0;">Verify your festival registration payment to unlock arena enrollments.</p>
+          <a href="/profile#payment" style="background: var(--red); color: #FFF; text-decoration: none; padding: 8px 16px; display: inline-block; font-weight: 800;" class="misregister-hover">
+            SUBMIT PAYMENT REFERENCE →
+          </a>
+        </div>
+      <% } else { %>
+        <form action="/events/<%= slug %>/register" method="post" style="space-y: 16px;">
+          <% if (event.team_type === 'TEAM') { %>
+            <div style="margin-bottom: 16px;">
+              <label style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); block; font-weight: 700; margin-bottom: 6px;">
+                TEAM NAME *
+              </label>
+              <input type="text" name="team_name" required placeholder="Enter team name..." style="width: 100%; max-width: 400px; background: var(--ink-2); border: 1px solid var(--red-40); color: var(--on-ink); padding: 10px 14px; font-family: var(--font-text); font-size: 13px;" />
+            </div>
+          <% } %>
+          <button type="submit" style="background: var(--red); color: #FFF; border: none; padding: 14px 28px; font-family: var(--font-data); font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;" class="misregister-hover">
+            CONFIRM ARENA REGISTRATION →
+          </button>
+        </form>
+      <% } %>
+    </div>
+
+  </div>
+
+</div>

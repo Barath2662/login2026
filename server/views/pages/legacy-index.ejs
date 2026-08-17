@@ -1,0 +1,36 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px;">
+  
+  <div style="margin-bottom: 32px;">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 700;">HISTORICAL SYMPOSIUM ARCHIVE</div>
+    <h1 class="poster-l" style="color: var(--on-ink); margin: 8px 0;">LOGIN LEGACY EDITIONS</h1>
+    <p style="font-family: var(--font-text); font-size: 14px; color: var(--on-ink-muted); max-width: 60ch;">
+      Explore thirty-five years of technical excellence, masterminds, and past symposium media.
+    </p>
+  </div>
+
+  <% if (!editions || editions.length === 0) { %>
+    <div style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 48px; text-align: center;" class="registration-mark">
+      <div style="font-family: var(--font-data); font-size: 12px; color: var(--on-ink-muted);">
+        No published legacy editions currently available in the archive.
+      </div>
+    </div>
+  <% } else { %>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+      <% editions.forEach(function(ed) { %>
+        <a href="/legacy/<%= ed.year %>" style="display: block; background: var(--ink-2); border: 1px solid var(--red-40); padding: 24px; text-decoration: none; color: var(--on-ink);" class="misregister-hover registration-mark">
+          <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); margin-bottom: 8px;">
+            EDITION <%= ed.edition_number %> · <%= ed.year %>
+          </div>
+          <h2 class="poster-m" style="margin: 0 0 8px 0; color: var(--on-ink);"><%= ed.title %></h2>
+          <p style="font-family: var(--font-text); font-size: 13px; color: var(--on-ink-muted); margin-bottom: 16px;">
+            <%= ed.description || 'Archive photographs and video documentation.' %>
+          </p>
+          <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 800;">
+            VIEW GALLERY ITEMS →
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  <% } %>
+
+</div>

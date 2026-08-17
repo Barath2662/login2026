@@ -1,0 +1,102 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px; space-y: 32px;">
+
+  <!-- Broadcast Ticker Notice Banner -->
+  <% if (announcements && announcements.length > 0) { %>
+    <div style="background: var(--paper-2); border: 2px solid var(--red); padding: 16px 24px; margin-bottom: 24px;">
+      <div style="font-family: var(--font-data); font-size: 11px; color: var(--red); font-weight: 800; margin-bottom: 8px;">
+        📢 LIVE BROADCAST & VENUE SCHEDULE NOTICES (adminpsgtech@gmail.com)
+      </div>
+      <% announcements.forEach(function(a) { %>
+        <div style="font-family: var(--font-text); font-size: 13px; color: var(--on-paper); font-weight: 700; margin-top: 4px;">
+          • <%= a.title %> — <%= a.message %>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <!-- Identity Card (§8.7) -->
+  <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;" class="registration-mark">
+    <div style="display: flex; gap: 20px; align-items: center;">
+      <div style="width: 64px; height: 64px; border-radius: 9999px; background: var(--red-40); color: #FFF; font-family: var(--font-poster); font-weight: 800; font-size: 28px; display: flex; align-items: center; justify-content: center;" class="avatar-circle">
+        <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+      </div>
+      <div>
+        <div style="font-family: var(--font-poster); font-size: 24px; font-weight: 800; color: var(--on-paper);">
+          <%= user.name %>
+        </div>
+        <div style="font-family: var(--font-data); font-size: 12px; color: var(--on-paper-muted); margin-top: 4px;">
+          <%= user.email %> · <%= user.college_name || 'PSG Tech' %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student ID in Mono at Poster Scale -->
+    <div style="background: var(--paper); border: 2px solid var(--red); padding: 16px 24px; text-align: right;">
+      <div style="font-family: var(--font-data); font-size: 10px; color: var(--on-paper-muted); font-weight: 700;">OFFICIAL STUDENT ID</div>
+      <div style="font-family: var(--font-data); font-size: 28px; font-weight: 800; color: var(--red);">
+        <%= user.student_id_code || 'LGN26-0000' %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Journey Rail -->
+  <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px; margin-top: 32px;">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--red); font-weight: 800; margin-bottom: 16px;">
+      SURVIVOR JOURNEY TRACKER
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; font-family: var(--font-data); font-size: 12px; text-align: center;">
+      <div style="background: var(--paper); border: 1px solid var(--red); padding: 12px;">
+        <span style="font-size: 10px; color: var(--red); block;">STEP 01</span>
+        <strong>ACCOUNT REGISTERED ✓</strong>
+      </div>
+      <div style="background: var(--paper); border: 1px solid <%= paymentStatus !== 'NOT_SUBMITTED' ? 'var(--red)' : 'var(--on-paper-muted)' %>; padding: 12px; color: <%= paymentStatus !== 'NOT_SUBMITTED' ? 'var(--on-paper)' : 'var(--on-paper-muted)' %>;">
+        <span style="font-size: 10px; block;">STEP 02</span>
+        <strong>PAYMENT REFERENCE</strong>
+      </div>
+      <div style="background: var(--paper); border: 1px solid <%= paymentStatus === 'VERIFIED' ? 'var(--red)' : 'var(--on-paper-muted)' %>; padding: 12px; color: <%= paymentStatus === 'VERIFIED' ? 'var(--red)' : 'var(--on-paper-muted)' %>;">
+        <span style="font-size: 10px; block;">STEP 03</span>
+        <strong>DESK VERIFIED</strong>
+      </div>
+      <div style="background: var(--paper); border: 1px solid <%= registrations.length > 0 ? 'var(--red)' : 'var(--on-paper-muted)' %>; padding: 12px;">
+        <span style="font-size: 10px; block;">STEP 04</span>
+        <strong>EVENTS ENROLLED (<%= registrations.length %>)</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registered Events Table -->
+  <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 32px; margin-top: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 class="poster-m" style="margin: 0; color: var(--on-paper);">MY REGISTERED EVENTS (<%= registrations.length %>)</h2>
+      <a href="/events" style="font-family: var(--font-data); font-size: 12px; color: var(--red); font-weight: 800; text-decoration: none;">+ BROWSE MORE EVENTS</a>
+    </div>
+
+    <% if (registrations.length === 0) { %>
+      <div style="background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 32px; text-align: center; font-family: var(--font-data); font-size: 12px; color: var(--on-paper-muted);">
+        No event registrations found. Browse the 11 arenas to enroll in competitions.
+      </div>
+    <% } else { %>
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-text); font-size: 13px;">
+        <thead>
+          <tr style="background: var(--paper); font-family: var(--font-data); font-size: 11px; color: var(--on-paper-muted); border-bottom: 2px solid var(--on-paper-muted);">
+            <th style="padding: 12px;">EVENT NAME</th>
+            <th style="padding: 12px;">DAY / TIME</th>
+            <th style="padding: 12px;">TEAM NAME</th>
+            <th style="padding: 12px;">VENUE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% registrations.forEach(function(reg) { %>
+            <tr style="border-bottom: 1px solid var(--on-paper-muted);">
+              <td style="padding: 12px; font-weight: 700; color: var(--on-paper);"><%= reg.Event ? reg.Event.name : 'Event #' + reg.event_id %></td>
+              <td style="padding: 12px; font-family: var(--font-data);">Day <%= reg.Event ? reg.Event.day : 18 %> Sep · <%= reg.Event ? reg.Event.start_time : '09:00 AM' %></td>
+              <td style="padding: 12px; font-family: var(--font-data); color: var(--red);"><%= reg.team_name || 'Individual' %></td>
+              <td style="padding: 12px; font-weight: 700; color: var(--red);"><%= reg.Event ? (reg.Event.venue || 'TBA') : 'TBA' %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+</div>

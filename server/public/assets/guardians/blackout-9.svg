@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fill="none">
+  <defs>
+    <linearGradient id="bGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30"/>
+      <stop offset="100%" stop-color="#0A0A0C"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0A0A0C" rx="16"/>
+  <!-- Low prowling stealth chassis -->
+  <path d="M50 200 L110 100 L190 100 L250 200 L220 300 L80 300 Z" fill="#141418" stroke="#2A1416" stroke-width="4"/>
+  <!-- Single horizontal slit of light -->
+  <line x1="80" y1="140" x2="220" y2="140" stroke="#FF3B30" stroke-width="4" filter="drop-shadow(0px 0px 8px #FF3B30)"/>
+  <!-- Cipher wheel in chest -->
+  <circle cx="150" cy="220" r="40" fill="#0A0A0C" stroke="#2A1416" stroke-width="6"/>
+  <circle cx="150" cy="220" r="28" stroke="url(#bGrad)" stroke-width="3" stroke-dasharray="6 4"/>
+  <circle cx="150" cy="220" r="12" fill="#FF3B30"/>
+  <text x="150" y="380" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="14" font-weight="800" fill="#F2F2F4">BLACKOUT-9 // EXTRACTION</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fill="none">
+  <defs>
+    <linearGradient id="tGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30"/>
+      <stop offset="100%" stop-color="#E01B24"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0A0A0C" rx="16"/>
+  <!-- Twin torsos on one chassis -->
+  <path d="M60 120 L140 100 L150 280 L70 290 Z M160 100 L240 120 L230 290 L150 280 Z" fill="#141418" stroke="#2A1416" stroke-width="4"/>
+  <!-- Two heads facing slightly apart -->
+  <circle cx="100" cy="70" r="22" fill="#0A0A0C" stroke="url(#tGrad)" stroke-width="3"/>
+  <circle cx="200" cy="70" r="22" fill="#0A0A0C" stroke="url(#tGrad)" stroke-width="3"/>
+  <line x1="90" y1="70" x2="110" y2="70" stroke="#FF3B30" stroke-width="3"/>
+  <line x1="190" y1="70" x2="210" y2="70" stroke="#FF3B30" stroke-width="3"/>
+  <!-- Baton conduit passing light -->
+  <path d="M100 170 C 130 140, 170 200, 200 170" stroke="url(#tGrad)" stroke-width="6" fill="none" filter="drop-shadow(0px 0px 8px #FF3B30)"/>
+  <text x="150" y="380" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="14" font-weight="800" fill="#F2F2F4">TANDEM // CODE RELAY</text>
+</svg>

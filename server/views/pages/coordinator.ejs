@@ -1,0 +1,70 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 32px 16px;">
+  
+  <!-- Header Control -->
+  <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="font-family: var(--font-data); font-size: 11px; color: var(--red); font-weight: 800;">COORDINATOR DESK</div>
+      <h1 class="poster-m" style="margin: 4px 0 0 0; color: var(--on-paper);">EVENT ROSTER & ATTENDANCE</h1>
+    </div>
+
+    <div style="display: flex; gap: 16px; align-items: center;">
+      <!-- Event Picker -->
+      <form action="/coordinator" method="get" style="display: inline;">
+        <select name="event" onchange="this.form.submit()" style="background: var(--paper); border: 1px solid var(--on-paper-muted); color: var(--on-paper); padding: 10px 16px; font-family: var(--font-data); font-size: 12px; font-weight: 700;">
+          <% events.forEach(function(evt) { %>
+            <option value="<%= evt.id %>" <%= selectedEventId === evt.id ? 'selected' : '' %>>
+              <%= evt.name %> (Day <%= evt.day %>)
+            </option>
+          <% }); %>
+        </select>
+      </form>
+
+      <!-- CSV Export Button -->
+      <a href="/coordinator/export-csv?event=<%= selectedEventId %>" style="background: var(--red); color: #FFF; text-decoration: none; padding: 10px 16px; font-family: var(--font-data); font-size: 11px; font-weight: 800;" class="misregister-hover">
+        EXPORT ROSTER CSV 📥
+      </a>
+    </div>
+  </div>
+
+  <!-- Roster Table (56px touch target rows for mobile phone execution) -->
+  <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px;">
+    <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0; color: var(--on-paper);">REGISTERED PARTICIPANTS (<%= roster.length %>)</h3>
+    </div>
+
+    <% if (roster.length === 0) { %>
+      <div style="background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 32px; text-align: center; font-family: var(--font-data); font-size: 12px; color: var(--on-paper-muted);">
+        No participants currently registered for this competition event arena.
+      </div>
+    <% } else { %>
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-text); font-size: 13px;">
+        <thead>
+          <tr style="background: var(--paper); font-family: var(--font-data); font-size: 11px; color: var(--on-paper-muted); border-bottom: 2px solid var(--on-paper-muted);">
+            <th style="padding: 14px;">STUDENT ID</th>
+            <th style="padding: 14px;">NAME</th>
+            <th style="padding: 14px;">COLLEGE & PHONE</th>
+            <th style="padding: 14px;">ATTENDANCE TOGGLE (56px)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% roster.forEach(function(r) { %>
+            <% const sId = r.student_id || (r.User ? r.User.id : null); %>
+            <tr style="height: 56px; border-bottom: 1px solid var(--on-paper-muted);">
+              <td style="padding: 14px; font-family: var(--font-data); font-weight: 800; color: var(--red);"><%= r.User ? (r.User.student_id_code || 'LGN26-????') : 'LGN26-????' %></td>
+              <td style="padding: 14px; font-weight: 700; color: var(--on-paper);"><%= r.User ? r.User.name : 'Participant' %></td>
+              <td style="padding: 14px; color: var(--on-paper-muted); font-family: var(--font-data); font-size: 11px;"><%= r.User ? (r.User.college_name + ' · ' + (r.User.phone || '-')) : 'PSG Tech' %></td>
+              <td style="padding: 14px;">
+                <form action="/coordinator/<%= selectedEventId %>/attendance/<%= sId %>" method="post" style="display: inline;">
+                  <button type="submit" style="min-height: 44px; padding: 8px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; background: <%= r.attendance_status === 'PRESENT' ? 'var(--red)' : 'var(--paper)' %>; color: <%= r.attendance_status === 'PRESENT' ? '#FFF' : 'var(--on-paper)' %>; border: 1px solid var(--on-paper-muted);" class="misregister-hover">
+                    <%= r.attendance_status === 'PRESENT' ? 'PRESENT ✓' : 'MARK PRESENT' %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+</div>

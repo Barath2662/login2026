@@ -1,0 +1,48 @@
+<div style="max-width: 1100px; margin: 0 auto; padding: 64px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;">
+  
+  <!-- Left Poster Composition -->
+  <div style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 32px; text-align: center;" class="halftone-25 registration-mark">
+    <img src="/assets/guardians/vaultwarden.svg" alt="VAULTWARDEN" style="max-height: 280px; width: auto; margin-bottom: 16px;" />
+    <div style="font-family: var(--font-data); font-size: 12px; color: var(--red-100); font-weight: 800;">
+      GUARDIAN // VAULTWARDEN
+    </div>
+    <div className="voice-italic" style="font-size: 16px; margin-top: 8px;">
+      "State your credentials to unlock access."
+    </div>
+  </div>
+
+  <!-- Right Auth Form -->
+  <div style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 40px;" class="registration-mark">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 800; text-transform: uppercase;">
+      SURVIVOR SIGN IN
+    </div>
+    <h1 class="poster-m" style="color: var(--on-ink); margin: 8px 0 24px 0;">ACCESS COMMAND CONSOLE</h1>
+
+    <% if (error) { %>
+      <div style="background: var(--red-20); border: 1px solid var(--red-100); color: var(--red-100); padding: 12px; font-family: var(--font-data); font-size: 11px; margin-bottom: 20px;">
+        ⚠️ <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/login" method="post" style="space-y: 20px;">
+      <div style="margin-bottom: 16px;">
+        <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted); block; font-weight: 700; margin-bottom: 6px;">EMAIL ADDRESS *</label>
+        <input type="email" name="email" required placeholder="survivor@psgtech.ac.in" style="width: 100%; background: var(--ink); border: 1px solid var(--red-40); color: var(--on-ink); padding: 12px 14px; font-family: var(--font-text);" />
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted); block; font-weight: 700; margin-bottom: 6px;">PASSWORD *</label>
+        <input type="password" name="password" required placeholder="••••••••" style="width: 100%; background: var(--ink); border: 1px solid var(--red-40); color: var(--on-ink); padding: 12px 14px; font-family: var(--font-text);" />
+      </div>
+
+      <button type="submit" style="width: 100%; background: var(--red); color: #FFF; border: none; padding: 14px; font-family: var(--font-data); font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;" class="misregister-hover">
+        AUTHENTICATE & ENTER →
+      </button>
+    </form>
+
+    <div style="border-top: 1px solid var(--red-40); margin-top: 24px; pt: 16px; text-align: center; font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">
+      Don't have a survivor account? <a href="/register" style="color: var(--red-100); text-decoration: none; font-weight: 800;">REGISTER HERE →</a>
+    </div>
+  </div>
+
+</div>

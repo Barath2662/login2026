@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fill="none">
+  <defs>
+    <linearGradient id="qGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30"/>
+      <stop offset="100%" stop-color="#2A1416"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0A0A0C" rx="16"/>
+  <!-- QR lattice plating chassis -->
+  <rect x="70" y="100" width="160" height="180" rx="12" fill="#141418" stroke="#2A1416" stroke-width="4"/>
+  <!-- QR Blocks Motif -->
+  <rect x="90" y="120" width="30" height="30" fill="#E01B24"/>
+  <rect x="180" y="120" width="30" height="30" fill="#E01B24"/>
+  <rect x="90" y="220" width="30" height="30" fill="#E01B24"/>
+  <rect x="135" y="165" width="30" height="30" fill="#FF3B30"/>
+  <rect x="170" y="210" width="20" height="20" fill="#9B0A12"/>
+  <rect x="130" y="225" width="25" height="25" fill="#E01B24"/>
+  <!-- Lantern Eye projecting code -->
+  <circle cx="150" cy="70" r="20" fill="#0A0A0C" stroke="#FF3B30" stroke-width="4"/>
+  <polygon points="150,70 110,20 190,20" fill="#FF3B30" opacity="0.3"/>
+  <text x="150" y="380" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="14" font-weight="800" fill="#F2F2F4">QRUX // HUNT YOUR TREASURE</text>
+</svg>
