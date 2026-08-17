@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fill="none">
+  <defs>
+    <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30"/>
+      <stop offset="50%" stop-color="#E01B24"/>
+      <stop offset="100%" stop-color="#E8A317"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0A0A0C" rx="16"/>
+  <!-- Scorched plating chassis -->
+  <path d="M100 90 L200 90 L230 250 L70 250 Z" fill="#141418" stroke="#2A1416" stroke-width="4"/>
+  <!-- Vented wing struts from back -->
+  <path d="M90 100 L20 60 L40 180 Z M210 100 L280 60 L260 180 Z" fill="#2A1416" stroke="url(#pGrad)" stroke-width="2"/>
+  <!-- Molten seams re-welding -->
+  <path d="M100 120 Q 150 140 200 120 M110 180 Q 150 200 190 180" stroke="url(#pGrad)" stroke-width="5" fill="none" filter="drop-shadow(0px 0px 6px #E01B24)"/>
+  <!-- Core flame -->
+  <polygon points="150,140 165,175 135,175" fill="#E8A317"/>
+  <text x="150" y="380" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="14" font-weight="800" fill="#F2F2F4">PYRE-01 // PROJECT PHOENIX</text>
+</svg>

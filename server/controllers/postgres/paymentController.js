@@ -1,4 +1,11 @@
 const paymentModel = require("../../models/postgres/paymentModel");
+const userModel = require("../../models/postgres/userModel");
+const { sendPaymentVerificationEmail } = require("../../services/emailService");
+
+const generateStudentIdCode = async (userId) => {
+  const paddedId = String(userId).padStart(4, "0");
+  return `LGN26-${paddedId}`;
+};
 
 const getMyPayment = async (req, res) => {
   try {
@@ -6,10 +13,13 @@ const getMyPayment = async (req, res) => {
       where: { student_id: req.user.id },
     });
 
+    const user = await userModel.findByPk(req.user.id);
+
     return res.json(
       payment || {
-        amount: 100,
-        status: "required",
+        amount: 150,
+        status: "NOT_SUBMITTED",
+        student_id_code: user ? user.student_id_code : null,
       }
     );
   } catch (error) {
@@ -19,53 +29,72 @@ const getMyPayment = async (req, res) => {
 
 const createPayment = async (req, res) => {
   try {
+    const { transaction_reference, receipt_url } = req.body;
+
+    if (!transaction_reference || !transaction_reference.trim()) {
+      return res.status(400).json({ message: "Transaction reference is required" });
+    }
+
+    const trimmedRef = transaction_reference.trim();
+
+    // Check if transaction_reference is already used by another user
+    const existingRef = await paymentModel.findOne({
+      where: { transaction_reference: trimmedRef },
+    });
+
+    if (existingRef && existingRef.student_id !== req.user.id) {
+      return res.status(409).json({ message: "This transaction reference number has already been submitted by another account." });
+    }
+
     const existing = await paymentModel.findOne({
       where: { student_id: req.user.id },
     });
 
-    if (existing && existing.status === "successful") {
+    if (existing && existing.status === "VERIFIED") {
       return res.status(409).json({
-        message: "Payment already completed",
+        message: "Payment already verified",
         payment: existing,
       });
     }
 
     const payment = existing
       ? await existing.update({
-          amount: 100,
-          transaction_reference: req.body.transaction_reference,
-          status: "in_progress",
+          amount: 150,
+          transaction_reference: trimmedRef,
+          receipt_url: receipt_url || existing.receipt_url,
+          status: "PENDING",
+          rejection_reason: null,
         })
       : await paymentModel.create({
           student_id: req.user.id,
-          amount: 100,
-          transaction_reference: req.body.transaction_reference,
-          status: "in_progress",
+          amount: 150,
+          transaction_reference: trimmedRef,
+          receipt_url: receipt_url || null,
+          status: "PENDING",
         });
 
     return res.status(201).json({
-      message: "Payment initiated",
+      message: "Payment reference submitted successfully. Pending admin verification.",
       payment,
-      gateway_required: true,
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Failed to initiate payment",
+      message: "Failed to submit payment reference",
       error: error.message,
     });
   }
 };
 
-const userModel = require("../../models/postgres/userModel");
-
 const getAllPayments = async (req, res) => {
   try {
     const payments = await paymentModel.findAll({
-      include: [{
-        model: userModel,
-        as: "student",
-        attributes: ["id", "name", "roll_no", "email", "phone"]
-      }],
+      include: [
+        {
+          model: userModel,
+          as: "student",
+          attributes: ["id", "name", "email", "phone", "college_name", "department", "roll_no", "student_id_code"],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
     return res.json(payments);
@@ -76,17 +105,41 @@ const getAllPayments = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
   try {
+    const { status, rejection_reason } = req.body;
     const payment = await paymentModel.findByPk(req.params.id);
     if (!payment) return res.status(404).json({ message: "Payment not found" });
 
-    await payment.update({
-      status: "successful",
-      verified_by: req.user.id,
-      verified_at: new Date(),
-      refund_status: "not_applicable",
-    });
+    const targetStatus = status ? status.toUpperCase() : "VERIFIED";
 
-    return res.json({ message: "Payment verified", payment });
+    if (targetStatus === "VERIFIED") {
+      await payment.update({
+        status: "VERIFIED",
+        verified_by: req.user.id,
+        verified_at: new Date(),
+        rejection_reason: null,
+      });
+
+      // Generate & update official Student ID
+      const user = await userModel.findByPk(payment.student_id);
+      if (user) {
+        if (!user.student_id_code) {
+          const studentIdCode = await generateStudentIdCode(user.id);
+          user.student_id_code = studentIdCode;
+          await user.save();
+        }
+        sendPaymentVerificationEmail(user, user.student_id_code);
+      }
+      return res.json({ message: "Payment verified successfully", payment });
+    } else if (targetStatus === "REJECTED") {
+      await payment.update({
+        status: "REJECTED",
+        verified_by: req.user.id,
+        rejection_reason: rejection_reason || "Transaction reference could not be verified.",
+      });
+      return res.json({ message: "Payment rejected", payment });
+    } else {
+      return res.status(400).json({ message: "Invalid verification status. Must be VERIFIED or REJECTED." });
+    }
   } catch (error) {
     return res.status(500).json({ message: "Failed to verify payment", error: error.message });
   }
@@ -103,7 +156,6 @@ const initiateRefund = async (req, res) => {
       verified_by: req.user.id,
     });
 
-    // Actual refund API integration is intentionally handled separately.
     return res.json({ message: "Refund initiated", payment });
   } catch (error) {
     return res.status(500).json({ message: "Failed to initiate refund", error: error.message });

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fill="none">
+  <defs>
+    <linearGradient id="hGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E01B24"/>
+      <stop offset="100%" stop-color="#2A1416"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0A0A0C" rx="16"/>
+  <!-- Mariner mech hull -->
+  <path d="M70 120 L150 70 L230 120 L210 290 L90 290 Z" fill="#141418" stroke="#2A1416" stroke-width="4"/>
+  <!-- Ship's wheel chest core -->
+  <circle cx="150" cy="190" r="42" fill="#0A0A0C" stroke="url(#hGrad)" stroke-width="5"/>
+  <path d="M150 140 L150 240 M100 190 L200 190 M115 155 L185 225 M115 225 L185 155" stroke="#E01B24" stroke-width="3"/>
+  <circle cx="150" cy="190" r="14" fill="#FF3B30"/>
+  <!-- Tether cables hanging -->
+  <path d="M90 290 C 100 340, 120 350, 130 360 M210 290 C 200 340, 180 350, 170 360" stroke="#9A9AA2" stroke-width="3" fill="none"/>
+  <text x="150" y="380" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="14" font-weight="800" fill="#F2F2F4">HELMSMAN // NOSTOS</text>
+</svg>

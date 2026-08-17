@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+﻿const { Op } = require("sequelize");
 const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
 const teamRequestModel = require("../../models/postgres/teamRequestModel");

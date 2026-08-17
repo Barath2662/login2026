@@ -1,16 +1,9 @@
-const express = require("express");
+﻿const express = require("express");
 const { verifyJwt } = require("../../middleware/auth");
 const allowRoles = require("../../middleware/allowRoles");
 const registrationController = require("../../controllers/postgres/registrationController");
 
 const router = express.Router();
-
-router.get(
-  "/",
-  verifyJwt,
-  allowRoles("admin"),
-  registrationController.getAllRegistrations
-);
 
 router.post(
   "/",

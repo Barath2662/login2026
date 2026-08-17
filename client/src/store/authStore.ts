@@ -1,26 +1,33 @@
 import { create } from 'zustand';
 
-export interface SurvivorProfile {
+export interface UserProfile {
   id: number;
   name: string;
+  fullName?: string;
   email: string;
   phone: string | null;
   college_name: string | null;
   department: string | null;
   roll_no: string | null;
   role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin';
+  user_type: 'PARTICIPANT' | 'ALUMNI';
+  student_id_code?: string | null;
+  must_change_password?: boolean;
   is_active: boolean;
   hasPaidFee?: boolean;
+  registrations?: any[];
 }
 
 interface AuthState {
   isInitialized: boolean;
   isAuthenticated: boolean;
   token: string | null;
-  survivor: SurvivorProfile | null;
+  user: UserProfile | null;
+  survivor: UserProfile | null;
   setInitialized: (isInitialized: boolean) => void;
-  setAuth: (isAuthenticated: boolean, token: string | null) => void;
-  setSurvivor: (survivor: SurvivorProfile | null) => void;
+  setAuth: (isAuthenticated: boolean, token: string | null, user?: UserProfile | null) => void;
+  setUser: (user: UserProfile | null) => void;
+  setSurvivor: (user: UserProfile | null) => void;
   resetAuth: () => void;
 }
 
@@ -28,19 +35,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   isInitialized: false,
   isAuthenticated: !!localStorage.getItem('token'),
   token: localStorage.getItem('token'),
+  user: null,
   survivor: null,
   setInitialized: (isInitialized) => set({ isInitialized }),
-  setAuth: (isAuthenticated, token) => {
+  setAuth: (isAuthenticated, token, user = null) => {
     if (token) {
       localStorage.setItem('token', token);
     } else {
       localStorage.removeItem('token');
     }
-    set({ isAuthenticated, token });
+    set({ isAuthenticated, token, user: user || null, survivor: user || null });
   },
-  setSurvivor: (survivor) => set({ survivor }),
+  setUser: (user) => set({ user, survivor: user }),
+  setSurvivor: (survivor) => set({ user: survivor, survivor }),
   resetAuth: () => {
     localStorage.removeItem('token');
-    set({ isAuthenticated: false, token: null, survivor: null });
+    set({ isAuthenticated: false, token: null, user: null, survivor: null });
   },
 }));

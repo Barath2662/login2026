@@ -1,0 +1,255 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px; space-y: 32px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--on-paper-muted); padding-bottom: 16px;">
+    <div>
+      <div style="font-family: var(--font-data); font-size: 11px; color: var(--red); font-weight: 800;">ADMINISTRATION</div>
+      <h1 class="poster-m" style="margin: 4px 0 0 0; color: var(--on-paper);">SYSTEM CONTROL SURFACE</h1>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 8px; font-family: var(--font-data); font-size: 11px;">
+      <a href="/admin?tab=payments" style="background: <%= activeTab === 'payments' ? 'var(--red)' : 'var(--paper-2)' %>; color: <%= activeTab === 'payments' ? '#FFF' : 'var(--on-paper)' %>; text-decoration: none; padding: 8px 16px; font-weight: 800;">PAYMENTS QUEUE</a>
+      <a href="/admin?tab=users" style="background: <%= activeTab === 'users' ? 'var(--red)' : 'var(--paper-2)' %>; color: <%= activeTab === 'users' ? '#FFF' : 'var(--on-paper)' %>; text-decoration: none; padding: 8px 16px; font-weight: 800;">USERS & ROLES</a>
+      <a href="/admin?tab=events" style="background: <%= activeTab === 'events' ? 'var(--red)' : 'var(--paper-2)' %>; color: <%= activeTab === 'events' ? '#FFF' : 'var(--on-paper)' %>; text-decoration: none; padding: 8px 16px; font-weight: 800;">ARENAS & VENUES</a>
+      <a href="/admin?tab=announcements" style="background: <%= activeTab === 'announcements' ? 'var(--red)' : 'var(--paper-2)' %>; color: <%= activeTab === 'announcements' ? '#FFF' : 'var(--on-paper)' %>; text-decoration: none; padding: 8px 16px; font-weight: 800;">ANNOUNCEMENTS</a>
+      <a href="/admin?tab=legacy" style="background: <%= activeTab === 'legacy' ? 'var(--red)' : 'var(--paper-2)' %>; color: <%= activeTab === 'legacy' ? '#FFF' : 'var(--on-paper)' %>; text-decoration: none; padding: 8px 16px; font-weight: 800;">LEGACY MEDIA</a>
+    </div>
+  </div>
+
+  <% if (activeTab === 'payments') { %>
+    <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px;">
+      <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">PAYMENT VERIFICATION QUEUE (<%= payments.length %>)</h3>
+
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-text); font-size: 13px;">
+        <thead>
+          <tr style="background: var(--paper); font-family: var(--font-data); font-size: 11px; color: var(--on-paper-muted); border-bottom: 2px solid var(--on-paper-muted);">
+            <th style="padding: 12px;">USER</th>
+            <th style="padding: 12px;">REFERENCE UTR</th>
+            <th style="padding: 12px;">STATUS</th>
+            <th style="padding: 12px;">STUDENT ID</th>
+            <th style="padding: 12px;">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% payments.forEach(function(p) { %>
+            <tr style="border-bottom: 1px solid var(--on-paper-muted);">
+              <td style="padding: 12px; font-weight: 700; color: var(--on-paper);"><%= p.User ? p.User.name : 'User #' + p.student_id %></td>
+              <td style="padding: 12px; font-family: var(--font-data); color: var(--red);"><%= p.transaction_reference %></td>
+              <td style="padding: 12px; font-family: var(--font-data);"><%= p.status %></td>
+              <td style="padding: 12px; font-family: var(--font-data); font-weight: 800;"><%= p.User ? (p.User.student_id_code || '-') : '-' %></td>
+              <td style="padding: 12px;">
+                <% if (p.status !== 'VERIFIED') { %>
+                  <form action="/admin/payments/<%= p.id %>/verify" method="post" style="display: inline;">
+                    <button type="submit" style="background: var(--red); color: #FFF; border: none; padding: 6px 12px; font-family: var(--font-data); font-size: 10px; font-weight: 800; cursor: pointer;">
+                      APPROVE ✓
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+
+  <% if (activeTab === 'users') { %>
+    <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px; space-y: 32px;">
+      
+      <!-- Role Provisioning Form (Admin Only) -->
+      <% if (user.role === 'admin') { %>
+        <div style="border-bottom: 1px solid var(--on-paper-muted); padding-bottom: 24px; margin-bottom: 24px;">
+          <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">PROVISION ROLE ACCESS (ADMIN & COORDINATOR)</h3>
+          
+          <form action="/admin/access" method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">USER NAME *</label>
+              <input type="text" name="name" required placeholder="e.g. Nitheesh Coordinator" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+            </div>
+            <div>
+              <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">EMAIL ADDRESS *</label>
+              <input type="email" name="email" required placeholder="coordinator@psgtech.ac.in" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+            </div>
+            <div>
+              <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">PHONE *</label>
+              <input type="tel" name="phone" required placeholder="9876543210" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+            </div>
+            <div>
+              <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">ASSIGN ROLE *</label>
+              <select name="role" required style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px; font-family: var(--font-data);">
+                <option value="event_coordinator">EVENT COORDINATOR</option>
+                <option value="admin_power">ADMIN POWER</option>
+              </select>
+            </div>
+            <div style="grid-column: span 2;">
+              <button type="submit" style="background: var(--red); color: #FFF; border: none; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase;">
+                PROVISION ROLE ACCESS & EMAIL CREDENTIALS →
+              </button>
+            </div>
+          </form>
+        </div>
+      <% } %>
+
+      <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">REGISTERED USERS (<%= usersList.length %>)</h3>
+
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-text); font-size: 13px;">
+        <thead>
+          <tr style="background: var(--paper); font-family: var(--font-data); font-size: 11px; color: var(--on-paper-muted); border-bottom: 2px solid var(--on-paper-muted);">
+            <th style="padding: 12px;">ID</th>
+            <th style="padding: 12px;">NAME & EMAIL</th>
+            <th style="padding: 12px;">TYPE</th>
+            <th style="padding: 12px;">CURRENT ROLE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% usersList.forEach(function(u) { %>
+            <tr style="border-bottom: 1px solid var(--on-paper-muted);">
+              <td style="padding: 12px; font-family: var(--font-data);">#<%= u.id %></td>
+              <td style="padding: 12px; font-weight: 700; color: var(--on-paper);"><%= u.name %> (<%= u.email %>)</td>
+              <td style="padding: 12px; font-family: var(--font-data); color: var(--red);"><%= u.user_type || 'PARTICIPANT' %></td>
+              <td style="padding: 12px; font-family: var(--font-data); font-weight: 800;"><%= u.role %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+
+  <% if (activeTab === 'events') { %>
+    <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px;">
+      <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">COMPETITION ARENAS & SCHEDULE MANAGER</h3>
+      <p style="font-family: var(--font-data); font-size: 11px; color: var(--red); margin-bottom: 20px;">
+        Updating venue or start time will automatically dispatch notification emails from adminpsgtech@gmail.com to all enrolled participants.
+      </p>
+
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-text); font-size: 13px;">
+        <thead>
+          <tr style="background: var(--paper); font-family: var(--font-data); font-size: 11px; color: var(--on-paper-muted); border-bottom: 2px solid var(--on-paper-muted);">
+            <th style="padding: 12px;">ARENA NAME</th>
+            <th style="padding: 12px;">DAY</th>
+            <th style="padding: 12px;">CURRENT VENUE</th>
+            <th style="padding: 12px;">START TIME</th>
+            <th style="padding: 12px;">UPDATE & NOTIFY PARTICIPANTS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (eventsList || []).forEach(function(evt) { %>
+            <tr style="border-bottom: 1px solid var(--on-paper-muted);">
+              <td style="padding: 12px; font-weight: 700; color: var(--on-paper);"><%= evt.name %></td>
+              <td style="padding: 12px; font-family: var(--font-data);">Day <%= evt.day %></td>
+              <form action="/admin/events/<%= evt.id %>/update" method="post">
+                <td style="padding: 12px;">
+                  <input type="text" name="venue" value="<%= evt.venue || 'Lab 3, MCA Block' %>" style="background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 6px 10px; font-family: var(--font-data); font-size: 11px;" />
+                </td>
+                <td style="padding: 12px;">
+                  <input type="text" name="start_time" value="<%= evt.start_time || '09:00 AM' %>" style="background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 6px 10px; font-family: var(--font-data); font-size: 11px; width: 100px;" />
+                </td>
+                <td style="padding: 12px;">
+                  <button type="submit" style="background: var(--red); color: #FFF; border: none; padding: 6px 12px; font-family: var(--font-data); font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase;">
+                    SAVE & BROADCAST EMAIL →
+                  </button>
+                </td>
+              </form>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+
+  <% if (activeTab === 'announcements') { %>
+    <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px; space-y: 24px;">
+      <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">BROADCAST TICKER ANNOUNCEMENT</h3>
+
+      <form action="/admin/announcements" method="post" style="space-y: 16px;">
+        <div>
+          <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">TITLE TAG *</label>
+          <input type="text" name="title" required placeholder="e.g. VENUE UPDATE" style="width: 100%; max-width: 400px; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px; font-family: var(--font-text);" />
+        </div>
+
+        <div>
+          <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">BROADCAST MESSAGE *</label>
+          <textarea name="message" required placeholder="Enter announcement notice..." style="width: 100%; max-width: 600px; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px; font-family: var(--font-text); height: 80px;"></textarea>
+        </div>
+
+        <button type="submit" style="background: var(--red); color: #FFF; border: none; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase;" class="misregister-hover">
+          BROADCAST TICKER NOTICE →
+        </button>
+      </form>
+    </div>
+  <% } %>
+
+  <% if (activeTab === 'legacy') { %>
+    <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 24px; space-y: 32px;">
+      
+      <!-- Create Legacy Edition -->
+      <div>
+        <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">CREATE LEGACY EDITION ARCHIVE</h3>
+        <form action="/admin/legacy/editions" method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">EDITION NUMBER *</label>
+            <input type="number" name="edition_number" required placeholder="e.g. 34" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+          </div>
+          <div>
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">YEAR *</label>
+            <input type="number" name="year" required placeholder="e.g. 2025" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+          </div>
+          <div style="grid-column: span 2;">
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">TITLE *</label>
+            <input type="text" name="title" required placeholder="e.g. LOGIN 2025 — 34th Edition" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+          </div>
+          <div style="grid-column: span 2;">
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">DESCRIPTION</label>
+            <textarea name="description" placeholder="Archive description..." style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px; height: 60px;"></textarea>
+          </div>
+          <div>
+            <button type="submit" style="background: var(--red); color: #FFF; border: none; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase;">
+              PUBLISH EDITION ARCHIVE →
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Add Photo or Video Item to Edition -->
+      <div style="border-top: 1px solid var(--on-paper-muted); padding-top: 24px;">
+        <h3 style="font-family: var(--font-poster); font-size: 16px; margin: 0 0 16px 0; color: var(--on-paper);">POST LEGACY PHOTO OR VIDEO EMBED</h3>
+        <form action="/admin/legacy/items" method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">TARGET EDITION *</label>
+            <select name="edition_id" required style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;">
+              <% (legacyEditions || []).forEach(function(ed) { %>
+                <option value="<%= ed.id %>">Edition <%= ed.edition_number %> (<%= ed.year %>) — <%= ed.title %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">MEDIA TYPE *</label>
+            <select name="type" required style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;">
+              <option value="PHOTO">PHOTO (Image URL)</option>
+              <option value="VIDEO">VIDEO (YouTube / Video URL)</option>
+            </select>
+          </div>
+          <div style="grid-column: span 2;">
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">IMAGE URL OR VIDEO EMBED LINK *</label>
+            <input type="text" name="storage_key" required placeholder="e.g. https://images.unsplash.com/... or https://www.youtube.com/watch?v=..." style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+          </div>
+          <div>
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">CAPTION</label>
+            <input type="text" name="caption" placeholder="e.g. Valedictory Ceremony LOGIN 2025" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+          </div>
+          <div>
+            <label style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">CREDIT</label>
+            <input type="text" name="credit" placeholder="e.g. CAA Media Team" style="width: 100%; background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 8px 12px;" />
+          </div>
+          <div>
+            <button type="submit" style="background: var(--on-paper); color: var(--paper); border: none; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase;">
+              POST MEDIA ITEM →
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  <% } %>
+
+</div>

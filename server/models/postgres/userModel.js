@@ -61,6 +61,49 @@ const userModel = sequelize.define(
       defaultValue: "student",
     },
 
+    user_type: {
+      type: DataTypes.ENUM("PARTICIPANT", "ALUMNI"),
+      allowNull: false,
+      defaultValue: "PARTICIPANT",
+    },
+
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    student_id_code: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+
+    year_of_study: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    batch_year: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    place: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    current_organization: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    must_change_password: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
     is_active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

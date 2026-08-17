@@ -1,4 +1,4 @@
-const notificationModel = require("../../models/postgres/notificationModel");
+﻿const notificationModel = require("../../models/postgres/notificationModel");
 
 const getMyNotifications = async (req, res) => {
   try {

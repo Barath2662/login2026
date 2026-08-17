@@ -1,6 +1,4 @@
-const attendanceModel = require("../../models/postgres/attendanceModel");
-
-const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
+﻿const attendanceModel = require("../../models/postgres/attendanceModel");
 
 const getEventAttendance = async (req, res) => {
   try {
@@ -21,15 +19,6 @@ const markAttendance = async (req, res) => {
 
     if (!["present", "absent", "not_marked"].includes(status)) {
       return res.status(400).json({ message: "Invalid attendance status" });
-    }
-
-    if (req.user.role === 'event_coordinator') {
-      const assignment = await eventCoordinatorModel.findOne({
-        where: { event_id, user_id: req.user.id }
-      });
-      if (!assignment) {
-        return res.status(403).json({ message: "Not authorized to mark attendance for this event" });
-      }
     }
 
     const [attendance] = await attendanceModel.findOrCreate({

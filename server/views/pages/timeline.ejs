@@ -1,0 +1,40 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px;">
+  
+  <div style="margin-bottom: 32px;">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 700;">DYNAMIC SCHEDULE MATRIX</div>
+    <h1 class="poster-l" style="color: var(--on-ink); margin: 8px 0;">SYMPOSIUM TIMELINE</h1>
+  </div>
+
+  <!-- Day Switcher Links -->
+  <div style="display: flex; gap: 16px; margin-bottom: 32px;">
+    <a href="/timeline?day=18" style="background: <%= selectedDay === 18 ? 'var(--red)' : 'var(--ink-2)' %>; color: #FFF; border: 1px solid var(--red-40); padding: 10px 24px; font-family: var(--font-data); font-size: 12px; font-weight: 800; text-decoration: none;">
+      DAY 1 — 18 SEPTEMBER 2026
+    </a>
+    <a href="/timeline?day=19" style="background: <%= selectedDay === 19 ? 'var(--red)' : 'var(--ink-2)' %>; color: #FFF; border: 1px solid var(--red-40); padding: 10px 24px; font-family: var(--font-data); font-size: 12px; font-weight: 800; text-decoration: none;">
+      DAY 2 — 19 SEPTEMBER 2026
+    </a>
+  </div>
+
+  <!-- Schedule Grid -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <% events.forEach(function(evt) { %>
+      <a href="/events/<%= evt.slug %>" style="display: flex; justify-content: space-between; align-items: center; background: var(--ink-2); border: 1px solid var(--red-40); padding: 20px 24px; text-decoration: none; color: var(--on-ink);" class="misregister-hover">
+        <div style="display: flex; gap: 24px; align-items: center;">
+          <div style="font-family: var(--font-data); font-size: 13px; font-weight: 800; color: var(--red-100); width: 120px;">
+            <%= evt.start_time.slice(0, 5) %> - <%= evt.end_time.slice(0, 5) %>
+          </div>
+          <div>
+            <h3 class="poster-m" style="margin: 0; font-size: 18px; color: var(--on-ink);"><%= evt.name %></h3>
+            <span style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">
+              <%= evt.category %> · Venue: <%= evt.venue || 'TBA' %>
+            </span>
+          </div>
+        </div>
+        <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 800;">
+          VIEW DOSSIER →
+        </div>
+      </a>
+    <% }); %>
+  </div>
+
+</div>

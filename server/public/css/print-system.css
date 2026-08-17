@@ -1,0 +1,266 @@
+/* LOGIN 2026 — ONE INK, TWO STOCKS PRINT SYSTEM CSS */
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Instrument+Serif:italic@1&family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* STOCKS */
+  --paper:        #F4EFE9;   /* warm newsprint */
+  --paper-2:      #E9E1D8;   /* screened paper, table stripes */
+  --ink:          #120708;   /* near-black with red undertone */
+  --ink-2:        #1D1012;   /* raised ink surfaces */
+
+  /* THE ONE INK — red ladder sampled from the logo */
+  --red-100:      #FF2A2A;
+  --red:          #E01B22;   /* primary */
+  --red-70:       #B4111A;
+  --red-40:       #7E0910;
+  --red-20:       #4A050A;
+
+  /* Type colour per stock */
+  --on-paper:        #16090B;
+  --on-paper-muted:  #6B5A58;
+  --on-ink:          #F7F2F0;
+  --on-ink-muted:    #A79798;
+
+  /* Rules — printed lines, never shadows */
+  --rule-hair:  0.5px;
+  --rule:       1px;
+  --rule-bold:  3px;
+
+  /* Fonts */
+  --font-poster: 'Archivo Expanded', sans-serif;
+  --font-voice:  'Instrument Serif', serif;
+  --font-text:   'Inter Tight', system-ui, sans-serif;
+  --font-data:   'JetBrains Mono', monospace;
+
+  /* Motion */
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 520ms;
+  --ease-press: cubic-bezier(0.2, 0.9, 0.15, 1);
+  --ease-out:   cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Zero Radius Rule for everything except avatars and status chips */
+*, ::before, ::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+.chip-pill, .avatar-circle {
+  border-radius: 9999px !important;
+}
+
+/* Base Body Stock Styles */
+body.stock-ink {
+  background-color: var(--ink);
+  color: var(--on-ink);
+  font-family: var(--font-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body.stock-paper {
+  background-color: var(--paper);
+  color: var(--on-paper);
+  font-family: var(--font-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Halftone Dot Screens (CSS radial gradients, no opacity washes) */
+.halftone-10 {
+  background-image: radial-gradient(var(--red) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.halftone-25 {
+  background-image: radial-gradient(var(--red) 1.5px, transparent 1.5px);
+  background-size: 10px 10px;
+}
+
+.halftone-50 {
+  background-image: radial-gradient(var(--red) 2px, transparent 2px);
+  background-size: 6px 6px;
+}
+
+.halftone-75 {
+  background-image: radial-gradient(var(--red) 2.5px, transparent 2.5px);
+  background-size: 4px 4px;
+}
+
+/* Registration Crosshairs & Crop Marks */
+.registration-mark {
+  position: relative;
+}
+.registration-mark::before {
+  content: "+";
+  font-family: var(--font-data);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--red);
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  pointer-events: none;
+}
+.registration-mark::after {
+  content: "+";
+  font-family: var(--font-data);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--red);
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  pointer-events: none;
+}
+
+/* Deliberate Misregistration Hover Shift (1.5px red layer shift) */
+.misregister-hover {
+  transition: transform var(--dur-fast) var(--ease-press), text-shadow var(--dur-fast) var(--ease-press);
+}
+.misregister-hover:hover {
+  transform: translate(1.5px, -1.5px);
+  text-shadow: -1.5px 1.5px 0px var(--red);
+}
+
+/* Printed Running Head Strip */
+.running-head {
+  font-family: var(--font-data);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-ink .running-head {
+  background-color: var(--ink-2);
+  color: var(--on-ink-muted);
+  border-bottom: 1px solid var(--red-40);
+}
+
+.stock-paper .running-head {
+  background-color: var(--paper-2);
+  color: var(--on-paper-muted);
+  border-bottom: 1px solid var(--on-paper-muted);
+}
+
+/* Printed Folio Strip */
+.folio-strip {
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-ink .folio-strip {
+  border-top: 1px solid var(--red-40);
+  color: var(--on-ink-muted);
+}
+
+.stock-paper .folio-strip {
+  border-top: 1px solid var(--paper-2);
+  color: var(--on-paper-muted);
+}
+
+/* Typography Classes */
+.poster-xl {
+  font-family: var(--font-poster);
+  font-size: clamp(56px, 12vw, 180px);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.poster-l {
+  font-family: var(--font-poster);
+  font-size: clamp(36px, 6vw, 84px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.poster-m {
+  font-family: var(--font-poster);
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+/* Guardian Voice (Instrument Serif Italic) */
+.voice-italic {
+  font-family: var(--font-voice);
+  font-style: italic;
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.35;
+  color: var(--red-100);
+}
+
+.font-mono-data {
+  font-family: var(--font-data) !important;
+}
+
+/* Status Chips per §3 Print Treatment */
+.chip-verified {
+  background: var(--red);
+  color: #FFFFFF;
+  border: 1px solid var(--red);
+  padding: 4px 10px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chip-registered {
+  background: var(--paper-2);
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 4px 10px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chip-pending {
+  background: transparent;
+  color: var(--on-paper-muted);
+  border: 1px dashed var(--on-paper-muted);
+  padding: 4px 10px;
+  font-family: var(--font-data);
+  font-size: 11px;
+}
+
+.chip-rejected {
+  background: transparent;
+  color: var(--red-100);
+  border: 1px solid var(--red-100);
+  padding: 4px 10px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chip-closed {
+  background: var(--paper-2);
+  color: var(--on-paper-muted);
+  border: 1px solid var(--on-paper-muted);
+  padding: 4px 10px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  text-decoration: line-through;
+}
+
+/* View Transitions */
+@view-transition {
+  navigation: auto;
+}

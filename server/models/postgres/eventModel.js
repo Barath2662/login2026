@@ -45,6 +45,69 @@ const eventModel = sequelize.define(
       allowNull: true,
     },
 
+    category: {
+      type: DataTypes.ENUM("TECHNICAL", "NON_TECHNICAL"),
+      allowNull: false,
+      defaultValue: "TECHNICAL",
+    },
+
+    team_type: {
+      type: DataTypes.ENUM("INDIVIDUAL", "TEAM"),
+      allowNull: false,
+      defaultValue: "INDIVIDUAL",
+    },
+
+    min_team_size: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+    max_team_size: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+    day: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 18,
+    },
+
+    registration_deadline: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    is_flagship: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    guardian_asset: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    entry_fee: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+
+    rules_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    is_results_locked: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
     status: {
       type: DataTypes.ENUM("draft", "open", "closed", "completed", "cancelled"),
       allowNull: false,

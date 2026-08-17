@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const { verifyJwt } = require("../../middleware/auth");
 const allowRoles = require("../../middleware/allowRoles");
 const eventController = require("../../controllers/postgres/eventController");
@@ -6,8 +6,6 @@ const eventController = require("../../controllers/postgres/eventController");
 const router = express.Router();
 
 router.get("/", eventController.getAllEvents);
-router.get("/coordinator/my", verifyJwt, allowRoles("event_coordinator"), eventController.getMyCoordinatorEvents);
-router.get("/admin/all", verifyJwt, allowRoles("admin"), eventController.getAdminEvents);
 router.get("/timeline", verifyJwt, eventController.getTimeline);
 router.get("/:id", eventController.getEvent);
 

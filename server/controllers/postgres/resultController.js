@@ -1,4 +1,4 @@
-const resultModel = require("../../models/postgres/resultModel");
+﻿const resultModel = require("../../models/postgres/resultModel");
 
 const getEventResult = async (req, res) => {
   try {

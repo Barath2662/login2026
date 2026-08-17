@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" fill="none">
+  <defs>
+    <linearGradient id="vGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B30"/>
+      <stop offset="100%" stop-color="#9B0A12"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" fill="#0A0A0C" rx="16"/>
+  <!-- Tall narrow silhouette -->
+  <path d="M150 40 L180 80 L170 160 L200 240 L180 360 L120 360 L100 240 L130 160 L120 80 Z" fill="#141418" stroke="#2A1416" stroke-width="4"/>
+  <!-- Sightless Visor Plated Over -->
+  <rect x="120" y="70" width="60" height="24" rx="4" fill="#0A0A0C" stroke="url(#vGrad)" stroke-width="3"/>
+  <!-- Sensor whiskers -->
+  <path d="M110 100 L70 120 M110 110 L60 135 M190 100 L230 120 M190 110 L240 135" stroke="#FF3B30" stroke-width="2" stroke-dasharray="4 2"/>
+  <!-- Chest Core -->
+  <circle cx="150" cy="180" r="16" fill="#0A0A0C" stroke="url(#vGrad)" stroke-width="4"/>
+  <circle cx="150" cy="180" r="6" fill="#FF3B30"/>
+  <text x="150" y="380" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="14" font-weight="800" fill="#F2F2F4">VEIL // BLIND CODING</text>
+</svg>

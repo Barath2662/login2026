@@ -1,81 +1,76 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { GlitchNavbar } from '../components/GlitchNavbar';
+import React, { useState, useEffect } from 'react';
+import { Outlet } from 'react-router-dom';
+import { Navbar } from '../components/Navbar';
+import { InstrumentRail } from '../components/InstrumentRail';
+import { Ticker } from '../components/Ticker';
+import { UnpaidBanner } from '../components/UnpaidBanner';
 import { Footer } from '../components/Footer';
-import { useThemeStore } from '../store/themeStore';
-import { ProfileCompletionModal } from '../components/ProfileCompletionModal';
+import { IntroVideo } from '../components/IntroVideo';
+import { CommandSearchModal } from '../components/CommandSearchModal';
 import { useAuthStore } from '../store/authStore';
-import { useEffect, useState } from 'react';
 import { api } from '../services/api';
-import { CinematicIntro } from '../components/CinematicIntro';
 
-export const MainLayout = () => {
-  const location = useLocation();
-  const { reduceMotion } = useThemeStore();
-  const { token, survivor, setSurvivor, resetAuth, setInitialized } = useAuthStore();
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem('intro_seen'));
-
-  const handleIntroComplete = () => {
-    sessionStorage.setItem('intro_seen', 'true');
-    setShowIntro(false);
-  };
+export const MainLayout: React.FC = () => {
+  const { token, user, setUser, resetAuth, setInitialized } = useAuthStore();
+  const [showIntro, setShowIntro] = useState<boolean>(() => sessionStorage.getItem('hasPlayedIntro') !== 'true');
+  const [commandSearchOpen, setCommandSearchOpen] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (token && !survivor) {
+    const syncProfile = async () => {
+      if (token && !user) {
         try {
-          const { data } = await api.users.profile();
-          if (data && data.college_name && data.phone) {
-            setSurvivor(data);
-            setShowProfileModal(false);
-          } else {
-            setSurvivor(data);
-            setShowProfileModal(true);
+          const res = await api.users.profile();
+          if (res.data) {
+            setUser(res.data);
           }
-        } catch (error) {
-          console.error("Error fetching user profile", error);
+        } catch (err) {
+          console.warn('Invalid token or session expired');
           resetAuth();
         } finally {
           setInitialized(true);
         }
-      } else if (!token) {
-        resetAuth();
-        setShowProfileModal(false);
-        setInitialized(true);
-      } else if (token && survivor) {
+      } else {
         setInitialized(true);
       }
     };
-    
-    fetchProfile();
-  }, [token, survivor, setSurvivor, resetAuth, setInitialized]);
+
+    syncProfile();
+  }, [token, user, setUser, resetAuth, setInitialized]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg-primary text-text-primary overflow-x-hidden">
-      <AnimatePresence>
-        {showIntro && <CinematicIntro onComplete={handleIntroComplete} />}
-      </AnimatePresence>
+    <div className="flex flex-col min-h-screen bg-[#0A0607] text-[#F7F2F2] selection:bg-[#E01B22] selection:text-[#F7F2F2]">
+      
+      {/* Intro Video Overlay */}
+      {showIntro && <IntroVideo onComplete={() => setShowIntro(false)} />}
 
+      {/* Main App Shell */}
       {!showIntro && (
         <>
-          <GlitchNavbar />
-          <ProfileCompletionModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
-          <main className="flex-grow pt-20">
-        {/* pt-20 to offset the fixed header height */}
-        <AnimatePresence>
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: reduceMotion ? 0 : -10 }}
-            transition={{ duration: 0.2 }}
-          >
+          {/* Header & Navigation */}
+          <Navbar onOpenCommandSearch={() => setCommandSearchOpen(true)} />
+
+          {/* Instrument Rail (Fixed left on viewports >= 1280px) */}
+          <InstrumentRail />
+
+          {/* Announcements Ticker (Renders ONLY if active announcements exist) */}
+          <Ticker />
+
+          {/* Main Content Area (offset by 72px left on XL screens for instrument rail) */}
+          <main className="flex-grow xl:pl-[72px]">
             <Outlet />
-          </motion.div>
-        </AnimatePresence>
-      </main>
-          <Footer />
+          </main>
+
+          {/* Unpaid Nudge Banner (Fixed bottom stack for unverified participants) */}
+          <UnpaidBanner />
+
+          {/* Footer */}
+          <Footer onReplayIntro={() => setShowIntro(true)} />
+
+          {/* Command Search Modal (Ctrl+K) */}
+          <CommandSearchModal
+            isOpen={commandSearchOpen}
+            onClose={() => setCommandSearchOpen(false)}
+          />
         </>
       )}
     </div>

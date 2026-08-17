@@ -1,4 +1,4 @@
-const userModel = require("../../models/postgres/userModel");
+﻿const userModel = require("../../models/postgres/userModel");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -15,32 +15,15 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const registrationModel = require("../../models/postgres/registrationModel");
-
 const getMyProfile = async (req, res) => {
   try {
     const user = await userModel.findByPk(req.user.id, {
       attributes: { exclude: ["password"] },
-      include: [
-        {
-          model: registrationModel,
-          as: "registrations",
-        }
-      ]
     });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check payment status
-    const paymentModel = require("../../models/postgres/paymentModel");
-    const payment = await paymentModel.findOne({ where: { student_id: req.user.id } });
-    const hasPaidFee = payment ? payment.status === "successful" : false;
-
-    // Attach to response
-    const userResponse = user.toJSON();
-    userResponse.hasPaidFee = hasPaidFee;
-
-    return res.json(userResponse);
+    return res.json(user);
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile", error: error.message });
   }

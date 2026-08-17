@@ -3,14 +3,15 @@ const jwt = require("jsonwebtoken");
 const verifyJwt = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+    const token =
+      (authHeader && authHeader.startsWith("Bearer ") && authHeader.split(" ")[1]) ||
+      (req.cookies && req.cookies.token);
 
-    if (!authHeader || !authHeader.startsWith("Bearer ") || !req.cookies.token) {
+    if (!token) {
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    const token = (authHeader && authHeader.split(" ")[1]) || req.cookies.token;
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "super_secret_jwt_key_login_2k26_change_in_production");
 
     req.user = decoded;
     next();

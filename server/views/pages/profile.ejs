@@ -1,0 +1,65 @@
+<div style="max-width: 1000px; margin: 0 auto; padding: 48px 24px; space-y: 32px;">
+  
+  <div style="background: var(--paper-2); border: 1px solid var(--on-paper-muted); padding: 32px;" class="registration-mark">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--on-paper-muted); padding-bottom: 16px; margin-bottom: 24px;">
+      <div>
+        <h1 class="poster-m" style="margin: 0; color: var(--on-paper);">FEST REGISTRATION PAYMENT</h1>
+        <p style="font-family: var(--font-data); font-size: 11px; color: var(--on-paper-muted); margin-top: 4px;">
+          Submit payment reference UTR number to verify account access.
+        </p>
+      </div>
+
+      <!-- Status Chip -->
+      <% if (paymentStatus === 'VERIFIED') { %>
+        <span className="chip-verified">VERIFIED ✓</span>
+      <% } else if (paymentStatus === 'PENDING') { %>
+        <span className="chip-pending">PENDING VERIFICATION</span>
+      <% } else if (paymentStatus === 'REJECTED') { %>
+        <span className="chip-rejected">REJECTED ✗</span>
+      <% } else { %>
+        <span className="chip-closed">UNPAID</span>
+      <% } %>
+    </div>
+
+    <% if (error) { %>
+      <div style="background: #FFF; border: 1px solid var(--red); color: var(--red); padding: 12px; font-family: var(--font-data); font-size: 11px; margin-bottom: 20px;">
+        ⚠️ <%= error %>
+      </div>
+    <% } %>
+
+    <% if (message) { %>
+      <div style="background: var(--paper); border: 1px solid var(--red); color: var(--red); padding: 12px; font-family: var(--font-data); font-size: 11px; margin-bottom: 20px;">
+        ✓ <%= message %>
+      </div>
+    <% } %>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+      
+      <div style="background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 24px;">
+        <h4 style="font-family: var(--font-poster); font-size: 14px; margin: 0 0 8px 0; color: var(--on-paper);">STEP 1: PAY VIA PSG PORTAL</h4>
+        <p style="font-family: var(--font-text); font-size: 13px; color: var(--on-paper-muted); margin-bottom: 16px;">
+          Complete registration payment of ₹150 on the official PSG EMS portal.
+        </p>
+        <a href="https://events.psginstitutions.in/EMS/register/E5294158179" target="_blank" rel="noopener noreferrer" style="background: var(--red); color: #FFF; text-decoration: none; padding: 10px 18px; font-family: var(--font-data); font-size: 11px; font-weight: 800; display: inline-block;" class="misregister-hover">
+          OPEN PSG EMS PORTAL ↗
+        </a>
+      </div>
+
+      <div style="background: var(--paper); border: 1px solid var(--on-paper-muted); padding: 24px;">
+        <h4 style="font-family: var(--font-poster); font-size: 14px; margin: 0 0 8px 0; color: var(--on-paper);">STEP 2: SUBMIT REFERENCE</h4>
+        <form action="/profile/payment-reference" method="post" style="space-y: 12px;">
+          <div>
+            <label style="font-family: var(--font-data); font-size: 10px; color: var(--on-paper); block; font-weight: 700; margin-bottom: 4px;">UTR / TRANSACTION REF *</label>
+            <input type="text" name="transaction_reference" required placeholder="e.g. PSG-EMS-948102" value="<%= payment ? payment.transaction_reference : '' %>" style="width: 100%; background: var(--paper-2); border: 1px solid var(--on-paper-muted); color: var(--on-paper); padding: 8px 12px; font-family: var(--font-data); font-size: 12px;" />
+          </div>
+          <button type="submit" style="background: var(--on-paper); color: var(--paper); border: none; padding: 10px 18px; font-family: var(--font-data); font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase;" class="misregister-hover">
+            SUBMIT REFERENCE CODE
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

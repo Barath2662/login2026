@@ -35,6 +35,10 @@ const paymentModel = sequelize.define(
 
     status: {
       type: DataTypes.ENUM(
+        "NOT_SUBMITTED",
+        "PENDING",
+        "VERIFIED",
+        "REJECTED",
         "required",
         "in_progress",
         "successful",
@@ -44,7 +48,17 @@ const paymentModel = sequelize.define(
         "refunded"
       ),
       allowNull: false,
-      defaultValue: "required",
+      defaultValue: "PENDING",
+    },
+
+    rejection_reason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    receipt_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
 
     verified_by: {

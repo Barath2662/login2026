@@ -1,4 +1,4 @@
-const bonafideModel = require("../../models/postgres/bonafideModel");
+﻿const bonafideModel = require("../../models/postgres/bonafideModel");
 
 const getMyBonafide = async (req, res) => {
   try {

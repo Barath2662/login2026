@@ -1,21 +1,69 @@
 :root {
-  --bg-primary: #050505;
-  --bg-secondary: #111111;
-  --bg-card: #111111;
-  
-  --color-red: #EF233C;
-  --color-red-dim: #D90429;
-  --color-danger: #FF0033;
-  --color-silver: #E5E5E5;
-  --color-silver-dim: #A8A9AD;
-  
-  --text-primary: #E5E5E5;
-  --text-secondary: #A8A9AD;
-  --text-muted: #8A8A8A;
-  
-  --border-color: #A8A9AD;
-  --border-highlight: var(--color-red);
-  
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Surfaces — near-black with a red undertone, subtly stepped */
+  --void:          #0A0607;   /* page background */
+  --panel:         #130C0E;   /* cards, sheets, tables */
+  --panel-raised:  #1A1114;   /* modals, popovers, hovered rows */
+  --panel-sunken:  #070405;   /* inputs, code blocks, wells */
+
+  /* Lines — borders carry the structure, not shadows */
+  --line:          #2A1A1D;   /* default hairline */
+  --line-strong:   #3E2529;   /* dividers, table headers */
+  --line-hot:      #5C1116;   /* brand-tinted edge on active panels */
+
+  /* The red ladder — sampled from the logo */
+  --red-bright:    #FF2A2A;   /* highlight, focus ring, core light */
+  --red:           #E01B22;   /* PRIMARY: actions, active state */
+  --red-mid:       #B4111A;   /* hover, secondary emphasis */
+  --red-deep:      #7E0910;   /* pressed, trace lines, depth */
+  --red-oxblood:   #4A050A;   /* deepest shade, large fills, vignette */
+  --red-wash:      rgba(224,27,34,0.08);   /* selected row, active tab */
+  --red-veil:      rgba(224,27,34,0.16);   /* borders on active panels */
+
+  /* Text — warm off-whites, never blue-white */
+  --text:          #F7F2F2;
+  --text-muted:    #A79798;
+  --text-faint:    #6B5A5C;   /* labels, meta, disabled */
+
+  /* Optional single warm accent */
+  --amber:         #E08A17;
+
+  /* Typography */
+  --font-display: 'Orbitron', 'Chakra Petch', 'Rajdhani', sans-serif;
+  --font-body: 'Inter', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+
+  /* Durations & Easing */
+  --dur-instant: 120ms;
+  --dur-fast:    200ms;
+  --dur-base:    320ms;
+  --dur-slow:    560ms;
+
+  --ease-enter:  cubic-bezier(0.16, 0.84, 0.24, 1);
+  --ease-exit:   cubic-bezier(0.4, 0, 1, 1);
+  --ease-snap:   cubic-bezier(0.87, 0, 0.13, 1);
+
+  /* Cursors */
+  cursor: default;
+}
+
+button, a, input[type="submit"], input[type="button"], select, [role="button"] {
+  cursor: pointer;
+}
+
+input[type="text"], input[type="email"], input[type="password"], textarea {
+  cursor: text;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--red-bright);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

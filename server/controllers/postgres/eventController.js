@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+﻿const { Op } = require("sequelize");
 const eventModel = require("../../models/postgres/eventModel");
 const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
 const userModel = require("../../models/postgres/userModel");
@@ -97,58 +97,6 @@ const getTimeline = async (req, res) => {
   }
 };
 
-const getMyCoordinatorEvents = async (req, res) => {
-  try {
-    const assignments = await eventCoordinatorModel.findAll({
-      where: { user_id: req.user.id },
-      attributes: ['event_id'],
-    });
-
-    const eventIds = assignments.map(a => a.event_id);
-
-    if (eventIds.length === 0) {
-      return res.json([]);
-    }
-
-    const events = await eventModel.findAll({
-      where: {
-        id: {
-          [Op.in]: eventIds
-        }
-      },
-      order: [["date", "ASC"], ["start_time", "ASC"]],
-    });
-
-    return res.json(events);
-  } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch coordinator events", error: error.message });
-  }
-};
-
-const getAdminEvents = async (req, res) => {
-  try {
-    const events = await eventModel.findAll({
-      include: [
-        {
-          model: eventCoordinatorModel,
-          as: "coordinatorAssignments",
-          include: [
-            {
-              model: userModel,
-              as: "coordinator",
-              attributes: ["id", "name", "email"]
-            }
-          ]
-        }
-      ],
-      order: [["date", "ASC"], ["start_time", "ASC"]],
-    });
-    return res.json(events);
-  } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch admin events", error: error.message });
-  }
-};
-
 module.exports = {
   createEvent,
   getAllEvents,
@@ -157,6 +105,4 @@ module.exports = {
   deleteEvent,
   assignCoordinator,
   getTimeline,
-  getMyCoordinatorEvents,
-  getAdminEvents,
 };

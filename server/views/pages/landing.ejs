@@ -1,0 +1,122 @@
+<!-- Hero Section (Poster headline at poster-xl overhanging left margin) -->
+<section style="padding: 96px 24px; border-bottom: 1px solid var(--red-40); max-width: 1280px; margin: 0 auto; position: relative;" class="registration-mark">
+  
+  <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); letter-spacing: 0.14em; font-weight: 700; margin-bottom: 16px;">
+    NATIONAL TECHNICAL SYMPOSIUM · 35TH EDITION
+  </div>
+
+  <h1 class="poster-xl" style="margin: 0 0 16px 0; color: var(--on-ink);">
+    LOGIN <span style="color: var(--red);">2026</span>
+  </h1>
+
+  <div style="font-family: var(--font-poster); font-size: clamp(24px, 4vw, 48px); color: var(--red-100); letter-spacing: 0.05em; font-weight: 800; margin-bottom: 24px;">
+    LAST MAN STANDING
+  </div>
+
+  <p style="font-family: var(--font-text); font-size: 16px; color: var(--on-ink-muted); max-width: 60ch; line-height: 1.6; margin-bottom: 32px;">
+    The perfect fusion of masterminds. Ten regular arenas plus one headline flagship competition — governed by eleven mechanical guardians.
+  </p>
+
+  <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+    <% if (user) { %>
+      <a href="/dashboard" style="background: var(--red); color: #FFF; text-decoration: none; padding: 14px 28px; font-family: var(--font-data); font-size: 12px; font-weight: 800; text-transform: uppercase;" class="misregister-hover">
+        GO TO SURVIVOR DOSSIER →
+      </a>
+    <% } else { %>
+      <a href="/register" style="background: var(--red); color: #FFF; text-decoration: none; padding: 14px 28px; font-family: var(--font-data); font-size: 12px; font-weight: 800; text-transform: uppercase;" class="misregister-hover">
+        REGISTER FOR SYMPOSIUM →
+      </a>
+    <% } %>
+    <a href="/events" style="background: transparent; color: var(--on-ink); border: 1px solid var(--red-40); text-decoration: none; padding: 14px 28px; font-family: var(--font-data); font-size: 12px; font-weight: 700; text-transform: uppercase;">
+      EXPLORE 11 ARENAS
+    </a>
+  </div>
+</section>
+
+<!-- Countdown Strip -->
+<section style="background: var(--ink-2); border-bottom: 1px solid var(--red-40); padding: 24px; text-align: center;">
+  <div style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted); letter-spacing: 0.14em; margin-bottom: 8px;">
+    T-MINUS TO SYMPOSIUM OPENING (18 SEP 2026 09:30 IST)
+  </div>
+  <div style="font-family: var(--font-data); font-size: clamp(24px, 5vw, 48px); font-weight: 800; color: var(--red-100); letter-spacing: 0.1em;">
+    <span id="days">33</span>D : <span id="hours">12</span>H : <span id="mins">45</span>M : <span id="secs">18</span>S
+  </div>
+</section>
+
+<!-- Live Telemetry Counters -->
+<section style="padding: 48px 24px; border-bottom: 1px solid var(--red-40); max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; text-align: center;">
+  <div style="border: 1px solid var(--red-40); padding: 20px; background: var(--ink-2);">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">REGISTERED SURVIVORS</div>
+    <div style="font-family: var(--font-data); font-size: 28px; font-weight: 800; color: var(--on-ink); margin-top: 4px;"><%= participantCount %></div>
+  </div>
+  <div style="border: 1px solid var(--red-40); padding: 20px; background: var(--ink-2);">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">OFFICIAL ARENAS</div>
+    <div style="font-family: var(--font-data); font-size: 28px; font-weight: 800; color: var(--red-100); margin-top: 4px;">11</div>
+  </div>
+  <div style="border: 1px solid var(--red-40); padding: 20px; background: var(--ink-2);">
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">SYMPOSIUM DAYS</div>
+    <div style="font-family: var(--font-data); font-size: 28px; font-weight: 800; color: var(--on-ink); margin-top: 4px;">02</div>
+  </div>
+</section>
+
+<!-- Directive Band (About Section) -->
+<section style="padding: 64px 24px; border-bottom: 1px solid var(--red-40); max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1fr 3fr; gap: 32px;">
+  <div style="font-family: var(--font-data); font-size: 12px; font-weight: 800; color: var(--red-100);">
+    [ DIRECTIVE // 01 ]
+  </div>
+  <div style="font-family: var(--font-text); font-size: 15px; color: var(--on-ink-muted); line-height: 1.6; space-y: 16px;">
+    <h2 class="poster-m" style="color: var(--on-ink); margin: 0 0 16px 0;">THIRTY-FIVE YEARS OF MASTERMINDS</h2>
+    <p style="margin-bottom: 12px;">
+      LOGIN is the national technical symposium organized annually by the Computer Applications Association (CAA), Department of Computer Applications, PSG College of Technology, Coimbatore.
+    </p>
+    <p style="margin: 0;">
+      The 2026 edition introduces "Last Man Standing" — testing technical depth, logic, and rapid decision-making across two days of high-intensity competition.
+    </p>
+  </div>
+</section>
+
+<!-- Event Index Preview -->
+<section style="padding: 64px 24px; border-bottom: 1px solid var(--red-40); max-width: 1280px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <h2 class="poster-m" style="color: var(--on-ink); margin: 0;">OFFICIAL ARENAS (11)</h2>
+    <a href="/events" style="font-family: var(--font-data); font-size: 12px; color: var(--red-100); text-decoration: none; font-weight: 700;">VIEW ALL 11 EVENTS →</a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+    <% events.forEach(function(evt, idx) { %>
+      <a href="/events/<%= evt.slug %>" style="display: block; background: var(--ink-2); border: 1px solid var(--red-40); padding: 20px; text-decoration: none; color: var(--on-ink);" class="misregister-hover">
+        <div style="display: flex; justify-content: space-between; font-family: var(--font-data); font-size: 11px; color: var(--red-100); margin-bottom: 8px;">
+          <span>0<%= idx + 1 %></span>
+          <span><%= evt.category %> · DAY <%= evt.day %></span>
+        </div>
+        <div style="font-family: var(--font-poster); font-weight: 700; font-size: 16px; margin-bottom: 4px;">
+          <%= evt.name %>
+        </div>
+        <div style="font-family: var(--font-voice); font-size: 14px; color: var(--red-100); font-style: italic;">
+          "<%= evt.guardian.voice %>"
+        </div>
+      </a>
+    <% }); %>
+  </div>
+</section>
+
+<!-- Flagship Band (One permitted paper inversion accent band) -->
+<% if (flagship) { %>
+<section style="background: var(--paper); color: var(--on-paper); padding: 80px 24px; border-bottom: 1px solid var(--on-paper-muted);">
+  <div style="max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;">
+    <div>
+      <span className="chip-registered" style="margin-bottom: 16px; display: inline-block;">★ HEADLINE FLAGSHIP</span>
+      <h2 class="poster-l" style="margin: 16px 0; color: var(--on-paper);"><%= flagship.name %></h2>
+      <p style="font-family: var(--font-text); font-size: 15px; color: var(--on-paper-muted); line-height: 1.6; margin-bottom: 24px;">
+        <%= flagship.description %>
+      </p>
+      <a href="/events/<%= flagship.slug %>" style="background: var(--red); color: #FFF; text-decoration: none; padding: 12px 24px; font-family: var(--font-data); font-size: 11px; font-weight: 800; text-transform: uppercase;" class="misregister-hover">
+        INSPECT FLAGSHIP BRIEFING →
+      </a>
+    </div>
+    <div style="text-align: center;">
+      <img src="<%= flagship.guardian_asset || '/assets/guardians/the_last_standing.svg' %>" alt="<%= flagship.name %>" style="max-height: 280px; width: auto;" />
+    </div>
+  </div>
+</section>
+<% } %>

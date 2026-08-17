@@ -38,11 +38,6 @@ export const InvasionTimeline = () => {
     return { isRegistered };
   };
 
-  // Helper to check overlap
-  const isOverlapping = (e1: any, e2: any) => {
-    return e1.timeStart < e2.timeEnd && e1.timeEnd > e2.timeStart;
-  };
-
   // Process and cluster events
   const clusters: any[][] = [];
   const processedEvents = (events || []).map((e: any) => {

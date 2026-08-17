@@ -10,8 +10,13 @@ const Bonafide = require("./bonafideModel");
 const Attendance = require("./attendanceModel");
 const Result = require("./resultModel");
 const Notification = require("./notificationModel");
+const Setting = require("./settingModel");
+const Announcement = require("./announcementModel");
+const EventChangeLog = require("./eventChangeLogModel");
+const { LegacyEdition, LegacyItem } = require("./legacyModel");
+const EmailLog = require("./emailLogModel");
 
-// User -> Events
+// User -> Registrations
 User.hasMany(Registration, { foreignKey: "student_id", as: "registrations" });
 Registration.belongsTo(User, { foreignKey: "student_id", as: "student" });
 
@@ -40,17 +45,6 @@ TeamMember.belongsTo(Team, { foreignKey: "team_id", as: "team" });
 User.hasMany(TeamMember, { foreignKey: "student_id", as: "teamMemberships" });
 TeamMember.belongsTo(User, { foreignKey: "student_id", as: "student" });
 
-// Team requests
-User.hasMany(TeamRequest, { foreignKey: "sender_id", as: "sentTeamRequests" });
-TeamRequest.belongsTo(User, { foreignKey: "sender_id", as: "sender" });
-
-User.hasMany(TeamRequest, { foreignKey: "receiver_id", as: "receivedTeamRequests" });
-TeamRequest.belongsTo(User, { foreignKey: "receiver_id", as: "receiver" });
-
-// Bonafide
-User.hasOne(Bonafide, { foreignKey: "student_id", as: "bonafide" });
-Bonafide.belongsTo(User, { foreignKey: "student_id", as: "student" });
-
 // Attendance
 User.hasMany(Attendance, { foreignKey: "student_id", as: "attendance" });
 Attendance.belongsTo(User, { foreignKey: "student_id", as: "student" });
@@ -58,19 +52,16 @@ Attendance.belongsTo(User, { foreignKey: "student_id", as: "student" });
 Event.hasMany(Attendance, { foreignKey: "event_id", as: "attendance" });
 Attendance.belongsTo(Event, { foreignKey: "event_id", as: "event" });
 
-User.hasMany(Attendance, { foreignKey: "marked_by", as: "markedAttendance" });
-Attendance.belongsTo(User, { foreignKey: "marked_by", as: "marker" });
-
 // Results
 Event.hasOne(Result, { foreignKey: "event_id", as: "result" });
 Result.belongsTo(Event, { foreignKey: "event_id", as: "event" });
 
-Result.belongsTo(User, { foreignKey: "winner_id", as: "winner" });
-Result.belongsTo(User, { foreignKey: "runner_id", as: "runner" });
-
-// Notifications
+// Notifications & Logs
 User.hasMany(Notification, { foreignKey: "user_id", as: "notifications" });
 Notification.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+Event.hasMany(EventChangeLog, { foreignKey: "event_id", as: "changeLogs" });
+EventChangeLog.belongsTo(Event, { foreignKey: "event_id", as: "event" });
 
 module.exports = {
   User,
@@ -85,4 +76,10 @@ module.exports = {
   Attendance,
   Result,
   Notification,
+  Setting,
+  Announcement,
+  EventChangeLog,
+  LegacyEdition,
+  LegacyItem,
+  EmailLog,
 };

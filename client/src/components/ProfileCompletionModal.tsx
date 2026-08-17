@@ -1,6 +1,5 @@
 import { FC, useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
-import imageCompression from 'browser-image-compression';
 import { api } from '../services/api';
 import { UploadCloud, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
