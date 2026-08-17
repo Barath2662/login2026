@@ -1,0 +1,48 @@
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 24px;">
+  
+  <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <a href="/legacy" style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); text-decoration: none; font-weight: 700;">← BACK TO LEGACY INDEX</a>
+      <h1 class="poster-l" style="color: var(--on-ink); margin: 8px 0 0 0;"><%= edition.title %> (<%= edition.year %>)</h1>
+    </div>
+    <div style="font-family: var(--font-data); font-size: 11px; color: var(--on-ink-muted);">
+      EDITION <%= edition.edition_number %> GALLERY
+    </div>
+  </div>
+
+  <% if (!items || items.length === 0) { %>
+    <div style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 48px; text-align: center;">
+      <div style="font-family: var(--font-data); font-size: 12px; color: var(--on-ink-muted);">
+        No media items found for this edition.
+      </div>
+    </div>
+  <% } else { %>
+    <!-- Ruled Media Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+      <% items.forEach(function(item) { %>
+        <div id="item-<%= item.id %>" style="background: var(--ink-2); border: 1px solid var(--red-40); padding: 16px;">
+          <% if (item.type === 'VIDEO') { %>
+            <div style="background: var(--ink); border: 1px solid var(--red-40); padding: 24px; text-align: center;">
+              <div style="font-family: var(--font-data); font-size: 11px; color: var(--red-100); font-weight: 800; margin-bottom: 8px;">VIDEO EMBED FACADE</div>
+              <a href="<%= item.storage_key %>" target="_blank" rel="noopener noreferrer" style="background: var(--red); color: #FFF; padding: 8px 16px; text-decoration: none; font-family: var(--font-data); font-size: 11px; font-weight: 800; display: inline-block;">
+                PLAY VIDEO 🎬
+              </a>
+            </div>
+          <% } else { %>
+            <img src="<%= item.storage_key %>" alt="<%= item.caption || 'Legacy Photo' %>" style="width: 100%; height: 220px; object-fit: cover; border: 1px solid var(--red-40);" />
+          <% } %>
+
+          <div style="margin-top: 12px; font-family: var(--font-text); font-size: 12px; color: var(--on-ink-muted);">
+            <%= item.caption || 'Photograph from edition archives.' %>
+          </div>
+          <% if (item.credit) { %>
+            <div style="font-family: var(--font-data); font-size: 10px; color: var(--red-100); margin-top: 4px;">
+              CREDIT: <%= item.credit %>
+            </div>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
+</div>

@@ -5,6 +5,7 @@ interface UserProfile {
   email: string | null;
   name: string | null;
   role: string | null;
+  hasPaid: boolean;
 }
 
 interface UserState {

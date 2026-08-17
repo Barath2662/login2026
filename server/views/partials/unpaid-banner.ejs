@@ -1,0 +1,11 @@
+<% if (user && user.role === 'student' && (typeof paymentStatus === 'undefined' || paymentStatus !== 'VERIFIED')) { %>
+  <div style="background: var(--paper-2); border-bottom: 2px solid var(--red); padding: 12px 24px; font-family: var(--font-data); font-size: 12px; color: var(--on-paper); display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <span style="color: var(--red); font-weight: 800; margin-right: 8px;">[UNPAID REGISTRATION]</span>
+      <span>Pay the registration fee of ₹150 on the PSG EMS portal to unlock event enrollment.</span>
+    </div>
+    <a href="/profile#payment" style="background: var(--red); color: #FFF; text-decoration: none; padding: 6px 14px; font-weight: 800; text-transform: uppercase;" class="misregister-hover">
+      COMPLETE PAYMENT →
+    </a>
+  </div>
+<% } %>

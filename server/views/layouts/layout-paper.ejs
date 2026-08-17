@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' | LOGIN 2026' : 'LOGIN 2026 — Field Manual & Roster' %></title>
+  <meta name="description" content="LOGIN 2026 Field Manual, Dashboard & Control Surface.">
+  <link rel="stylesheet" href="/css/print-system.css">
+  <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="stock-paper">
+
+  <!-- Printed Running Head Strip -->
+  <div class="running-head">
+    <span>MANUAL: <%= sectionName || 'SURVIVOR DOSSIER' %></span>
+    <span>LOGIN 2026 · FIELD OPERATIVE</span>
+    <span>ID: <%= pageId || 'DOC-01' %></span>
+  </div>
+
+  <!-- Header -->
+  <%- include('../partials/header-paper') %>
+
+  <!-- Announcement Ticker Bar -->
+  <%- include('../partials/ticker') %>
+
+  <!-- Unpaid Participant Banner -->
+  <%- include('../partials/unpaid-banner') %>
+
+  <!-- Main Content Block -->
+  <main className="min-h-screen">
+    <%- body %>
+  </main>
+
+  <!-- Folio Strip -->
+  <div class="folio-strip">
+    <span>DEPARTMENT OF COMPUTER APPLICATIONS</span>
+    <span>PSG COLLEGE OF TECHNOLOGY</span>
+    <span>+ REGISTRATION MARK +</span>
+  </div>
+
+  <!-- Footer -->
+  <%- include('../partials/footer-paper') %>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' | LOGIN 2026' : 'LOGIN 2026 — Last Man Standing' %></title>
+  <meta name="description" content="LOGIN 2026 - 35th Edition Technical Symposium, PSG College of Technology. 18-19 September 2026. Theme: Last Man Standing.">
+  <link rel="stylesheet" href="/css/print-system.css">
+  <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.min.js" defer></script>
+</head>
+<body class="stock-ink">
+
+  <!-- Printed Running Head Strip -->
+  <div class="running-head">
+    <span>SECTION: <%= sectionName || 'COMMAND CONSOLE' %></span>
+    <span>LOGIN 2026 · 35TH EDITION</span>
+    <span>PAGE ID: <%= pageId || 'SYS-01' %></span>
+  </div>
+
+  <!-- Header -->
+  <%- include('../partials/header-ink') %>
+
+  <!-- Announcement Ticker Bar (Renders ONLY when active notices exist) -->
+  <%- include('../partials/ticker') %>
+
+  <!-- Main Content Block -->
+  <main className="min-h-screen">
+    <%- body %>
+  </main>
+
+  <!-- Folio Strip -->
+  <div class="folio-strip">
+    <span>18 & 19 SEPTEMBER 2026</span>
+    <span>COMPUTER APPLICATIONS ASSOCIATION · PSG TECH</span>
+    <span>+ CROP MARK +</span>
+  </div>
+
+  <!-- Footer -->
+  <%- include('../partials/footer-ink') %>
+
+</body>
+</html>
