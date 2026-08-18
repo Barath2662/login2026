@@ -236,9 +236,11 @@ router.post('/admin/events/:id/update', async (req, res) => {
     if (EventChangeLog) {
       await EventChangeLog.create({
         event_id: event.id,
-        change_type: 'VENUE_OR_TIME_UPDATED',
-        previous_details: JSON.stringify({ venue: oldVenue, start_time: oldTime }),
-        new_details: JSON.stringify({ venue: event.venue, start_time: event.start_time }),
+        changed_by: req.session.user.id,
+        fields_changed: {
+          venue: { old: oldVenue, new: event.venue },
+          start_time: { old: oldTime, new: event.start_time }
+        },
         notified: true
       });
     }
