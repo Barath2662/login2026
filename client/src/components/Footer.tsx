@@ -29,7 +29,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
               <img src="/assets/logo.svg" alt="LOGIN 2026 Logo" className="h-9 w-auto" />
               <div>
                 <h3 className="font-display font-extrabold text-lg text-[#F2F2F4] tracking-wider">LOGIN 2026</h3>
-                <p className="text-[10px] font-mono text-[#E01B24] font-bold">THE LAST HUMAN STANDING</p>
+                <p className="text-[10px] font-mono text-[#E01B24] font-bold">THE LAST HUMAN</p>
               </div>
             </div>
             <p className="text-xs leading-relaxed text-[#9A9AA2]">
@@ -115,7 +115,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
         {/* Bottom Rights */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[#9A9AA2]">
           <p>© 2026 Computer Applications Association. All rights reserved.</p>
-          <p className="text-[#FF3B30]">LOGIN 2026 • LAST MAN STANDING</p>
+          <p className="text-[#FF3B30]">LOGIN 2026 &bull; THE LAST HUMAN</p>
         </div>
 
       </div>

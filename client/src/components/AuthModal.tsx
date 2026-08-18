@@ -80,7 +80,9 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose }) => {
         onClose();
         
         const role = res.data.user?.role;
-        if (role === 'event_coordinator') {
+        if (role === 'admin_power') {
+          window.location.href = '/admin/access-control';
+        } else if (role === 'event_coordinator') {
           window.location.href = '/event-dashboard';
         } else if (role === 'admin') {
           window.location.href = '/admin';

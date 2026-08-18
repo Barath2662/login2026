@@ -28,6 +28,7 @@ export const GlitchNavbar = () => {
     { name: 'Enter the Multiverse', path: '/events' },
     { name: 'About', path: '/about' },
     { name: 'Legacy', path: '/legacy' },
+    { name: 'Alumni', path: '/alumni' },
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -146,6 +147,15 @@ export const GlitchNavbar = () => {
                             className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
                           >
                             EVENT DASHBOARD
+                          </Link>
+                        )}
+                        {survivor.role === 'admin_power' && (
+                          <Link
+                            to="/admin/access-control"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="block px-4 py-2 text-sm text-color-silver hover:bg-color-silver/10 transition-colors"
+                          >
+                            SUPER ADMIN DASHBOARD
                           </Link>
                         )}
                         {survivor.role === 'admin' && (
@@ -268,6 +278,15 @@ export const GlitchNavbar = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       EVENT DASHBOARD
+                    </Link>
+                  )}
+                  {survivor.role === 'admin_power' && (
+                    <Link
+                      to="/admin/access-control"
+                      className="block w-full text-center px-5 py-3 text-sm font-medium rounded-sm border border-border-color text-color-silver hover:border-color-silver transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      SUPER ADMIN DASHBOARD
                     </Link>
                   )}
                   {survivor.role === 'admin' && (

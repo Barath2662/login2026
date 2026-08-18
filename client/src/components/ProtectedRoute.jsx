@@ -19,8 +19,8 @@ export const ProtectedRoute = ({ children, requireRole }) => {
 
   if (requireRole) {
     const userRole = survivor?.role || 'student';
-    // Let admin access everything
-    if (userRole !== requireRole && userRole !== 'admin') {
+    // Let admin and super_admin access everything
+    if (userRole !== requireRole && userRole !== 'admin' && userRole !== 'super_admin' && userRole !== 'admin_power') {
       return <Navigate to="/home" replace />;
     }
   }

@@ -84,18 +84,18 @@ export const InvasionTimeline = () => {
     <div className="relative w-full max-w-7xl mx-auto py-24 px-4 overflow-hidden min-h-screen">
       
       {/* TWO PARALLEL CONTINUOUS LINES (Desktop) */}
-      <div className="hidden md:block absolute top-0 bottom-0 left-[calc(50%-16px)] w-[2px] bg-bg-secondary z-0">
+      <div className="hidden md:block absolute top-0 bottom-0 left-[calc(50%-16px)] w-[2px] bg-border-color z-0">
         <motion.div 
-          className="w-full h-full bg-color-red-dim shadow-[0_0_15px_rgba(217,4,41,1)]"
+          className="w-full h-full bg-color-red shadow-[0_0_8px_rgba(239,35,60,0.8)]"
           initial={{ scaleY: 0, transformOrigin: 'top' }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1.5, ease: "easeOut" }}
         />
       </div>
-      <div className="hidden md:block absolute top-0 bottom-0 left-[calc(50%+16px)] w-[2px] bg-bg-secondary z-0">
+      <div className="hidden md:block absolute top-0 bottom-0 left-[calc(50%+16px)] w-[2px] bg-border-color z-0">
         <motion.div 
-          className="w-full h-full bg-color-red-dim shadow-[0_0_15px_rgba(217,4,41,1)]"
+          className="w-full h-full bg-color-red shadow-[0_0_8px_rgba(239,35,60,0.8)]"
           initial={{ scaleY: 0, transformOrigin: 'top' }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true }}
@@ -104,9 +104,9 @@ export const InvasionTimeline = () => {
       </div>
 
       {/* SINGLE CONTINUOUS LINE (Mobile) */}
-      <div className="md:hidden absolute top-0 bottom-0 left-[20px] w-[2px] bg-bg-secondary z-0">
+      <div className="md:hidden absolute top-0 bottom-0 left-[20px] w-[2px] bg-border-color z-0">
         <motion.div 
-          className="w-full h-full bg-color-red-dim shadow-[0_0_15px_rgba(217,4,41,1)]"
+          className="w-full h-full bg-color-red shadow-[0_0_8px_rgba(239,35,60,0.8)]"
           initial={{ scaleY: 0, transformOrigin: 'top' }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true }}
@@ -138,7 +138,7 @@ export const InvasionTimeline = () => {
                     {/* Node indicator - Attaches to the corresponding parallel line */}
                     <div 
                       className={`
-                        absolute top-[24px] w-4 h-4 rounded-full bg-color-red-dim border-2 border-black z-20 shadow-[0_0_10px_rgba(217,4,41,0.8)]
+                        absolute top-[24px] w-4 h-4 rounded-full bg-color-red border-2 border-[#E5E5E5] z-20 shadow-[0_0_8px_rgba(239,35,60,0.8)]
                         /* Mobile Positioning */
                         left-[20px] -translate-x-1/2
                         /* Desktop Positioning */

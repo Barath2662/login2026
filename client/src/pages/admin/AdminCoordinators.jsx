@@ -13,7 +13,7 @@ const AdminCoordinators = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const { data } = await api.events.getAdminEvents();
+        const { data } = await api.events.getAll();
         setEvents(Array.isArray(data) ? data : (data.data || []));
       } catch (err) {
         console.error('Failed to fetch events:', err);

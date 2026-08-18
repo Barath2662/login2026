@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 
 const { verifyJwt } = require("../../middleware/auth");
 const allowRoles = require("../../middleware/allowRoles");
@@ -26,7 +26,7 @@ router.put(
 router.get(
   "/",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "super_admin", "admin_power"),
   userController.getAllUsers
 );
 
@@ -34,7 +34,7 @@ router.get(
 router.get(
   "/:id",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "super_admin", "admin_power"),
   userController.getUserById
 );
 
@@ -42,7 +42,7 @@ router.get(
 router.put(
   "/:id/role",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("super_admin", "admin_power"),
   userController.updateUserRole
 );
 
@@ -50,7 +50,7 @@ router.put(
 router.put(
   "/:id/status",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "super_admin", "admin_power"),
   userController.updateUserStatus
 );
 

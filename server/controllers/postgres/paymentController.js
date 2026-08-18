@@ -131,12 +131,15 @@ const verifyPayment = async (req, res) => {
       }
       return res.json({ message: "Payment verified successfully", payment });
     } else if (targetStatus === "REJECTED") {
-      await payment.update({
-        status: "REJECTED",
-        verified_by: req.user.id,
-        rejection_reason: rejection_reason || "Transaction reference could not be verified.",
-      });
-      return res.json({ message: "Payment rejected", payment });
+      const studentId = payment.student_id;
+      const registrationModel = require("../../models/postgres/registrationModel");
+      
+      // Ban/Delete user from system on false UTR
+      await registrationModel.destroy({ where: { student_id: studentId } });
+      await payment.destroy();
+      await userModel.destroy({ where: { id: studentId } });
+      
+      return res.json({ message: "Payment rejected. Participant provided false UTR and has been banned." });
     } else {
       return res.status(400).json({ message: "Invalid verification status. Must be VERIFIED or REJECTED." });
     }

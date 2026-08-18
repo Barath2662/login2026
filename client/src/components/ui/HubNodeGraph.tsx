@@ -40,7 +40,7 @@ export const HubNodeGraph = () => {
       <div 
         className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(0, 240, 255, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.2) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(255, 42, 42, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 42, 42, 0.2) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
           transform: 'rotateX(60deg) rotateZ(-45deg) scale(2)',
           transformOrigin: 'center center'
@@ -74,7 +74,7 @@ export const HubNodeGraph = () => {
               onClick={() => navigate(`/worlds/${world.id}`)}
             >
               <div className={`relative w-16 h-16 rounded-full flex items-center justify-center
-                ${isFinale ? 'bg-color-danger/20 border-2 border-color-danger shadow-[0_0_30px_rgba(239,68,68,0.6)]' : 'bg-color-red/10 border border-color-red shadow-[0_0_15px_rgba(0,240,255,0.3)]'}
+                ${isFinale ? 'bg-color-danger/20 border-2 border-color-danger shadow-[0_0_30px_rgba(239,68,68,0.6)]' : 'bg-color-red/10 border border-color-red shadow-[0_0_15px_rgba(255, 42, 42,0.3)]'}
                 transition-all duration-300 group-hover:bg-opacity-40
               `}>
                 <div className="text-white font-mono font-bold text-lg">
@@ -96,7 +96,7 @@ export const HubNodeGraph = () => {
                 key={`line-${idx}`} 
                 x1={p1.x + 32} y1={p1.y + 32} 
                 x2={p2.x + 32} y2={p2.y + 32} 
-                stroke="rgba(0, 240, 255, 0.3)" 
+                stroke="rgba(255, 42, 42, 0.3)" 
                 strokeWidth="2"
                 strokeDasharray="4 4"
               />

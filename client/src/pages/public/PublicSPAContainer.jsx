@@ -4,6 +4,9 @@ import Home from './Home';
 import Events from './Events';
 import Legacy from './Legacy';
 import About from './About';
+import Teams from './Teams';
+import Sponsors from './Sponsors';
+import Alumni from './Alumni';
 import Contact from './Contact';
 
 const PublicSPAContainer = () => {
@@ -69,6 +72,15 @@ const PublicSPAContainer = () => {
       </div>
       <div id="legacy" className="public-spa-section">
         <Legacy />
+      </div>
+      <div id="teams" className="public-spa-section">
+        <Teams />
+      </div>
+      <div id="sponsors" className="public-spa-section">
+        <Sponsors />
+      </div>
+      <div id="alumni" className="public-spa-section">
+        <Alumni />
       </div>
       <div id="contact" className="public-spa-section">
         <Contact />

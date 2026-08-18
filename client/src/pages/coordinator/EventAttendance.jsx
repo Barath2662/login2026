@@ -16,7 +16,7 @@ const EventAttendance = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const { data } = await api.events.getCoordinatorEvents();
+        const { data } = await api.events.getAll();
         const eventsData = Array.isArray(data) ? data : (data.data || []);
         setEvents(eventsData);
         if (eventsData.length > 0) {

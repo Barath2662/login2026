@@ -31,6 +31,7 @@ export const router = createBrowserRouter([
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'coordinator', element: <CoordinatorPage /> },
       { path: 'admin', element: <AdminPage /> },
+      { path: 'admin/access-control', element: <AdminPage /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

@@ -17,8 +17,8 @@ const createRegistration = async (req, res) => {
       where: { student_id: student_id },
     });
 
-    if (!payment || (payment.status !== "VERIFIED" && payment.status !== "successful")) {
-      return res.status(403).json({ message: "Event registration is locked until your registration payment is verified by admin." });
+    if (!payment || (payment.status !== "VERIFIED" && payment.status !== "successful" && payment.status !== "PENDING")) {
+      return res.status(403).json({ message: "Event registration is locked until you submit your payment reference." });
     }
 
     // 2. Fetch Event & Validate Existence

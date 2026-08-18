@@ -33,7 +33,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <div 
-      className={`w-full p-4 md:p-5 bg-bg-primary border border-border-color rounded-sm transition-all duration-300 hover:border-color-red hover:shadow-[0_0_20px_rgba(239,35,60,0.15)] group ${className}`}
+      className={`w-full p-4 md:p-5 bg-bg-primary border border-[#E5E5E5] rounded-sm transition-all duration-300 hover:border-color-red hover:shadow-[0_0_20px_rgba(239,35,60,0.15)] group ${className}`}
     >
       <div className={`flex flex-col gap-2 md:gap-3 ${isLeftAligned ? 'md:text-right' : 'md:text-left'}`}>
         
@@ -52,8 +52,8 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         {/* Tactical Mini-Specs */}
         <div className={`flex flex-wrap gap-3 mt-1 ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
-          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
-            <Users size={12} className="mr-1 text-color-red" />
+          <div className="flex items-center text-[10px] md:text-xs text-color-red font-mono">
+            <Users size={12} className="mr-1" />
             {event.isTeam ? `${event.minTeamSize}-${event.maxTeamSize} OP` : 'SOLO'}
           </div>
           <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">

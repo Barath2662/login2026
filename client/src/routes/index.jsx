@@ -42,6 +42,7 @@ import AdminPayments from '../pages/admin/AdminPayments';
 import AdminTeams from '../pages/admin/AdminTeams';
 import AdminAttendance from '../pages/admin/AdminAttendance';
 import AdminReports from '../pages/admin/AdminReports';
+import SuperAdminAccess from '../pages/admin/SuperAdminAccess';
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,9 @@ export const router = createBrowserRouter([
           { path: 'events', element: <></> },
           { path: 'about', element: <></> },
           { path: 'legacy', element: <></> },
+          { path: 'teams', element: <></> },
+          { path: 'sponsors', element: <></> },
+          { path: 'alumni', element: <></> },
           { path: 'contact', element: <></> },
         ]
       },
@@ -146,6 +150,7 @@ export const router = createBrowserRouter([
               { path: 'teams', element: <AdminTeams /> },
               { path: 'attendance', element: <AdminAttendance /> },
               { path: 'reports', element: <AdminReports /> },
+              { path: 'access-control', element: <SuperAdminAccess /> },
             ],
           },
         ],

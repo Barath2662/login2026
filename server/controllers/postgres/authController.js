@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("../../models/postgres/userModel");
+const paymentModel = require("../../models/postgres/paymentModel");
+const registrationModel = require("../../models/postgres/registrationModel");
 const { sendEmail } = require("../../services/emailService");
 
 const registerUser = async (req, res) => {
@@ -89,6 +91,8 @@ const registerUser = async (req, res) => {
         student_id_code: user.student_id_code,
         is_active: user.is_active,
         must_change_password: user.must_change_password,
+        hasPaidFee: false,
+        registrations: [],
       },
     });
   } catch (error) {
@@ -152,6 +156,14 @@ const loginUser = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const payment = await paymentModel.findOne({
+      where: { student_id: user.id, status: ["PENDING", "VERIFIED"] }
+    });
+
+    const registrations = await registrationModel.findAll({
+      where: { student_id: user.id }
+    });
+
     return res.status(200).json({
       message: "Login successful",
       token,
@@ -168,6 +180,8 @@ const loginUser = async (req, res) => {
         student_id_code: user.student_id_code,
         is_active: user.is_active,
         must_change_password: user.must_change_password,
+        hasPaidFee: !!payment,
+        registrations: registrations.map(r => ({ worldId: r.event_id })),
       },
     });
   } catch (error) {

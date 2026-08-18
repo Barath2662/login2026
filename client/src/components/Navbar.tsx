@@ -52,9 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
           <img src="/assets/logo.svg" alt="LOGIN 2026 Logo" className="h-10 w-auto transition-transform group-hover:scale-105" />
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-display font-extrabold text-xl text-[#F7F2F2] tracking-wider group-hover:text-[#E01B22] transition-colors">
-                LOGIN <span className="text-[#E01B22]">2026</span>
-              </span>
+              <img src="/assets/login_logo.jpg" alt="LOGIN 2026" className="h-8 md:h-12 w-auto object-contain transition-transform group-hover:scale-105" />
               <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono bg-[#1A1114] text-[#FF2A2A] border border-[#3E2529] rounded-[2px]">
                 35th Edition
               </span>
@@ -176,6 +174,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
                     </Link>
                   )}
 
+                  {user?.role === 'admin_power' && (
+                    <Link
+                      to="/admin/access-control"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2 text-xs text-[#F7F2F2] hover:bg-[#1A1114] transition-colors"
+                    >
+                      <Shield className="w-4 h-4 text-[#FF2A2A]" />
+                      Super Admin Dashboard
+                    </Link>
+                  )}
+
                   {user?.role === 'event_coordinator' && (
                     <Link
                       to="/coordinator"
@@ -237,6 +246,33 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
 
           {isAuthenticated ? (
             <div className="pt-4 border-t border-[#2A1A1D] space-y-2">
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center py-2.5 bg-[#FF2A2A]/10 text-[#FF2A2A] rounded-[2px] font-mono text-xs font-bold border border-[#FF2A2A]/20"
+                >
+                  ADMIN CONTROL PANEL
+                </Link>
+              )}
+              {user?.role === 'admin_power' && (
+                <Link
+                  to="/admin/access-control"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center py-2.5 bg-[#FF2A2A]/10 text-[#FF2A2A] rounded-[2px] font-mono text-xs font-bold border border-[#FF2A2A]/20"
+                >
+                  SUPER ADMIN DASHBOARD
+                </Link>
+              )}
+              {user?.role === 'event_coordinator' && (
+                <Link
+                  to="/coordinator"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center py-2.5 bg-[#E08A17]/10 text-[#E08A17] rounded-[2px] font-mono text-xs font-bold border border-[#E08A17]/20"
+                >
+                  COORDINATOR PORTAL
+                </Link>
+              )}
               <Link
                 to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}

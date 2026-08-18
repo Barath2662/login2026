@@ -16,7 +16,7 @@ const EventStudents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const { data } = await api.events.getCoordinatorEvents();
+        const { data } = await api.events.getAll();
         const eventsData = Array.isArray(data) ? data : (data.data || []);
         setEvents(eventsData);
         if (eventsData.length > 0) {
@@ -180,8 +180,8 @@ const EventStudents = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-sm border ${
-                        student.bonafideStatus === 'VERIFIED' ? 'text-green-500 bg-green-500/10 border-green-500/30' :
-                        student.bonafideStatus === 'PENDING' ? 'text-yellow-500 bg-yellow-500/10 border-yellow-500/30' :
+                        student.bonafideStatus === 'VERIFIED' ? 'text-red-500 bg-red-500/10 border-red-500/30' :
+                        student.bonafideStatus === 'PENDING' ? 'text-zinc-500 bg-zinc-500/10 border-zinc-500/30' :
                         'text-color-red bg-color-red/10 border-color-red/30'
                       }`}>
                         {student.bonafideStatus === 'VERIFIED' && <Check size={12} />}
@@ -192,7 +192,7 @@ const EventStudents = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       {student.verified ? (
-                        <Check size={18} className="text-green-500 mx-auto" />
+                        <Check size={18} className="text-red-500 mx-auto" />
                       ) : (
                         <X size={18} className="text-color-red mx-auto" />
                       )}

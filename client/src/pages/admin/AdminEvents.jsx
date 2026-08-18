@@ -26,6 +26,27 @@ const AdminEvents = () => {
     fetchEvents();
   }, []);
 
+  const handleUpdateEvent = async (id, currentVenue, currentTime) => {
+    const newVenue = prompt('Enter new venue (leave empty to keep current):', currentVenue);
+    if (newVenue === null) return;
+    
+    const newTime = prompt('Enter new start time (e.g. 09:00:00) (leave empty to keep current):', currentTime);
+    if (newTime === null) return;
+
+    if (newVenue === currentVenue && newTime === currentTime) return;
+
+    try {
+      await api.put(`/events/${id}`, {
+        venue: newVenue || currentVenue,
+        start_time: newTime || currentTime
+      });
+      alert('Event updated and emails dispatched successfully!');
+      fetchEvents();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update event.');
+    }
+  };
+
   const filteredEvents = events.filter(e => 
     (e.name?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
     (e.id?.toString().includes(searchQuery))
@@ -47,13 +68,9 @@ const AdminEvents = () => {
             Global <span className="text-color-silver">Events</span>
           </GlitchText>
           <p className="text-text-secondary font-mono text-sm">
-            Manage all event configurations and schedules across the Multiverse.
+            Manage all event configurations and schedules across the Multiverse. Updating an event's venue or time will automatically email all registered participants.
           </p>
         </div>
-        
-        <Button className="bg-color-silver text-black hover:bg-white flex items-center gap-2 border-none">
-          <Plus size={16} /> CREATE EVENT
-        </Button>
       </div>
 
       <div className="bg-bg-card border border-border-color rounded-sm shadow-xl overflow-hidden">
@@ -78,6 +95,7 @@ const AdminEvents = () => {
                 <th className="px-6 py-4 font-mono font-bold tracking-wider">Venue</th>
                 <th className="px-6 py-4 font-mono font-bold tracking-wider">Coordinator ID</th>
                 <th className="px-6 py-4 text-center font-mono font-bold tracking-wider">Status</th>
+                <th className="px-6 py-4 text-center font-mono font-bold tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-color">
@@ -97,10 +115,19 @@ const AdminEvents = () => {
                   <td className="px-6 py-4 font-mono">{event.coordinator || 'Unassigned'}</td>
                   <td className="px-6 py-4 text-center">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-sm border ${
-                      event.status === 'open' || event.status === 'completed' ? 'text-green-500 bg-green-500/10 border-green-500/30' : 'text-color-red bg-color-red/10 border-color-red/30'
+                      event.status === 'open' || event.status === 'completed' ? 'text-red-500 bg-red-500/10 border-red-500/30' : 'text-color-red bg-color-red/10 border-color-red/30'
                     }`}>
                       {(event.status || 'draft').toUpperCase()}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <Button 
+                      variant="outline" 
+                      className="px-3 py-1 h-auto text-xs font-mono"
+                      onClick={() => handleUpdateEvent(event.id, event.venue, event.start_time)}
+                    >
+                      EDIT
+                    </Button>
                   </td>
                 </tr>
               ))}

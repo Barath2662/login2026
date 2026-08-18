@@ -45,6 +45,18 @@ const AdminPayments = () => {
     }
   };
 
+  const handleReject = async (paymentId) => {
+    const reason = prompt('Please enter a rejection reason (mandatory). This will also ban the user and remove their credentials:');
+    if (!reason) return;
+    try {
+      await api.put(`/payments/${paymentId}/verify`, { status: 'REJECTED', rejection_reason: reason });
+      fetchPayments();
+      alert('User has been banned and credentials removed.');
+    } catch (err) {
+      alert('Failed to reject payment');
+    }
+  };
+
   const filtered = payments.filter(p => 
     (p.student_id?.toString().includes(searchQuery.toLowerCase())) ||
     (p.transaction_reference?.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -109,26 +121,36 @@ const AdminPayments = () => {
                   <td className="px-6 py-4 font-mono text-xs">{new Date(pay.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-center">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-sm border ${
-                      pay.status === 'successful' ? 'text-green-500 bg-green-500/10 border-green-500/30' : 
-                      pay.status === 'failed' ? 'text-color-danger bg-color-danger/10 border-color-danger/30' :
+                      pay.status === 'VERIFIED' ? 'text-red-500 bg-red-500/10 border-red-500/30' : 
+                      pay.status === 'REJECTED' ? 'text-color-danger bg-color-danger/10 border-color-danger/30' :
                       'text-color-silver bg-color-silver/10 border-color-silver/30'
                     }`}>
-                      {pay.status === 'successful' && <CheckCircle2 size={12} />}
-                      {pay.status === 'failed' && <XCircle size={12} />}
-                      {pay.status === 'in_progress' && <Clock size={12} />}
+                      {pay.status === 'VERIFIED' && <CheckCircle2 size={12} />}
+                      {pay.status === 'REJECTED' && <XCircle size={12} />}
+                      {pay.status === 'PENDING' && <Clock size={12} />}
                       {(pay.status || 'unknown').toUpperCase()}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right space-x-2">
-                    {pay.status === 'in_progress' && (
-                      <Button onClick={() => handleVerify(pay.id)} size="sm" variant="outline" className="text-green-500 border-green-500 hover:bg-green-500 hover:text-black">
-                        Verify
-                      </Button>
+                    {pay.status === 'PENDING' && (
+                      <>
+                        <Button onClick={() => handleVerify(pay.id)} size="sm" variant="outline" className="text-red-500 border-red-500 hover:bg-red-500 hover:text-black">
+                          Verify
+                        </Button>
+                        <Button onClick={() => handleReject(pay.id)} size="sm" variant="outline" className="text-color-danger border-color-danger hover:bg-color-danger hover:text-black">
+                          Reject/Ban
+                        </Button>
+                      </>
                     )}
-                    {pay.status === 'successful' && (
-                      <Button onClick={() => handleRefund(pay.id)} size="sm" variant="outline" className="text-color-danger border-color-danger hover:bg-color-danger hover:text-black">
-                        Refund
-                      </Button>
+                    {pay.status === 'VERIFIED' && (
+                      <>
+                        <Button onClick={() => handleRefund(pay.id)} size="sm" variant="outline" className="text-color-silver border-color-silver hover:bg-color-silver hover:text-black">
+                          Refund
+                        </Button>
+                        <Button onClick={() => handleReject(pay.id)} size="sm" variant="outline" className="text-color-danger border-color-danger hover:bg-color-danger hover:text-black ml-2">
+                          Revoke/Ban
+                        </Button>
+                      </>
                     )}
                   </td>
                 </tr>

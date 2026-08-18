@@ -2,6 +2,19 @@
 @import "tailwindcss";
 @import "./variables.css";
 
+@theme {
+  --color-color-red: var(--red);
+  --color-color-silver: var(--text-muted);
+  --color-color-danger: var(--red-bright);
+  --color-bg-primary: var(--void);
+  --color-bg-secondary: var(--panel);
+  --color-bg-card: var(--panel-raised);
+  --color-border-color: var(--line);
+  --color-text-primary: var(--text);
+  --color-text-secondary: var(--text-muted);
+  --color-text-muted: var(--text-faint);
+}
+
 @layer base {
   body {
     background-color: var(--void);
@@ -142,8 +155,8 @@
 
 .chip-pending {
   background: transparent;
-  color: var(--amber);
-  border: 1px dashed var(--amber);
+  color: var(--text-muted);
+  border: 1px dashed var(--text-muted);
   border-radius: 9999px;
   font-family: var(--font-mono);
   font-size: 11px;

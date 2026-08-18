@@ -11,7 +11,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center rounded-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-bg-primary uppercase tracking-wider text-sm py-2 px-6';
     
     const variants = {
-      primary: 'bg-color-red text-black hover:bg-color-red/90 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_25px_rgba(0,240,255,0.5)]',
+      primary: 'bg-color-red text-black hover:bg-color-red/90 shadow-[0_0_15px_rgba(255, 42, 42,0.3)] hover:shadow-[0_0_25px_rgba(255, 42, 42,0.5)]',
       secondary: 'bg-bg-card text-text-primary hover:bg-border-color border border-border-color',
       outline: 'border border-color-red text-color-red hover:bg-color-red/10',
       danger: 'bg-color-danger text-white hover:bg-color-danger/90 shadow-[0_0_15px_rgba(239,68,68,0.3)]'

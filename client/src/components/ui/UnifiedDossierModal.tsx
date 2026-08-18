@@ -346,12 +346,12 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
                   <div className={`p-6 md:p-8 rounded-lg border ${isFinale ? 'border-color-danger/50 bg-color-danger/5' : 'border-[#D90429]/30 bg-black/40 shadow-inner'}`}>
                     
                     {isLockedFuture ? (
-                      <div className="mb-8 p-5 rounded bg-amber-500/10 border border-amber-500/30">
-                        <div className="flex items-center space-x-3 text-amber-500 mb-2">
+                      <div className="mb-8 p-5 rounded bg-zinc-500/10 border border-zinc-500/30">
+                        <div className="flex items-center space-x-3 text-zinc-500 mb-2">
                           <Clock size={20} />
                           <span className="font-bold font-mono text-lg">OPENS IN {formatDistanceToNow(opensAt!, { addSuffix: false })}</span>
                         </div>
-                        <p className="text-sm text-amber-500/80 font-mono">Registration window has not yet opened.</p>
+                        <p className="text-sm text-zinc-500/80 font-mono">Registration window has not yet opened.</p>
                       </div>
                     ) : isLockedPast ? (
                       <div className="mb-8 p-5 rounded bg-color-danger/10 border border-color-danger/30">

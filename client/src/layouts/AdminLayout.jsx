@@ -1,7 +1,10 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Users, UserCog, FileCheck2, CreditCard, Shield, UserCheck, FileOutput } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, UserCog, FileCheck2, CreditCard, Shield, UserCheck, FileOutput, KeyRound } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 const AdminLayout = () => {
+  const { survivor } = useAuthStore();
+  const isSuperAdmin = survivor?.role === 'super_admin' || survivor?.role === 'admin_power';
   const navItems = [
     { name: 'Overview', path: '/admin', icon: <LayoutDashboard size={18} />, exact: true },
     { name: 'Events', path: '/admin/events', icon: <CalendarDays size={18} /> },
@@ -13,6 +16,10 @@ const AdminLayout = () => {
     { name: 'Attendance', path: '/admin/attendance', icon: <UserCheck size={18} /> },
     { name: 'Reports', path: '/admin/reports', icon: <FileOutput size={18} /> },
   ];
+
+  if (isSuperAdmin) {
+    navItems.push({ name: 'Access Control', path: '/admin/access-control', icon: <KeyRound size={18} /> });
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 relative min-h-[80vh] flex flex-col md:flex-row gap-8">

@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const { verifyJwt } = require("../../middleware/auth");
 const allowRoles = require("../../middleware/allowRoles");
 const exportController = require("../../controllers/postgres/exportController");
@@ -17,6 +17,34 @@ router.get(
   verifyJwt,
   allowRoles("junior_attendance", "admin"),
   exportController.exportAttendance
+);
+
+router.get(
+  "/users",
+  verifyJwt,
+  allowRoles("admin"),
+  exportController.exportUsers
+);
+
+router.get(
+  "/registrations",
+  verifyJwt,
+  allowRoles("admin"),
+  exportController.exportRegistrations
+);
+
+router.get(
+  "/payments",
+  verifyJwt,
+  allowRoles("admin"),
+  exportController.exportPayments
+);
+
+router.get(
+  "/teams",
+  verifyJwt,
+  allowRoles("admin"),
+  exportController.exportTeams
 );
 
 module.exports = router;

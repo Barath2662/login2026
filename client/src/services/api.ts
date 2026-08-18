@@ -101,4 +101,21 @@ export const api = {
   stats: {
     getParticipantStats: async () => await axiosInstance.get('/stats/participants'),
   },
+
+  // Bonafides Module
+  bonafides: {
+    getMy: async () => await axiosInstance.get('/bonafides/my'),
+    upload: async (data: any) => await axiosInstance.post('/bonafides/', data),
+    verify: async (id: number | string, data?: any) => await axiosInstance.put(`/bonafides/${id}/verify`, data),
+  },
+
+  // Exports Module (Reports)
+  exports: {
+    getEventStudents: async (eventId: number | string) => await axiosInstance.get(`/exports/event/${eventId}/students`, { responseType: 'blob' }),
+    getAttendance: async () => await axiosInstance.get('/exports/attendance', { responseType: 'blob' }),
+    getMasterRoster: async () => await axiosInstance.get('/exports/users', { responseType: 'blob' }),
+    getRegistrations: async () => await axiosInstance.get('/exports/registrations', { responseType: 'blob' }),
+    getPayments: async () => await axiosInstance.get('/exports/payments', { responseType: 'blob' }),
+    getTeams: async () => await axiosInstance.get('/exports/teams', { responseType: 'blob' }),
+  },
 };

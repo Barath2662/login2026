@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 import { Plus, Trash2 } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 export const AdminPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'PAYMENTS' | 'USERS' | 'ANNOUNCEMENTS' | 'SETTINGS'>('PAYMENTS');
+  const location = useLocation();
+  const { user: currentUser } = useAuthStore();
+  const isSuperAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'admin_power';
+  
+  const [activeTab, setActiveTab] = useState<'PAYMENTS' | 'USERS' | 'ANNOUNCEMENTS' | 'SETTINGS' | 'EVENTS'>(
+    location.pathname.includes('access-control') ? 'USERS' : 'PAYMENTS'
+  );
 
   // Data states
   const [payments, setPayments] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
 
   // Reject modal state
   const [rejectModalPaymentId, setRejectModalPaymentId] = useState<number | null>(null);
@@ -21,15 +30,17 @@ export const AdminPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [payRes, userRes, annoRes] = await Promise.all([
+      const [payRes, userRes, annoRes, eventRes] = await Promise.all([
         api.payments.getAll(),
         api.users.getAll(),
         api.announcements.getActive(),
+        api.events.getAll(),
       ]);
 
       if (Array.isArray(payRes.data)) setPayments(payRes.data);
       if (Array.isArray(userRes.data)) setUsers(userRes.data);
       if (Array.isArray(annoRes.data)) setAnnouncements(annoRes.data);
+      if (Array.isArray(eventRes.data)) setEvents(eventRes.data);
     } catch (err) {
       console.error('Failed to load admin data:', err);
     }
@@ -102,6 +113,27 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const handleUpdateEvent = async (id: number, currentVenue: string, currentTime: string) => {
+    const newVenue = prompt('Enter new venue (leave empty to keep current):', currentVenue);
+    if (newVenue === null) return;
+    
+    const newTime = prompt('Enter new start time (e.g. 09:00:00) (leave empty to keep current):', currentTime);
+    if (newTime === null) return;
+
+    if (newVenue === currentVenue && newTime === currentTime) return;
+
+    try {
+      await api.events.update(id, {
+        venue: newVenue || currentVenue,
+        start_time: newTime || currentTime
+      });
+      alert('Event updated and emails dispatched successfully!');
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update event.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0607] py-12 px-4 sm:px-6 lg:px-8 text-[#F7F2F2]">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -138,6 +170,14 @@ export const AdminPage: React.FC = () => {
               }`}
             >
               ANNOUNCEMENTS
+            </button>
+            <button
+              onClick={() => setActiveTab('EVENTS')}
+              className={`px-4 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
+                activeTab === 'EVENTS' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
+              }`}
+            >
+              EVENTS
             </button>
           </div>
         </div>
@@ -235,6 +275,14 @@ export const AdminPage: React.FC = () => {
                           <option value="student">student</option>
                           <option value="event_coordinator">event_coordinator</option>
                           <option value="admin">admin</option>
+                          {isSuperAdmin && (
+                            <>
+                              <option value="junior_attendance">junior_attendance</option>
+                              <option value="special_user">special_user</option>
+                              <option value="super_admin">super_admin</option>
+                              <option value="admin_power">admin_power</option>
+                            </>
+                          )}
                         </select>
                       </td>
                     </tr>
@@ -319,6 +367,50 @@ export const AdminPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Events & Notifications */}
+        {activeTab === 'EVENTS' && (
+          <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
+            <div>
+              <h2 className="text-lg font-display font-bold text-[#F7F2F2]">EVENT MANAGEMENT ({events.length})</h2>
+              <p className="text-xs text-[#A79798] font-mono mt-1">Updating an event's venue or time will automatically email all registered participants.</p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-body">
+                <thead className="bg-[#0A0607] text-[#6B5A5C] font-mono border-b border-[#3E2529]">
+                  <tr>
+                    <th className="p-3.5">EVENT NAME</th>
+                    <th className="p-3.5">CATEGORY</th>
+                    <th className="p-3.5">DAY & DATE</th>
+                    <th className="p-3.5">VENUE</th>
+                    <th className="p-3.5">START TIME</th>
+                    <th className="p-3.5">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2A1A1D]">
+                  {events.map((evt) => (
+                    <tr key={evt.id} className="hover:bg-[#1A1114] transition-colors">
+                      <td className="p-3.5 font-bold text-[#F7F2F2]">{evt.name}</td>
+                      <td className="p-3.5 font-mono text-[#E08A17]">{evt.category}</td>
+                      <td className="p-3.5 font-mono text-[#A79798]">Day {evt.day} | {evt.date}</td>
+                      <td className="p-3.5 font-mono text-[#F7F2F2]">{evt.venue}</td>
+                      <td className="p-3.5 font-mono text-[#F7F2F2]">{evt.start_time}</td>
+                      <td className="p-3.5">
+                        <button
+                          onClick={() => handleUpdateEvent(evt.id, evt.venue, evt.start_time)}
+                          className="px-3 py-1 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono font-bold text-[10px] rounded-[2px]"
+                        >
+                          EDIT
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

@@ -31,6 +31,8 @@ export const LoginPage: React.FC = () => {
 
       if (user.must_change_password) {
         navigate('/change-password');
+      } else if (user.role === 'super_admin' || user.role === 'admin_power') {
+        navigate('/admin/access-control');
       } else if (user.role === 'admin') {
         navigate('/admin');
       } else if (user.role === 'event_coordinator') {

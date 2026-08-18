@@ -1,4 +1,4 @@
-﻿const { Op } = require("sequelize");
+const { Op } = require("sequelize");
 const eventModel = require("../../models/postgres/eventModel");
 const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
 const userModel = require("../../models/postgres/userModel");
@@ -38,7 +38,38 @@ const updateEvent = async (req, res) => {
     const event = await eventModel.findByPk(req.params.id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
+    const oldVenue = event.venue;
+    const oldTime = event.start_time;
+
     await event.update(req.body);
+
+    // If venue or time changed, trigger notifications
+    if (req.body.venue !== oldVenue || req.body.start_time !== oldTime) {
+      const { sendEventChangeNotification } = require("../../services/emailService");
+      const announcementModel = require("../../models/postgres/announcementModel");
+      const registrationModel = require("../../models/postgres/registrationModel");
+      
+      // 1. Create Announcement
+      await announcementModel.create({
+        title: `VENUE/TIME ALERT: ${event.name.toUpperCase()}`,
+        message: `${event.name} venue updated to ${event.venue} (Start: ${event.start_time} IST)`,
+        is_active: true
+      });
+
+      // 2. Dispatch Emails
+      const registrations = await registrationModel.findAll({
+        where: { event_id: event.id },
+        include: [{ model: userModel, as: 'student' }]
+      });
+
+      for (const reg of registrations) {
+        const studentUser = reg.student || (await userModel.findByPk(reg.student_id));
+        if (studentUser && studentUser.email) {
+          await sendEventChangeNotification(studentUser, event, { venue: event.venue, start_time: event.start_time });
+        }
+      }
+    }
+
     return res.json({ message: "Event updated", event });
   } catch (error) {
     return res.status(500).json({ message: "Failed to update event", error: error.message });

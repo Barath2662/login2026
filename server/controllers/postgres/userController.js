@@ -1,4 +1,6 @@
-﻿const userModel = require("../../models/postgres/userModel");
+const userModel = require("../../models/postgres/userModel");
+const paymentModel = require("../../models/postgres/paymentModel");
+const registrationModel = require("../../models/postgres/registrationModel");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -23,7 +25,19 @@ const getMyProfile = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    return res.json(user);
+    const payment = await paymentModel.findOne({
+      where: { student_id: user.id, status: ["PENDING", "VERIFIED"] }
+    });
+
+    const registrations = await registrationModel.findAll({
+      where: { student_id: user.id }
+    });
+
+    const userData = user.toJSON();
+    userData.hasPaidFee = !!payment;
+    userData.registrations = registrations.map((r) => ({ worldId: r.event_id }));
+
+    return res.json(userData);
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile", error: error.message });
   }
@@ -73,6 +87,8 @@ const updateUserRole = async (req, res) => {
       "junior_attendance",
       "special_user",
       "admin",
+      "super_admin",
+      "admin_power",
     ];
 
     if (!allowedRoles.includes(req.body.role)) {

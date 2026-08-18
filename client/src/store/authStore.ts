@@ -9,7 +9,7 @@ export interface UserProfile {
   college_name: string | null;
   department: string | null;
   roll_no: string | null;
-  role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin';
+  role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin' | 'super_admin' | 'admin_power';
   user_type: 'PARTICIPANT' | 'ALUMNI';
   student_id_code?: string | null;
   must_change_password?: boolean;

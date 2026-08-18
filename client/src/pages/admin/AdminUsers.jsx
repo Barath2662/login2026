@@ -110,7 +110,7 @@ const AdminUsers = () => {
                         onClick={() => handleToggleStatus(user.id, user.is_active)}
                         variant="outline" 
                         size="sm" 
-                        className="border-green-500 text-green-500 hover:bg-green-500 hover:text-black h-8 px-3 text-xs"
+                        className="border-red-500 text-red-500 hover:bg-red-500 hover:text-black h-8 px-3 text-xs"
                       >
                         <UserCheck size={14} className="mr-1" /> UNBAN
                       </Button>

@@ -245,13 +245,13 @@ export const ConstellationTimeline = () => {
         <path 
           ref={path1Ref}
           d={path1Data}
-          stroke="rgba(0, 240, 255, 0.8)"
+          stroke="rgba(255, 42, 42, 0.8)"
           strokeWidth="4"
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeDasharray="10 15"
-          className="drop-shadow-[0_0_12px_rgba(0,240,255,1)]"
+          className="drop-shadow-[0_0_12px_rgba(255, 42, 42,1)]"
         />
         <path 
           ref={path2Ref}
@@ -342,7 +342,7 @@ export const ConstellationTimeline = () => {
             switch (state.status) {
               case 'UPCOMING':
                 return (
-                  <div className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-0.5 rounded border border-orange-500/40 flex items-center gap-1 uppercase tracking-wider font-mono w-fit">
+                  <div className="bg-zinc-500/20 text-zinc-400 text-[10px] px-2 py-0.5 rounded border border-zinc-500/40 flex items-center gap-1 uppercase tracking-wider font-mono w-fit">
                     <Lock size={10} /> OPENS SOON
                   </div>
                 );

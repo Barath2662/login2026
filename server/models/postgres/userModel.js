@@ -55,7 +55,9 @@ const userModel = sequelize.define(
         "event_coordinator",
         "junior_attendance",
         "special_user",
-        "admin"
+        "admin",
+        "super_admin",
+        "admin_power"
       ),
       allowNull: false,
       defaultValue: "student",

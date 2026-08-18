@@ -178,9 +178,20 @@ export const ConstellationTimeline3D = () => {
     );
   }
 
+  // Fetch user registrations if authenticated
+  const { data: myRegistrations = [] } = useQuery({
+    queryKey: ['my-registrations', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const res = await api.get('/registrations/my');
+      return Array.isArray(res.data) ? res.data : (res.data.data || []);
+    },
+    enabled: !!user,
+  });
+
   const isHubUnlocked = user?.hasPaid ?? true; 
-  const registeredNodes = ['world-01', 'world-02']; // Mock logic preserved
-  const isFinaleEligible = false; // Mock logic preserved
+  const registeredNodes = myRegistrations.map((reg: any) => reg.event_id?.toString() || reg.event_id);
+  const isFinaleEligible = registeredNodes.length >= 3; // Basic logic: 3 events unlocks finale (adjust as per actual rules)
 
   const getNodeState = (world: any) => {
     const now = new Date();
