@@ -193,3 +193,223 @@
   white-space: nowrap;
   animation: marquee 30s linear infinite;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL MICRO-ANIMATION KEYFRAMES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Gentle continuous floating for logos/images */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 3.5s ease-in-out 0.5s infinite;
+}
+
+/* Subtle red glow pulse for accent elements */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(224,27,34,0.2), 0 0 20px rgba(224,27,34,0.05); }
+  50%      { box-shadow: 0 0 16px rgba(224,27,34,0.4), 0 0 40px rgba(224,27,34,0.15); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Fade-in from below — entrance animation for sections/cards */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s var(--ease-enter) forwards;
+  opacity: 0;
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.7s var(--ease-enter) forwards;
+  opacity: 0;
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.7s var(--ease-enter) forwards;
+  opacity: 0;
+}
+
+/* Scale-in entrance — for modals and form cards */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s var(--ease-enter) forwards;
+  opacity: 0;
+}
+
+/* Shimmer sweep — for buttons and borders */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255,255,255,0.12) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Stagger delay utilities for sequential animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+.stagger-7 { animation-delay: 0.7s; }
+.stagger-8 { animation-delay: 0.8s; }
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD & INTERACTION POLISH
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Lift-on-hover for event/info cards */
+.card-hover-lift {
+  transition: transform var(--dur-base) var(--ease-enter),
+              box-shadow var(--dur-base) var(--ease-enter),
+              border-color var(--dur-base);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(224,27,34,0.15), 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* Underline slide-in for links */
+.link-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--red);
+  transition: width var(--dur-fast) var(--ease-enter);
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* Input focus glow */
+.input-glow {
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.input-glow:focus {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 3px rgba(224,27,34,0.15), 0 0 12px rgba(224,27,34,0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM SCROLLBAR
+   ═══════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red-deep);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) var(--void);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Full-bleed sections that prevent horizontal overflow */
+.section-safe {
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+/* Snap scroll for horizontal event strips */
+.snap-scroll-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-scroll-x > * {
+  scroll-snap-align: start;
+}
+
+/* Mobile-first container padding */
+@media (max-width: 640px) {
+  .display-xl {
+    font-size: clamp(36px, 12vw, 60px) !important;
+  }
+  .display-l {
+    font-size: clamp(24px, 6vw, 40px) !important;
+  }
+  .display-m {
+    font-size: clamp(18px, 4.5vw, 28px) !important;
+  }
+}

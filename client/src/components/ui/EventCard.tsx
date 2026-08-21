@@ -54,7 +54,15 @@ export const EventCard: React.FC<EventCardProps> = ({
         <div className={`flex flex-wrap gap-3 mt-1 ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
           <div className="flex items-center text-[10px] md:text-xs text-color-red font-mono">
             <Users size={12} className="mr-1" />
-            {event.isTeam ? `${event.minTeamSize}-${event.maxTeamSize} OP` : 'SOLO'}
+            {(() => {
+              const minSize = event.min_team_size || event.minTeamSize || 1;
+              const maxSize = event.max_team_size || event.maxTeamSize || 1;
+              const isTeam = maxSize > 1 || event.team_type === 'TEAM' || event.isTeam;
+              if (isTeam) {
+                return minSize === maxSize ? `TEAM (${maxSize} MEMBERS)` : `TEAM (${minSize}-${maxSize} MEMBERS)`;
+              }
+              return 'SOLO';
+            })()}
           </div>
           <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <MapPin size={12} className="mr-1 text-color-silver" />
@@ -62,7 +70,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           </div>
           <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <Clock size={12} className="mr-1 text-color-silver" />
-            {event.time || 'TBA'}
+            {event.start_time ? `${event.start_time.slice(0, 5)} - ${event.end_time.slice(0, 5)} IST` : (event.time && event.time !== 'TBA' ? event.time : '10:30 - 12:30 IST')}
           </div>
         </div>
 

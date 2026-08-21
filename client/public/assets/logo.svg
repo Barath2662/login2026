@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Glow -->
+    <radialGradient id="redGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF2A2A" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#E01B22" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Circuit Trace Linear Gradients -->
+    <linearGradient id="circuitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2A2A"/>
+      <stop offset="50%" stop-color="#E01B22"/>
+      <stop offset="100%" stop-color="#7E0910"/>
+    </linearGradient>
+
+    <!-- Cyberpunk Ring Glow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient Dark Glow Behind Logo -->
+  <circle cx="250" cy="250" r="230" fill="url(#redGlow)"/>
+
+  <!-- Outer Concentric Circuit Rings -->
+  <circle cx="250" cy="250" r="215" fill="none" stroke="#3E2529" stroke-width="1.5" stroke-dasharray="4 8 16 8"/>
+  <circle cx="250" cy="250" r="200" fill="none" stroke="#E01B22" stroke-width="2" stroke-dasharray="80 20 40 20 120 30" filter="url(#neonGlow)"/>
+  <circle cx="250" cy="250" r="185" fill="none" stroke="#FF2A2A" stroke-width="1" stroke-dasharray="6 6"/>
+
+  <!-- Inner Cyber Tech Arc Rings -->
+  <path d="M 120 250 A 130 130 0 0 1 380 250" fill="none" stroke="#E01B22" stroke-width="4" stroke-linecap="round" filter="url(#neonGlow)"/>
+  <path d="M 150 250 A 100 100 0 0 0 350 250" fill="none" stroke="#7E0910" stroke-width="3" stroke-dasharray="20 10"/>
+
+  <!-- Horizontal Data Bus Lines -->
+  <line x1="30" y1="250" x2="100" y2="250" stroke="#FF2A2A" stroke-width="2" filter="url(#neonGlow)"/>
+  <line x1="400" y1="250" x2="470" y2="250" stroke="#FF2A2A" stroke-width="2" filter="url(#neonGlow)"/>
+  <circle cx="30" cy="250" r="4" fill="#FF2A2A"/>
+  <circle cx="470" cy="250" r="4" fill="#FF2A2A"/>
+
+  <!-- Stepped Bus Traces Left -->
+  <polyline points="45,230 75,230 95,245" fill="none" stroke="#E01B22" stroke-width="1.5"/>
+  <polyline points="45,270 75,270 95,255" fill="none" stroke="#E01B22" stroke-width="1.5"/>
+
+  <!-- Stepped Bus Traces Right -->
+  <polyline points="455,230 425,230 405,245" fill="none" stroke="#E01B22" stroke-width="1.5"/>
+  <polyline points="455,270 425,270 405,255" fill="none" stroke="#E01B22" stroke-width="1.5"/>
+
+  <!-- Cyber Node Pins -->
+  <circle cx="45" cy="230" r="3" fill="#FF2A2A"/>
+  <circle cx="45" cy="270" r="3" fill="#FF2A2A"/>
+  <circle cx="455" cy="230" r="3" fill="#FF2A2A"/>
+  <circle cx="455" cy="270" r="3" fill="#FF2A2A"/>
+
+  <!-- Central Target Reticle & Fingerprint Core -->
+  <circle cx="250" cy="205" r="42" fill="none" stroke="#E01B22" stroke-width="2" stroke-dasharray="15 8"/>
+  <circle cx="250" cy="205" r="28" fill="none" stroke="#FF2A2A" stroke-width="1.5"/>
+  <circle cx="250" cy="205" r="14" fill="#E01B22" opacity="0.4"/>
+  <circle cx="250" cy="205" r="4" fill="#FFFFFF"/>
+
+  <!-- Top Tech Badge Icon (Human Head / Cyber Silhouette) -->
+  <circle cx="330" cy="140" r="18" fill="#130C0E" stroke="#FF2A2A" stroke-width="1.5"/>
+  <path d="M 324 148 C 324 138 336 138 336 148 Z M 330 133 A 4 4 0 1 1 330 141 A 4 4 0 1 1 330 133" fill="#FF2A2A"/>
+
+  <!-- Main LOGIN Typography -->
+  <text x="250" y="275" font-family="'Orbitron', 'Chakra Petch', sans-serif" font-size="74" font-weight="900" text-anchor="middle" fill="#F7F2F2" letter-spacing="4" filter="url(#neonGlow)">
+    LOGIN
+  </text>
+  <text x="250" y="275" font-family="'Orbitron', 'Chakra Petch', sans-serif" font-size="74" font-weight="900" text-anchor="middle" fill="none" stroke="#E01B22" stroke-width="1.5" letter-spacing="4">
+    LOGIN
+  </text>
+
+  <!-- 2026 Year Badge -->
+  <text x="250" y="325" font-family="'Orbitron', 'JetBrains Mono', monospace" font-size="36" font-weight="800" text-anchor="middle" fill="#FF2A2A" letter-spacing="8" filter="url(#neonGlow)">
+    2026
+  </text>
+
+  <!-- Dates & Subtitle Ribbon -->
+  <path d="M 160 345 L 340 345" stroke="#3E2529" stroke-width="1"/>
+  <text x="250" y="360" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" text-anchor="middle" fill="#A79798" letter-spacing="3">
+    SEPTEMBER 18 &amp; 19
+  </text>
+  <text x="250" y="380" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="600" text-anchor="middle" fill="#E01B22" letter-spacing="2">
+    THE PERFECT FUSION OF MASTERMINDS
+  </text>
+
+  <!-- Bottom Chevron Accent -->
+  <polyline points="230,395 250,410 270,395" fill="none" stroke="#FF2A2A" stroke-width="2" stroke-linecap="round"/>
+  <polyline points="238,402 250,412 262,402" fill="none" stroke="#E01B22" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

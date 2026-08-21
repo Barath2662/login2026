@@ -7,6 +7,7 @@ import { api } from '../../services/api';
 
 const EventAttendance = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'PRESENT' | 'ABSENT'
   const [events, setEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState('');
   const [students, setStudents] = useState([]);
@@ -46,12 +47,21 @@ const EventAttendance = () => {
       const mergedStudents = regs.map(reg => {
         const attendanceRecord = atts.find(a => a.student_id === reg.student_id);
         return {
-          id: reg.student_id, // we use student_id for marking attendance
+          id: reg.student_id,
           fullName: reg.student?.name || 'Unknown',
           rollNo: reg.student?.roll_no || 'N/A',
           college: reg.student?.college_name || 'N/A',
+          teamName: reg.team_name || 'Individual',
           status: attendanceRecord ? attendanceRecord.status : 'not_marked'
         };
+      });
+
+      // Keep teams together in exact order
+      mergedStudents.sort((a, b) => {
+        if (a.teamName !== b.teamName) {
+          return a.teamName.localeCompare(b.teamName);
+        }
+        return a.fullName.localeCompare(b.fullName);
       });
 
       setStudents(mergedStudents);
@@ -66,15 +76,26 @@ const EventAttendance = () => {
     fetchData();
   }, [selectedEventId]);
 
-  const filteredStudents = students.filter(s => 
-    (s.fullName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (s.rollNo?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (s.id?.toString().includes(searchQuery))
-  );
+  const filteredStudents = students.filter(s => {
+    const isPresent = s.status === 'present';
+    const matchesStatus = 
+      statusFilter === 'ALL' ? true :
+      statusFilter === 'PRESENT' ? isPresent :
+      !isPresent;
+
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = 
+      (s.fullName?.toLowerCase().includes(query)) ||
+      (s.rollNo?.toLowerCase().includes(query)) ||
+      (s.teamName?.toLowerCase().includes(query)) ||
+      (s.college?.toLowerCase().includes(query)) ||
+      (s.id?.toString().includes(query));
+
+    return matchesStatus && matchesSearch;
+  });
 
   const toggleAttendance = async (studentId, currentStatus) => {
     const newStatus = currentStatus === 'present' ? 'absent' : 'present';
-    // Optimistic update
     setStudents(prev => prev.map(s => s.id === studentId ? { ...s, status: newStatus } : s));
     
     try {
@@ -85,17 +106,16 @@ const EventAttendance = () => {
       });
     } catch (err) {
       alert('Failed to update attendance');
-      // Revert on failure
       setStudents(prev => prev.map(s => s.id === studentId ? { ...s, status: currentStatus } : s));
     }
   };
 
   const handleExportCSV = () => {
     if (filteredStudents.length === 0) return;
-    const headers = ['Name', 'UID', 'Roll No', 'College', 'Attendance Status'];
+    const headers = ['Team Name', 'Operative Name', 'UID', 'Roll No', 'College', 'Attendance Status'];
     const csvContent = [
       headers.join(','),
-      ...filteredStudents.map(s => `"${s.fullName}","${s.id}","${s.rollNo}","${s.college}","${s.status.toUpperCase()}"`)
+      ...filteredStudents.map(s => `"${s.teamName}","${s.fullName}","${s.id}","${s.rollNo}","${s.college}","${s.status.toUpperCase()}"`)
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -117,7 +137,8 @@ const EventAttendance = () => {
     );
   }
 
-
+  const presentCount = students.filter(s => s.status === 'present').length;
+  const absentCount = students.length - presentCount;
 
   return (
     <div className="space-y-6">
@@ -127,12 +148,12 @@ const EventAttendance = () => {
             Attendance <span className="text-color-silver">Tracker</span>
           </GlitchText>
           <p className="text-text-secondary font-mono text-sm">
-            Scan or manually mark operative attendance at the venue checkpoint.
+            Scan or mark operative attendance by team or individual.
           </p>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 items-end">
-          <div className="min-w-[200px]">
+          <div className="min-w-[220px]">
             <select
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
@@ -150,21 +171,57 @@ const EventAttendance = () => {
             disabled={filteredStudents.length === 0}
             className="border-color-silver text-color-silver hover:bg-color-silver hover:text-black flex items-center gap-2 h-10"
           >
-            <Download size={16} /> EXPORT ATTENDANCE
+            <Download size={16} /> EXPORT CSV
           </Button>
         </div>
       </div>
 
       <div className="bg-bg-card border border-border-color rounded-sm shadow-xl overflow-hidden">
-        <div className="p-4 border-b border-border-color bg-black/20">
-          <div className="relative max-w-md">
+        
+        {/* Search & Filter Toolbar */}
+        <div className="p-4 border-b border-border-color bg-black/20 flex flex-wrap items-center justify-between gap-4">
+          <div className="relative max-w-md flex-1">
             <Input 
-              placeholder="Search by Name or Roll No..." 
+              placeholder="Search by Team Name, Participant Name, Roll No, or ID..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-black/50 border-color-silver/30 focus:border-color-silver"
+              className="pl-10 bg-black/50 border-color-silver/30 focus:border-color-silver text-xs font-mono"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+          </div>
+
+          {/* Attendance Status Filter Pills */}
+          <div className="flex items-center gap-2 font-mono text-xs">
+            <button
+              onClick={() => setStatusFilter('ALL')}
+              className={`px-3 py-1.5 rounded-sm border transition-colors ${
+                statusFilter === 'ALL'
+                  ? 'bg-white text-black border-white font-bold'
+                  : 'bg-black/40 text-text-secondary border-border-color hover:border-text-secondary'
+              }`}
+            >
+              ALL ({students.length})
+            </button>
+            <button
+              onClick={() => setStatusFilter('PRESENT')}
+              className={`px-3 py-1.5 rounded-sm border transition-colors ${
+                statusFilter === 'PRESENT'
+                  ? 'bg-color-red text-black border-color-red font-bold'
+                  : 'bg-black/40 text-color-red border-color-red/30 hover:bg-color-red/10'
+              }`}
+            >
+              PRESENTEES ({presentCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('ABSENT')}
+              className={`px-3 py-1.5 rounded-sm border transition-colors ${
+                statusFilter === 'ABSENT'
+                  ? 'bg-text-muted text-black border-text-muted font-bold'
+                  : 'bg-black/40 text-text-muted border-border-color hover:border-text-muted'
+              }`}
+            >
+              ABSENTEES ({absentCount})
+            </button>
           </div>
         </div>
 
@@ -177,22 +234,33 @@ const EventAttendance = () => {
           <table className="w-full text-left text-sm text-text-secondary">
             <thead className="text-xs uppercase bg-black/40 text-text-primary border-b border-border-color">
               <tr>
-                <th className="px-6 py-4 font-mono font-bold tracking-wider">Operative</th>
-                <th className="px-6 py-4 font-mono font-bold tracking-wider">Origin</th>
+                <th className="px-6 py-4 font-mono font-bold tracking-wider">Team / Squad Name</th>
+                <th className="px-6 py-4 font-mono font-bold tracking-wider">Participant</th>
+                <th className="px-6 py-4 font-mono font-bold tracking-wider">College</th>
                 <th className="px-6 py-4 text-center font-mono font-bold tracking-wider">Status</th>
-                <th className="px-6 py-4 text-right font-mono font-bold tracking-wider">Mark</th>
+                <th className="px-6 py-4 text-right font-mono font-bold tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-color">
               {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => {
+                filteredStudents.map((student, idx) => {
                   const isPresent = student.status === 'present';
-                  
+                  const showTeamHeader = idx === 0 || filteredStudents[idx - 1].teamName !== student.teamName;
+
                   return (
                     <tr key={student.id} className={`transition-colors ${isPresent ? 'bg-color-red/5' : 'hover:bg-white/5'}`}>
+                      <td className="px-6 py-4 font-mono">
+                        <span className={`px-2.5 py-1 text-xs font-bold rounded-sm border ${
+                          student.teamName !== 'Individual'
+                            ? 'bg-[#1A1114] text-color-red border-color-red/40'
+                            : 'bg-black/40 text-text-muted border-border-color'
+                        }`}>
+                          {student.teamName}
+                        </span>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="font-bold text-white">{student.fullName}</div>
-                        <div className="text-xs text-text-muted font-mono mt-1">{student.rollNo} (UID: {student.id})</div>
+                        <div className="text-xs text-text-muted font-mono mt-0.5">{student.rollNo} (UID: {student.id})</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-text-secondary">{student.college}</div>
@@ -201,19 +269,19 @@ const EventAttendance = () => {
                         <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-sm border ${
                           isPresent ? 'text-color-red bg-color-red/10 border-color-red/30' : 'text-text-muted bg-black/40 border-border-color'
                         }`}>
-                          {isPresent ? 'PRESENT' : 'ABSENT'}
+                          {isPresent ? 'PRESENT ✓' : 'ABSENT'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => toggleAttendance(student.id, student.status)}
-                          className={`p-2 rounded-sm border transition-colors ${
+                          className={`px-3 py-1.5 rounded-sm border font-mono text-xs font-bold transition-colors ${
                             isPresent 
                               ? 'bg-color-red border-color-red text-black hover:bg-black hover:text-color-red' 
                               : 'bg-black border-border-color text-text-muted hover:border-color-silver hover:text-color-silver'
                           }`}
                         >
-                          {isPresent ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                          {isPresent ? 'Mark Absent' : 'Mark Present'}
                         </button>
                       </td>
                     </tr>
@@ -221,8 +289,8 @@ const EventAttendance = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-text-muted">
-                    No operatives found matching the criteria.
+                  <td colSpan={5} className="px-6 py-12 text-center text-text-muted">
+                    No participants found matching the criteria.
                   </td>
                 </tr>
               )}

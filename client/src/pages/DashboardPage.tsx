@@ -108,13 +108,28 @@ export const DashboardPage: React.FC = () => {
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl font-display font-bold text-[#F7F2F2]">{user?.name}</h1>
                 <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-[#1A1114] text-[#FF2A2A] border border-[#3E2529] rounded-[2px] uppercase">
                   {user?.user_type || 'PARTICIPANT'}
                 </span>
+                
+                {/* Dynamic Verification Status Badge */}
+                {pStatus === 'VERIFIED' ? (
+                  <span className="px-3 py-0.5 text-xs font-mono font-bold bg-[#1FA971]/20 text-[#1FA971] border border-[#1FA971] rounded-[2px] flex items-center gap-1.5 shadow-[0_0_12px_rgba(31,169,113,0.3)]">
+                    <ShieldCheck className="w-3.5 h-3.5" /> VERIFIED SURVIVOR
+                  </span>
+                ) : pStatus === 'PENDING' ? (
+                  <span className="px-3 py-0.5 text-xs font-mono font-bold bg-[#E08A17]/20 text-[#E08A17] border border-[#E08A17] rounded-[2px] flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" /> PENDING VERIFICATION
+                  </span>
+                ) : (
+                  <span className="px-3 py-0.5 text-xs font-mono font-bold bg-[#4A050A] text-[#FF2A2A] border border-[#E01B22] rounded-[2px] flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5" /> UNVERIFIED (PAY FEE)
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-[#A79798] font-mono mt-1">{user?.email} • {user?.college_name || 'PSG Tech'}</p>
+              <p className="text-xs text-[#A79798] font-mono mt-1.5">{user?.email} • {user?.college_name || 'PSG Tech'}</p>
             </div>
           </div>
 

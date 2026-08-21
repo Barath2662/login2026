@@ -30,6 +30,13 @@ router.get(
   userController.getAllUsers
 );
 
+router.post(
+  "/",
+  verifyJwt,
+  allowRoles("admin", "super_admin", "admin_power"),
+  userController.createUserByAdmin
+);
+
 
 router.get(
   "/:id",

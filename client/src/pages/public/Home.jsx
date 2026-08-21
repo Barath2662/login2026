@@ -25,27 +25,6 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden -mt-20">
 
-        {/* Logo circles — top left overlay */}
-        <div className="absolute top-24 left-4 sm:left-8 z-30 flex items-center gap-2">
-          {[
-            { src: '/assets/logos/psg-main.png', alt: 'PSG Tech'    },
-            { src: '/assets/logos/psg-100.png',  alt: 'PSG 100 Yrs' },
-            { src: '/assets/logos/psg-75.png',   alt: 'PSG 75 Yrs'  },
-            { src: '/assets/logos/caa.png',      alt: 'CAA'          },
-          ].map((logo) => (
-            <div
-              key={logo.alt}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#E01B22]/50 bg-white shrink-0 overflow-hidden flex items-center justify-center shadow-[0_0_10px_rgba(224,27,34,0.4)]"
-            >
-              <img
-                src={logo.src}
-                alt={logo.alt}
-                className="w-[85%] h-[85%] object-contain"
-              />
-            </div>
-          ))}
-        </div>
-        
         {/* Scanlines overlay for the entire section */}
         <div className="absolute inset-0 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay pointer-events-none z-10" />
 
@@ -81,7 +60,21 @@ const Home = () => {
                   INITIALIZE PROFILE
                 </Button>
               ) : (
-                <Button className="h-14 px-8 text-lg w-full sm:w-auto text-center justify-center flex" onClick={() => navigate('/dashboard')}>
+                <Button
+                  className="h-14 px-8 text-lg w-full sm:w-auto text-center justify-center flex"
+                  onClick={() => {
+                    const userRole = useAuthStore.getState().user?.role || useAuthStore.getState().survivor?.role;
+                    if (userRole === 'admin' || userRole === 'super_admin') {
+                      navigate('/admin');
+                    } else if (userRole === 'admin_power') {
+                      navigate('/admin/access-control');
+                    } else if (userRole === 'event_coordinator') {
+                      navigate('/coordinator');
+                    } else {
+                      navigate('/dashboard');
+                    }
+                  }}
+                >
                   PROCEED TO DASHBOARD
                 </Button>
               )}

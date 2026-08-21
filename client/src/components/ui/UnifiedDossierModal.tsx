@@ -30,12 +30,18 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
   const [activeTab, setActiveTab] = useState<'briefing' | 'intel' | 'access'>('briefing');
   const [isRegistering, setIsRegistering] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [teammateEmails, setTeammateEmails] = useState<string[]>(['', '', '']);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Reset tab and state on open
   useEffect(() => {
     if (isOpen) {
       setActiveTab('briefing');
       setRegistrationSuccess(false);
+      setTeamName('');
+      setTeammateEmails(['', '', '']);
+      setFormError(null);
       dialogRef.current?.showModal();
       document.body.style.overflow = 'hidden';
     } else {
@@ -75,7 +81,7 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
       if (eventData) {
         addItem({
           id: `world_${eventData.id}`,
-          name: `Registration: ${eventData.title}`,
+          name: `Registration: ${eventData.title || eventData.name}`,
           price: 0,
           type: 'world_pass'
         });
@@ -84,9 +90,42 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
       return;
     }
 
+    const minMembers = eventData.min_team_size || eventData.minTeamSize || 1;
+    const maxMembers = eventData.max_team_size || eventData.maxTeamSize || 1;
+    const isTeamEvent = maxMembers > 1 || eventData.team_type === 'TEAM' || eventData.isTeam;
+    const mandatoryExtra = Math.max(1, minMembers - 1);
+
+    if (isTeamEvent) {
+      if (!teamName.trim()) {
+        setFormError("Team Name is required for group events.");
+        return;
+      }
+
+      const cleanEmails = teammateEmails.map(e => e.trim().toLowerCase()).filter(Boolean);
+      const uniqueEmails = [...new Set(cleanEmails)];
+
+      if (uniqueEmails.length < cleanEmails.length) {
+        setFormError("Duplicate teammate emails are not allowed.");
+        return;
+      }
+
+      if (uniqueEmails.length < mandatoryExtra) {
+        setFormError(`This team event requires at least ${mandatoryExtra} teammate email(s).`);
+        return;
+      }
+    }
+
+    setFormError(null);
     setIsRegistering(true);
+
     try {
-      await api.post('/registrations/', { event_id: eventData.id });
+      const payload = {
+        event_id: eventData.id,
+        team_name: isTeamEvent ? teamName.trim() : undefined,
+        team_members: isTeamEvent ? teammateEmails.map(e => ({ email: e.trim() })).filter(m => m.email) : undefined
+      };
+
+      await api.post('/registrations/', payload);
       setRegistrationSuccess(true);
       const profileRes = await api.get('/users/profile');
       if (profileRes.data) {
@@ -94,13 +133,8 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
       }
     } catch (err: any) {
       console.error(err);
-      if (err.response?.status === 403) {
-         alert(err.response.data?.message || "Complete the one-time payment first before registering.");
-      } else if (err.response?.status === 409) {
-         alert(err.response.data?.message || "Conflict with an existing registration.");
-      } else {
-         alert(err.response?.data?.message || "Failed to establish secure link to Vanguard servers.");
-      }
+      const msg = err.response?.data?.message || err.message || "Registration failed.";
+      setFormError(msg);
     } finally {
       setIsRegistering(false);
     }
@@ -201,10 +235,10 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
                   <span>NODE DATA STREAM</span>
                 </div>
                 <h1 className="text-2xl md:text-4xl font-bold uppercase text-white font-['Orbitron']">
-                  {lore.name}
+                  {eventData.name || eventData.title || lore.name}
                 </h1>
                 <h2 className={`text-sm md:text-base font-mono ${primaryColor}`}>
-                  // {lore.theme}
+                  // {eventData.category || lore.theme}
                 </h2>
               </div>
             </div>
@@ -377,6 +411,80 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
                         </p>
                       </div>
                     )}
+
+                    {(() => {
+                      const minMembers = eventData.min_team_size || eventData.minTeamSize || 1;
+                      const maxMembers = eventData.max_team_size || eventData.maxTeamSize || 1;
+                      const isTeam = maxMembers > 1 || eventData.team_type === 'TEAM' || eventData.isTeam;
+                      const mandatoryCount = Math.max(1, minMembers - 1);
+                      const maxExtraCount = Math.max(1, maxMembers - 1);
+
+                      if (!isTeam || registrationSuccess || isAlreadyRegistered || !isAvailable) {
+                        return formError ? (
+                          <div className="mb-4 p-3 bg-color-danger/20 border border-color-danger text-color-danger font-mono text-xs rounded-sm text-left">
+                            ⚠️ {formError}
+                          </div>
+                        ) : null;
+                      }
+
+                      return (
+                        <div className="mb-6 p-4 bg-[#111115] border border-color-red/40 rounded-sm space-y-4 text-left">
+                          <div className="border-b border-[#2A1A1D] pb-2">
+                            <h4 className="text-sm font-mono font-bold text-white uppercase tracking-wider">
+                              SQUAD REGISTRATION FORM ({minMembers}–{maxMembers} MEMBERS)
+                            </h4>
+                            <p className="text-xs text-text-muted font-mono mt-0.5">
+                              Leader is automatically set to your profile ({survivor?.email}). Enter registered teammate emails below.
+                            </p>
+                          </div>
+
+                          {formError && (
+                            <div className="p-3 bg-color-danger/20 border border-color-danger text-color-danger font-mono text-xs rounded-sm">
+                              ⚠️ {formError}
+                            </div>
+                          )}
+
+                          <div>
+                            <label className="block text-xs font-mono text-[#A79798] mb-1 font-bold">TEAM NAME *</label>
+                            <input
+                              type="text"
+                              value={teamName}
+                              onChange={(e) => setTeamName(e.target.value)}
+                              placeholder="e.g. CyberVanguards"
+                              className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-color-red rounded-sm px-3 py-2 text-xs font-mono text-white outline-none"
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="block text-xs font-mono text-[#A79798] font-bold">
+                              TEAMMATE EMAILS (VERIFIED AGAINST LOGIN 2026 DATABASE)
+                            </label>
+
+                            {Array.from({ length: maxExtraCount }).map((_, idx) => {
+                              const isMandatory = idx < mandatoryCount;
+                              return (
+                                <div key={idx} className="space-y-1">
+                                  <span className="text-[11px] font-mono text-text-muted block">
+                                    Teammate #{idx + 2} Email {isMandatory ? <span className="text-color-red">* (Mandatory)</span> : '(Optional)'}
+                                  </span>
+                                  <input
+                                    type="email"
+                                    value={teammateEmails[idx] || ''}
+                                    onChange={(e) => {
+                                      const updated = [...teammateEmails];
+                                      updated[idx] = e.target.value;
+                                      setTeammateEmails(updated);
+                                    }}
+                                    placeholder={isMandatory ? "teammate@college.edu (Required)" : "teammate@college.edu (Optional)"}
+                                    className="w-full bg-[#0A0A0C] border border-[#2A1A1D] focus:border-color-red rounded-sm px-3 py-2 text-xs font-mono text-white outline-none"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <Button
                       variant={isFinale ? 'danger' : 'primary'}

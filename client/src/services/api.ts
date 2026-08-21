@@ -27,6 +27,7 @@ export const api = {
     profile: async () => await axiosInstance.get('/users/profile'),
     updateProfile: async (data: any) => await axiosInstance.put('/users/profile', data),
     getAll: async () => await axiosInstance.get('/users/'),
+    create: async (data: any) => await axiosInstance.post('/users/', data),
     getById: async (id: number | string) => await axiosInstance.get(`/users/${id}`),
     updateRole: async (id: number | string, role: string) => await axiosInstance.put(`/users/${id}/role`, { role }),
     updateStatus: async (id: number | string, is_active: boolean) => await axiosInstance.put(`/users/${id}/status`, { is_active }),

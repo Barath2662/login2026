@@ -1,4 +1,4 @@
-﻿const { DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../config/db/postgres");
 const userModel = require("./userModel");
 const eventModel = require("./eventModel");
@@ -36,6 +36,11 @@ const registrationModel = sequelize.define(
       type: DataTypes.ENUM("registered", "cancelled", "attended", "disqualified"),
       allowNull: false,
       defaultValue: "registered",
+    },
+
+    team_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {

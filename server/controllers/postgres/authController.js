@@ -23,9 +23,11 @@ const registerUser = async (req, res) => {
       current_organization,
     } = req.body;
 
-    if (!name || !email || !password) {
+    const isAlumni = String(user_type).toUpperCase() === "ALUMNI";
+
+    if (!name || !email || (!isAlumni && !password)) {
       return res.status(400).json({
-        message: "Name, email and password are required",
+        message: isAlumni ? "Name and email are required" : "Name, email and password are required",
       });
     }
 
@@ -39,7 +41,8 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const rawPassword = password || `AlumniRSVP_${Math.random().toString(36).slice(-8)}`;
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     const user = await userModel.create({
       name,
