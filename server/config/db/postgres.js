@@ -18,7 +18,7 @@ function createPostgresInstance() {
 }
 
 function createSqliteInstance() {
-  const dbPath = process.env.SQLITE_PATH || path.join(__dirname, "../../login.sqlite");
+  const dbPath = process.env.SQLITE_PATH || path.resolve(__dirname, "../../login.sqlite");
   return new Sequelize({
     dialect: "sqlite",
     storage: dbPath,
@@ -42,7 +42,7 @@ const connectPostgres = async () => {
     if (!forceSqlite) {
       console.warn("PostgreSQL server connection unauthenticated or inactive. Auto-reconfiguring to local database engine...");
       const newSequelize = createSqliteInstance();
-      Object.assign(sequelize, newSequelize);
+      sequelize = newSequelize;
       await sequelize.authenticate();
       console.log(`Database connected successfully using fallback: ${sequelize.getDialect()}`);
     } else {

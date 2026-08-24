@@ -33,7 +33,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
               />
               <div>
                 <h3 className="font-display font-extrabold text-lg text-[#F7F2F2] tracking-wider">LOGIN 2026</h3>
-                <p className="text-[10px] font-mono text-[#E01B22] font-bold tracking-wider">LAST MAN STANDING</p>
+                <p className="text-[10px] font-mono text-[#E01B22] font-bold tracking-wider">THE LAST HUMAN</p>
               </div>
             </div>
             <p className="text-xs leading-relaxed text-[#6B5A5C]">
@@ -105,7 +105,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#E01B22] shrink-0" />
-                <a href="mailto:adminpsgtech@gmail.com" className="hover:text-[#F7F2F2] transition-colors font-mono">adminpsgtech@gmail.com</a>
+                <a href="mailto:login@psgtech.ac.in" className="hover:text-[#F7F2F2] transition-colors font-mono">login@psgtech.ac.in</a>
               </li>
               <li className="flex flex-col gap-1 text-xs">
                 <div className="flex items-center gap-2">
@@ -128,8 +128,8 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
 
         {/* Bottom Rights */}
         <div className="pt-6 sm:pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-[#6B5A5C]">
-          <p>© 2026 Computer Applications Association. All rights reserved.</p>
-          <p className="text-[#E01B22] font-bold tracking-wider">LOGIN 2026 &bull; LAST MAN STANDING</p>
+          <p>© 2026 Computer Applications Association - PSG College of Technology. All rights reserved.</p>
+          <p className="text-[#E01B22] font-bold tracking-wider">LOGIN 2026 &bull; THE LAST HUMAN</p>
         </div>
 
       </div>

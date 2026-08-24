@@ -114,7 +114,7 @@ export const LoginPage: React.FC = () => {
         <div className="text-center text-xs text-[#6B5A5C] border-t border-[#2A1A1D] pt-5">
           Don't have an account yet?{' '}
           <Link to="/register" className="text-[#E01B22] hover:text-[#FF2A2A] font-bold link-underline transition-colors">
-            Create Participant / Alumni Account
+            Create Participant account
           </Link>
         </div>
 

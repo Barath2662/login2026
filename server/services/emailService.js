@@ -18,7 +18,7 @@ const createTransporter = () => {
 const sendEmail = async ({ to, subject, html, text }) => {
   try {
     const transporter = createTransporter();
-    const from = process.env.SMTP_FROM || `"LOGIN 2026 Admin" <adminpsgtech@gmail.com>`;
+    const from = process.env.SMTP_FROM || `"LOGIN 2026 Admin" <login@psgtech.ac.in>`;
 
     if (transporter) {
       const info = await transporter.sendMail({
@@ -28,11 +28,11 @@ const sendEmail = async ({ to, subject, html, text }) => {
         html,
         text: text || html.replace(/<[^>]*>?/gm, ""),
       });
-      console.log(`[Email Sent from adminpsgtech@gmail.com] To: ${to} | Subject: ${subject} | ID: ${info.messageId}`);
+      console.log(`[Email Sent from login@psgtech.ac.in] To: ${to} | Subject: ${subject} | ID: ${info.messageId}`);
       return info;
     } else {
-      console.log(`[Email Logged (Sender: adminpsgtech@gmail.com)] To: ${to} | Subject: ${subject}`);
-      return { mock: true, from: 'adminpsgtech@gmail.com' };
+      console.log(`[Email Logged (Sender: login@psgtech.ac.in)] To: ${to} | Subject: ${subject}`);
+      return { mock: true, from: 'login@psgtech.ac.in' };
     }
   } catch (error) {
     console.error(`[Email Error] To: ${to} | Error:`, error.message);
@@ -63,7 +63,7 @@ const sendEventRegistrationConfirmation = async (user, event, team = null) => {
       <div style="border-bottom: 2px solid #E01B22; padding-bottom: 16px; margin-bottom: 24px;">
         <h1 style="color: #E01B22; margin: 0; font-size: 24px; letter-spacing: 2px;">LOGIN 2026</h1>
         <p style="color: #A79798; margin: 6px 0 0 0; font-size: 12px; font-family: monospace;">Department of Computer Applications • PSG College of Technology</p>
-        <p style="color: #FF2A2A; margin: 4px 0 0 0; font-size: 11px; font-family: monospace;">Sender: adminpsgtech@gmail.com</p>
+        <p style="color: #FF2A2A; margin: 4px 0 0 0; font-size: 11px; font-family: monospace;">Sender: login@psgtech.ac.in</p>
       </div>
 
       <h2 style="color: #F7F2F2; font-size: 20px; margin-top: 0;">Enrolment Confirmed: ${event.name}</h2>
@@ -94,7 +94,7 @@ const sendEventRegistrationConfirmation = async (user, event, team = null) => {
       </div>
 
       <p style="color: #6B5A5C; font-size: 12px; margin-top: 24px; border-top: 1px solid #2A1A1D; pt: 16px;">
-        For assistance, contact the organizing team at <a href="mailto:adminpsgtech@gmail.com" style="color: #E01B22;">adminpsgtech@gmail.com</a>.
+        For assistance, contact the organizing team at <a href="mailto:login@psgtech.ac.in" style="color: #E01B22;">login@psgtech.ac.in</a>.
       </p>
     </div>
   `;
@@ -107,7 +107,7 @@ const sendEventChangeNotification = async (user, event, changes) => {
     <div style="font-family: Arial, sans-serif; background-color: #0A0A0C; color: #F2F2F4; padding: 24px; border-radius: 8px;">
       <div style="border-bottom: 2px solid #E01B24; padding-bottom: 12px; margin-bottom: 20px;">
         <h1 style="color: #E01B24; margin: 0;">LOGIN 2026 — VENUE & TIME UPDATE ALERT</h1>
-        <p style="color: #9A9AA2; margin: 4px 0 0 0;">Sender: adminpsgtech@gmail.com</p>
+        <p style="color: #9A9AA2; margin: 4px 0 0 0;">Sender: login@psgtech.ac.in</p>
       </div>
 
       <h2>Attention: Schedule/Venue Change Notice</h2>

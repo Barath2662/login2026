@@ -26,9 +26,9 @@ export const RegisterPage: React.FC = () => {
     college_name: '',
     department: '',
     roll_no: '',
-    gender: 'Male',
-    year_of_study: '3rd Year',
-    batch_year: '2022',
+    gender: '',
+    year_of_study: '',
+    batch_year: '',
     place: '',
     current_organization: '',
   });
@@ -173,7 +173,7 @@ export const RegisterPage: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="e.g. Sabarish K"
+                placeholder="e.g. Arun"
                 required
                 className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
@@ -186,7 +186,7 @@ export const RegisterPage: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="student@domain.edu"
+                placeholder="example@mail.com"
                 required
                 className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />

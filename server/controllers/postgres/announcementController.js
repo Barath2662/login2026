@@ -56,7 +56,7 @@ const createAnnouncement = async (req, res) => {
                   ${message}
                 </div>
                 <p style="color: #6B5A5C; font-size: 11px; margin-top: 20px; border-top: 1px solid #2A1A1D; padding-top: 12px;">
-                  Dispatched via LOGIN 2026 Command Center &bull; <a href="mailto:adminpsgtech@gmail.com" style="color: #E01B22;">adminpsgtech@gmail.com</a>
+                  Dispatched via LOGIN 2026 Command Center &bull; <a href="mailto:login@psgtech.ac.in" style="color: #E01B22;">login@psgtech.ac.in</a>
                 </p>
               </div>
             `,

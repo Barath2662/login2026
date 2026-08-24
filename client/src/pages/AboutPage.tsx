@@ -23,7 +23,7 @@ export const AboutPage: React.FC = () => {
             LOGIN is the flagship national-level technical symposium organized annually by the Computer Applications Association (CAA), Department of Computer Applications, PSG College of Technology, Coimbatore.
           </p>
           <p className="text-xs sm:text-sm text-[#9A9AA2] font-body leading-relaxed">
-            Over the past three and a half decades, LOGIN has served as a premier battleground for students across India, fostering innovation, analytical brilliance, and competitive coding spirit. The 2026 edition introduces the theme <strong className="text-[#F2F2F4]">"Last Man Standing"</strong> — a testament to endurance, skill, and mastery.
+            Over the past three and a half decades, LOGIN has served as a premier battleground for students across India, fostering innovation, analytical brilliance, and competitive coding spirit. The 2026 edition introduces the theme <strong className="text-[#F2F2F4]">"THE LAST HUMAN"</strong> — a testament to endurance, skill, and mastery.
           </p>
         </div>
 

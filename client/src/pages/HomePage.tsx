@@ -91,7 +91,7 @@ export const HomePage: React.FC = () => {
                 LOGIN <span className="text-[#E01B22]">2026</span>
               </h1>
               <p className="font-display text-2xl sm:text-4xl font-bold text-[#FF2A2A] tracking-widest uppercase animate-fade-in-up stagger-3">
-                LAST MAN STANDING
+                THE LAST HUMAN
               </p>
             </div>
 
@@ -189,7 +189,7 @@ export const HomePage: React.FC = () => {
             LOGIN is the national technical symposium organized annually by the Computer Applications Association (CAA), Department of Computer Applications, PSG College of Technology, Coimbatore.
           </p>
           <p>
-            The 2026 edition introduces <strong className="text-[#F7F2F2]">"Last Man Standing"</strong> — testing technical depth, logic, and rapid decision-making across two days of high-intensity competition.
+            The 2026 edition introduces <strong className="text-[#F7F2F2]">"THE LAST HUMAN"</strong> — testing technical depth, logic, and rapid decision-making across two days of high-intensity competition.
           </p>
         </div>
       </section>

@@ -5,6 +5,8 @@ const paymentModel = require("../../models/postgres/paymentModel");
 const registrationModel = require("../../models/postgres/registrationModel");
 const { sendEmail } = require("../../services/emailService");
 
+const jwtSecret = process.env.JWT_SECRET || "super_secret_jwt_key_login_2026";
+
 const registerUser = async (req, res) => {
   try {
     const {
@@ -67,7 +69,7 @@ const registerUser = async (req, res) => {
         role: user.role,
         user_type: user.user_type,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: "7d" }
     );
 
@@ -146,7 +148,7 @@ const loginUser = async (req, res) => {
         role: user.role,
         user_type: user.user_type,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       {
         expiresIn: "7d",
       }
@@ -221,7 +223,7 @@ const forgotPassword = async (req, res) => {
       return res.status(200).json({ message: "If account exists, password reset token has been sent to email." });
     }
 
-    const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const resetToken = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: "1h" });
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`;
 
     await sendEmail({
@@ -246,7 +248,7 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Token and new password are required" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
     const user = await userModel.findByPk(decoded.id);
 
     if (!user) {

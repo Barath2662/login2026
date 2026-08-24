@@ -227,7 +227,7 @@ export const DashboardPage: React.FC = () => {
               <div className="bg-[#0A0607] p-5 rounded-[2px] border border-[#2A1A1D] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h4 className="font-display font-bold text-sm text-[#F7F2F2]">Step 1: Pay via PSG Portal</h4>
-                  <p className="text-xs text-[#A79798] mt-1">Complete your registration payment of ₹150 on the official PSG EMS portal.</p>
+                  <p className="text-xs text-[#A79798] mt-1">Complete your registration payment of ₹100 on the official PSG EMS portal.</p>
                 </div>
                 <a
                   href="https://events.psginstitutions.in/EMS/register/E5294158179"
