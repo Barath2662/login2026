@@ -72,6 +72,10 @@
     background-color: var(--panel);
     color: var(--text);
   }
+
+  p {
+    text-align: justify;
+  }
 }
 
 /* 2px Radius Rule for panels, buttons, cards, modals */

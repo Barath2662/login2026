@@ -29,7 +29,7 @@ router.get(
 router.put(
   "/:id/verify",
   verifyJwt,
-  allowRoles("special_user", "admin"),
+  allowRoles("special_user", "admin", "super_admin", "admin_power"),
   paymentController.verifyPayment
 );
 

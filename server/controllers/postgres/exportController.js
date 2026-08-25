@@ -156,11 +156,39 @@ const exportTeams = async (req, res) => {
   }
 };
 
+const exportAlumni = async (req, res) => {
+  try {
+    const alumni = await userModel.findAll({
+      where: { user_type: "ALUMNI" },
+      order: [["createdAt", "ASC"]],
+    });
+
+    const rows = alumni.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || "",
+      department: user.department || "",
+      batch_year: user.batch_year || "",
+      place: user.place || "",
+      current_organization: user.current_organization || "",
+      registered_at: user.createdAt || "",
+    }));
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="alumni_roster.csv"');
+    return res.send(stringify(rows, { header: true }));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export alumni roster", error: error.message });
+  }
+};
+
 module.exports = {
   exportEventStudents,
   exportAttendance,
   exportUsers,
   exportRegistrations,
   exportPayments,
-  exportTeams
+  exportTeams,
+  exportAlumni,
 };

@@ -100,6 +100,15 @@ export const HomePage: React.FC = () => {
               The perfect fusion of masterminds. Ten regular arenas plus one headline flagship competition — governed by eleven mechanical guardians.
             </p>
 
+            <div className="inline-flex flex-col border border-[#E08A17]/60 bg-[#E08A17]/10 px-5 py-3 animate-fade-in-up stagger-4">
+              <span className="mono-label text-[#E08A17]">TOTAL PRIZE POOL</span>
+              <strong className="font-display text-3xl sm:text-4xl text-[#E08A17]">1 LAKH</strong>
+            </div>
+
+            <p className="text-xs sm:text-sm text-[#F7F2F2] font-mono leading-relaxed max-w-[58ch] animate-fade-in-up stagger-4">
+              Rs. 100 registration includes all events, both symposium days, lunch, and refreshments.
+            </p>
+
             {/* CTAs — shimmer effect */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 animate-fade-in-up stagger-5">
               {isAuthenticated ? (

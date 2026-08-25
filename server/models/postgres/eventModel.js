@@ -20,6 +20,16 @@ const eventModel = sequelize.define(
       allowNull: true,
     },
 
+    coordinator_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    coordinator_phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     date: {
       type: DataTypes.DATEONLY,
       allowNull: false,
@@ -38,6 +48,12 @@ const eventModel = sequelize.define(
     venue: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+
+    is_online: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
 
     max_participants: {

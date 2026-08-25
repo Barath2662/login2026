@@ -26,7 +26,7 @@ export const CoordinatorPage: React.FC = () => {
     const fetchEvents = async () => {
       setLoading(true);
       try {
-        const res = await api.events.getAll();
+        const res = await api.events.getAssigned();
         if (Array.isArray(res.data) && res.data.length > 0) {
           setEvents(res.data);
           setSelectedEventId(res.data[0].id);

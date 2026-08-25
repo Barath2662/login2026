@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { CheckCircle2, Clock, MapPin, Calendar, LayoutGrid, BarChart3, ChevronRight, Trophy, Sparkles } from 'lucide-react';
+import { UnifiedDossierModal } from '../components/ui/UnifiedDossierModal';
+import { CheckCircle2, Clock, MapPin, Calendar, LayoutGrid, BarChart3, ChevronRight, Trophy } from 'lucide-react';
 
 interface Event {
   id: number;
@@ -13,6 +13,7 @@ interface Event {
   start_time: string;
   end_time: string;
   venue: string;
+  is_online: boolean;
   team_type?: string;
   min_team_size?: number;
   max_team_size?: number;
@@ -38,7 +39,6 @@ const TIMELINE_TOTAL_MINUTES = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * 60; /
 const HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
 export const TimelinePage: React.FC = () => {
-  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
   const [events, setEvents] = useState<Event[]>([]);
@@ -47,6 +47,7 @@ export const TimelinePage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'GANTT' | 'CARDS'>('GANTT');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'TECHNICAL' | 'NON_TECHNICAL'>('ALL');
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
     const fetchTimeline = async () => {
@@ -77,6 +78,7 @@ export const TimelinePage: React.FC = () => {
   }, [isAuthenticated, user]);
 
   const dayEvents = events.filter((e) => {
+    if (e.is_online) return false;
     const matchDay = e.day === selectedDay;
     const matchCat = categoryFilter === 'ALL' || e.category === categoryFilter;
     return matchDay && matchCat;
@@ -92,12 +94,10 @@ export const TimelinePage: React.FC = () => {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#2A1A1D] pb-6">
           <div className="text-left space-y-2 max-w-2xl">
-            <span className="mono-label text-[#E01B22] font-bold flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#E01B22]" /> VISUAL EVENT SCHEDULE
-            </span>
+
             <h1 className="display-l text-[#F7F2F2]">TIMELINE &amp; TIMINGS</h1>
             <p className="text-xs sm:text-sm text-[#A79798] leading-relaxed">
-              Interactive timeline map for 18 &amp; 19 September 2026. Review start times, durations, and parallel arenas.
+              Timeline map for 18 &amp; 19 September 2026. Review start times, durations, and parallel arenas.
             </p>
           </div>
 
@@ -240,7 +240,7 @@ export const TimelinePage: React.FC = () => {
                       <div key={evt.id} className="relative h-20 group">
                         {/* Event Positioning Box on Time Axis */}
                         <div
-                          onClick={() => navigate(`/events?id=${evt.id}`)}
+                          onClick={() => setSelectedEvent(evt)}
                           style={{
                             left: `${leftPercent}%`,
                             width: `${widthPercent}%`,
@@ -316,7 +316,7 @@ export const TimelinePage: React.FC = () => {
               return (
                 <div
                   key={evt.id}
-                  onClick={() => navigate(`/events?id=${evt.id}`)}
+                  onClick={() => setSelectedEvent(evt)}
                   className="bg-[#130C0E] border border-[#2A1A1D] hover:border-[#FF2A2A] p-5 rounded-[2px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer transition-all hover:bg-[#1A1114] group"
                 >
                   <div className="flex items-center gap-4">
@@ -354,6 +354,8 @@ export const TimelinePage: React.FC = () => {
                           <MapPin className="w-3.5 h-3.5 text-[#E08A17]" />
                           Venue: {evt.venue || 'TBA'}
                         </span>
+                        <span>•</span>
+                        <span>Team: {evt.team_type === 'TEAM' ? `${evt.min_team_size || 1}–${evt.max_team_size || evt.min_team_size || 1}` : 'Individual'}</span>
                       </div>
                     </div>
                   </div>
@@ -405,6 +407,13 @@ export const TimelinePage: React.FC = () => {
           </div>
         )}
 
+        {selectedEvent && (
+          <UnifiedDossierModal
+            event={selectedEvent}
+            isOpen={true}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
       </div>
     </div>
   );

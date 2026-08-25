@@ -97,6 +97,7 @@ const getAllPayments = async (req, res) => {
           model: userModel,
           as: "student",
           attributes: ["id", "name", "email", "phone", "college_name", "department", "roll_no", "student_id_code"],
+          where: { user_type: "PARTICIPANT" },
         },
       ],
       order: [["createdAt", "DESC"]],

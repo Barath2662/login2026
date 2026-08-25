@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
-import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy } from 'lucide-react';
+import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export const AdminPage: React.FC = () => {
@@ -9,7 +9,7 @@ export const AdminPage: React.FC = () => {
   const { user: currentUser } = useAuthStore();
   const isSuperAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'admin_power';
   
-  const [activeTab, setActiveTab] = useState<'PAYMENTS' | 'PARTICIPANTS' | 'POWER_PEOPLE' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS'>(
+  const [activeTab, setActiveTab] = useState<'PAYMENTS' | 'PARTICIPANTS' | 'ALUMNI' | 'POWER_PEOPLE' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS'>(
     location.pathname.includes('access-control') ? 'POWER_PEOPLE' : 'PAYMENTS'
   );
 
@@ -39,6 +39,7 @@ export const AdminPage: React.FC = () => {
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('event_coordinator');
+  const [newUserEventId, setNewUserEventId] = useState('');
   const [newUserCollege, setNewUserCollege] = useState('PSG College of Technology');
   const [newUserDepartment, setNewUserDepartment] = useState('Computer Applications');
   const [creatingUser, setCreatingUser] = useState(false);
@@ -95,6 +96,7 @@ export const AdminPage: React.FC = () => {
         phone: newUserPhone.trim() || '9876543210',
         password: newUserPassword,
         role: newUserRole,
+        event_id: newUserRole === 'event_coordinator' ? Number(newUserEventId) : undefined,
         college_name: newUserCollege.trim(),
         department: newUserDepartment.trim(),
       });
@@ -104,6 +106,7 @@ export const AdminPage: React.FC = () => {
       setNewUserEmail('');
       setNewUserPhone('');
       setNewUserPassword('');
+      setNewUserEventId('');
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to create user.');
@@ -130,12 +133,67 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const handleVerifyPayment = async (paymentId: number) => {
+    try {
+      await api.payments.verify(paymentId, { status: 'VERIFIED' });
+      await fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to verify payment.');
+    }
+  };
+
   const handleRoleChange = async (userId: number, role: string) => {
     try {
       await api.users.updateRole(userId, role);
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to update user role.');
+    }
+  };
+
+  const editManagedUser = async (user: any) => {
+    const name = window.prompt('Name:', user.name || '');
+    if (name === null) return;
+    const email = window.prompt('Email:', user.email || '');
+    if (email === null) return;
+    const phone = window.prompt('Phone:', user.phone || '');
+    if (phone === null) return;
+    const college_name = window.prompt('College:', user.college_name || '');
+    if (college_name === null) return;
+    const department = window.prompt('Department:', user.department || '');
+    if (department === null) return;
+    const roll_no = window.prompt('Roll number:', user.roll_no || '');
+    if (roll_no === null) return;
+    let alumniFields = {};
+    if (user.user_type === 'ALUMNI') {
+      const batch_year = window.prompt('Batch year:', user.batch_year || '');
+      if (batch_year === null) return;
+      const place = window.prompt('Place:', user.place || '');
+      if (place === null) return;
+      const current_organization = window.prompt('Current organization:', user.current_organization || '');
+      if (current_organization === null) return;
+      alumniFields = { batch_year, place, current_organization };
+    }
+
+    try {
+      await api.users.updateDetails(user.id, {
+        name: name.trim(), email: email.trim(), phone: phone.trim(), college_name: college_name.trim(),
+        department: department.trim(), roll_no: roll_no.trim(), ...alumniFields,
+      });
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update user details.');
+    }
+  };
+
+  const deleteManagedUser = async (user: any) => {
+    if (!window.confirm(`Delete ${user.name || 'this user'} permanently?`)) return;
+
+    try {
+      await api.users.delete(user.id);
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete user.');
     }
   };
 
@@ -259,6 +317,26 @@ export const AdminPage: React.FC = () => {
     return users.filter((u) => u.role !== 'student');
   }, [users]);
 
+  const alumniUsers = useMemo(() => {
+    return users.filter((u) => u.user_type === 'ALUMNI');
+  }, [users]);
+
+  const exportAlumniCSV = async () => {
+    try {
+      const response = await api.exports.getAlumni();
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `LOGIN_2K26_Alumni_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to export alumni roster.');
+    }
+  };
+
   // Telemetry Calculations
   const totalStudents = users.filter((u) => u.role === 'student').length;
   const verifiedPaymentsCount = payments.filter((p) => p.status === 'VERIFIED').length;
@@ -299,6 +377,14 @@ export const AdminPage: React.FC = () => {
               }`}
             >
               EVENT-WISE ROSTER
+            </button>
+            <button
+              onClick={() => setActiveTab('ALUMNI')}
+              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
+                activeTab === 'ALUMNI' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
+              }`}
+            >
+              ALUMNI ROSTER ({alumniUsers.length})
             </button>
             <button
               onClick={() => setActiveTab('POWER_PEOPLE')}
@@ -396,14 +482,12 @@ export const AdminPage: React.FC = () => {
                       </td>
                       <td className="p-3.5 font-mono text-[#1FA971] font-bold">{p.student?.student_id_code || p.user?.student_id_code || '-'}</td>
                       <td className="p-3.5">
-                        {p.status !== 'REJECTED' && (
-                          <button
-                            onClick={() => setRejectModalPaymentId(p.id)}
-                            className="px-3.5 py-1.5 bg-[#7E0910] hover:bg-[#E01B22] text-[#F7F2F2] font-mono font-bold text-[10px] rounded-[2px] transition-colors"
-                          >
-                            REJECT ✗
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => editManagedUser(p.student || p.user)} title="Edit participant details" className="p-1.5 text-[#E08A17] hover:text-[#F7F2F2]"><Pencil className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => deleteManagedUser(p.student || p.user)} title="Delete participant" className="p-1.5 text-[#E01B22] hover:text-[#FF2A2A]"><Trash2 className="w-3.5 h-3.5" /></button>
+                          {p.status !== 'VERIFIED' && p.status !== 'REJECTED' && <button onClick={() => handleVerifyPayment(p.id)} className="px-3.5 py-1.5 bg-[#1FA971] hover:bg-[#27C487] text-[#0A0607] font-mono font-bold text-[10px] rounded-[2px] transition-colors">VERIFY ✓</button>}
+                          {p.status !== 'REJECTED' && <button onClick={() => setRejectModalPaymentId(p.id)} className="px-3.5 py-1.5 bg-[#7E0910] hover:bg-[#E01B22] text-[#F7F2F2] font-mono font-bold text-[10px] rounded-[2px] transition-colors">REJECT ✗</button>}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -474,6 +558,7 @@ export const AdminPage: React.FC = () => {
                               <th className="py-2 px-3">COLLEGE</th>
                               <th className="py-2 px-3">TEAM / SQUAD</th>
                               <th className="py-2 px-3">ATTENDANCE</th>
+                              <th className="py-2 px-3">ACTIONS</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#1A1114]">
@@ -501,6 +586,12 @@ export const AdminPage: React.FC = () => {
                                     {reg.attended || reg.attendance_status === 'PRESENT' ? 'PRESENT ✓' : 'REGISTERED'}
                                   </span>
                                 </td>
+                                <td className="py-2 px-3">
+                                  <div className="flex items-center gap-2">
+                                    <button onClick={() => editManagedUser(reg.student || reg.user)} title="Edit participant details" className="p-1.5 text-[#E08A17] hover:text-[#F7F2F2]"><Pencil className="w-3.5 h-3.5" /></button>
+                                    <button onClick={() => deleteManagedUser(reg.student || reg.user)} title="Delete participant" className="p-1.5 text-[#E01B22] hover:text-[#FF2A2A]"><Trash2 className="w-3.5 h-3.5" /></button>
+                                  </div>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -513,7 +604,63 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 3: POWER PERSONNEL (Coordinators & Admins Roster + Creation) */}
+        {/* TAB 3: ALUMNI ROSTER */}
+        {activeTab === 'ALUMNI' && (
+          <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-lg font-display font-bold text-[#F7F2F2]">REGISTERED ALUMNI</h2>
+                <p className="text-xs text-[#A79798] font-mono mt-0.5">Alumni RSVP records only. This roster is restricted to administrators.</p>
+              </div>
+              <button
+                onClick={exportAlumniCSV}
+                className="px-4 py-1.5 bg-[#1A1114] hover:bg-[#2A1A1D] border border-[#3E2529] hover:border-[#E01B22] text-[#F7F2F2] font-mono text-xs font-bold rounded-[2px] flex items-center gap-2"
+              >
+                <Download className="w-3.5 h-3.5 text-[#E01B22]" /> EXPORT ALUMNI CSV
+              </button>
+            </div>
+
+            {alumniUsers.length === 0 ? (
+              <div className="py-10 text-center text-xs text-[#6B5A5C] font-mono">No alumni registrations found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-body">
+                  <thead className="bg-[#0A0607] text-[#6B5A5C] font-mono border-b border-[#3E2529]">
+                    <tr>
+                      <th className="p-3.5">NAME</th>
+                      <th className="p-3.5">EMAIL</th>
+                      <th className="p-3.5">PHONE</th>
+                      <th className="p-3.5">BATCH</th>
+                      <th className="p-3.5">PLACE</th>
+                      <th className="p-3.5">ORGANIZATION</th>
+                      <th className="p-3.5">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#2A1A1D]">
+                    {alumniUsers.map((alumni) => (
+                      <tr key={alumni.id} className="hover:bg-[#1A1114]">
+                        <td className="p-3.5 font-bold text-[#F7F2F2]">{alumni.name}</td>
+                        <td className="p-3.5 font-mono text-[#A79798]">{alumni.email}</td>
+                        <td className="p-3.5 font-mono text-[#A79798]">{alumni.phone || '-'}</td>
+                        <td className="p-3.5 font-mono text-[#E08A17]">{alumni.batch_year || '-'}</td>
+                        <td className="p-3.5 text-[#A79798]">{alumni.place || '-'}</td>
+                        <td className="p-3.5 text-[#A79798]">{alumni.current_organization || '-'}</td>
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => editManagedUser(alumni)} title="Edit alumni details" className="p-1.5 text-[#E08A17] hover:text-[#F7F2F2]"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => deleteManagedUser(alumni)} title="Delete alumni" className="p-1.5 text-[#E01B22] hover:text-[#FF2A2A]"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: POWER PERSONNEL (Coordinators & Admins Roster + Creation) */}
         {activeTab === 'POWER_PEOPLE' && (
           <div className="space-y-8">
             {/* Create Official / Power User Form */}
@@ -589,6 +736,22 @@ export const AdminPage: React.FC = () => {
                       )}
                     </select>
                   </div>
+                  {newUserRole === 'event_coordinator' && (
+                    <div>
+                      <label className="block text-[#A79798] mb-1 font-semibold">Assigned Event *</label>
+                      <select
+                        value={newUserEventId}
+                        onChange={(e) => setNewUserEventId(e.target.value)}
+                        required
+                        className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-2.5 rounded-[2px] outline-none font-mono"
+                      >
+                        <option value="">Select one event</option>
+                        {events.map((event) => (
+                          <option key={event.id} value={event.id}>{event.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-[#A79798] mb-1 font-semibold">College</label>
                     <input
@@ -632,6 +795,7 @@ export const AdminPage: React.FC = () => {
                       <th className="p-3.5">ID</th>
                       <th className="p-3.5">NAME &amp; EMAIL</th>
                       <th className="p-3.5">DEPARTMENT</th>
+                      <th className="p-3.5">ASSIGNED EVENT</th>
                       <th className="p-3.5">ASSIGNED ROLE</th>
                       <th className="p-3.5">CHANGE ROLE</th>
                     </tr>
@@ -645,6 +809,11 @@ export const AdminPage: React.FC = () => {
                           <div className="text-[10px] text-[#A79798] font-mono">{u.email} &bull; {u.phone || '-'}</div>
                         </td>
                         <td className="p-3.5 font-mono text-[#A79798]">{u.department || 'Computer Applications'}</td>
+                        <td className="p-3.5 font-mono text-[#E08A17]">
+                          {u.role === 'event_coordinator'
+                            ? (u.eventAssignments?.[0]?.event?.name || 'Unassigned')
+                            : '-'}
+                        </td>
                         <td className="p-3.5 font-mono text-[#FF2A2A] font-bold uppercase">{u.role}</td>
                         <td className="p-3.5">
                           <select

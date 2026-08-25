@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuthStore } from '../../store/authStore';
-import { useCartStore } from '../../store/cartStore';
 import { api } from '../../services/api';
 
 interface UnifiedDossierModalProps {
@@ -24,7 +23,6 @@ interface UnifiedDossierModalProps {
 export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: UnifiedDossierModalProps) => {
   const navigate = useNavigate();
   const { survivor, setSurvivor, isAuthenticated } = useAuthStore();
-  const { addItem } = useCartStore();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [activeTab, setActiveTab] = useState<'briefing' | 'intel' | 'access'>('briefing');
@@ -74,19 +72,6 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
   const handleRegister = async () => {
     if (!isAuthenticated || !survivor) {
       alert("AUTHENTICATION REQUIRED. INITIALIZE PROFILE FIRST.");
-      return;
-    }
-
-    if (!survivor.hasPaidFee) {
-      if (eventData) {
-        addItem({
-          id: `world_${eventData.id}`,
-          name: `Registration: ${eventData.title || eventData.name}`,
-          price: 0,
-          type: 'world_pass'
-        });
-      }
-      navigate('/payment');
       return;
     }
 
@@ -289,6 +274,16 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
                         ? "This is it. The core of the Rogue AI's intelligence network. The Star of Login holds the key to restoring our reality. Expect heavy resistance, complex algorithmic defenses, and reality-bending anomalies. Only the most elite operatives will survive this encounter."
                         : "You are attempting to infiltrate a corrupted sector of the grid. Analyze the threat parameters and execute the required protocol to purge the anomaly. The Rogue AI has heavily fortified this node.")}
                     </p>
+                    {(eventData.coordinator_name || eventData.coordinator_phone) && (
+                      <div className="text-[#E5E5E5] leading-relaxed text-sm mt-4">
+                        <span className="text-[#A8A9AD] font-mono block">EVENT COORDINATORS:</span>
+                        {(eventData.coordinator_name || '').split(';').map((name: string, index: number) => (
+                          <div key={name}>
+                            Coordinator {index + 1} - {name.trim()} {eventData.coordinator_phone?.split(';')[index]?.trim() && `- ${eventData.coordinator_phone.split(';')[index].trim()}`}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </section>
                   
                   <section>
@@ -303,7 +298,7 @@ export const UnifiedDossierModal = ({ id, event: propEvent, isOpen, onClose }: U
                       </li>
                       <li className="flex items-start space-x-3">
                         <span className={primaryColor}>{'>'}</span>
-                        <span>TEAM SIZE: {eventData.minTeamSize}-{eventData.maxTeamSize} OPERATIVES</span>
+                        <span>TEAM SIZE: {eventData.min_team_size || eventData.minTeamSize || 1}-{eventData.max_team_size || eventData.maxTeamSize || 1} OPERATIVES</span>
                       </li>
                       <li className="flex items-start space-x-3">
                         <span className={primaryColor}>{'>'}</span>

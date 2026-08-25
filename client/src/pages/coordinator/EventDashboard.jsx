@@ -13,7 +13,7 @@ const EventDashboard = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const { data } = await api.events.getAll();
+        const { data } = await api.events.getAssigned();
         const eventsData = Array.isArray(data) ? data : (data.data || []);
         setEvents(eventsData);
         if (eventsData.length > 0) {

@@ -17,9 +17,26 @@ const getAllEvents = async (req, res) => {
     const events = await eventModel.findAll({
       order: [["date", "ASC"], ["start_time", "ASC"]],
     });
-    return res.json(events);
+    const orderedEvents = events.sort((a, b) => {
+      const rank = (event) => event.name.toLowerCase().includes("nostos") ? -1 : event.is_flagship || event.name.toLowerCase().includes("star of login") ? 1 : 0;
+      return rank(a) - rank(b);
+    });
+    return res.json(orderedEvents);
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch events", error: error.message });
+  }
+};
+
+const getAssignedEvents = async (req, res) => {
+  try {
+    const assignments = await eventCoordinatorModel.findAll({
+      where: { user_id: req.user.id },
+      include: [{ model: eventModel, as: "event" }],
+    });
+
+    return res.json(assignments.map((assignment) => assignment.event).filter(Boolean));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch assigned events", error: error.message });
   }
 };
 
@@ -101,6 +118,14 @@ const assignCoordinator = async (req, res) => {
       return res.status(400).json({ message: "User is not an event coordinator" });
     }
 
+    const existingAssignment = await eventCoordinatorModel.findOne({
+      where: { user_id },
+    });
+
+    if (existingAssignment) {
+      return res.status(409).json({ message: "Each event coordinator can coordinate only one event" });
+    }
+
     const assignment = await eventCoordinatorModel.create({
       event_id: eventId,
       user_id,
@@ -115,7 +140,8 @@ const assignCoordinator = async (req, res) => {
 const getTimeline = async (req, res) => {
   try {
     const { date } = req.query;
-    const where = date ? { date } : {};
+    const where = { is_online: false };
+    if (date) where.date = date;
 
     const events = await eventModel.findAll({
       where,
@@ -131,6 +157,7 @@ const getTimeline = async (req, res) => {
 module.exports = {
   createEvent,
   getAllEvents,
+  getAssignedEvents,
   getEvent,
   updateEvent,
   deleteEvent,

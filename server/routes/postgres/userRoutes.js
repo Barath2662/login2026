@@ -37,6 +37,20 @@ router.post(
   userController.createUserByAdmin
 );
 
+router.put(
+  "/:id/details",
+  verifyJwt,
+  allowRoles("admin"),
+  userController.updateUserDetails
+);
+
+router.delete(
+  "/:id",
+  verifyJwt,
+  allowRoles("admin"),
+  userController.deleteUser
+);
+
 
 router.get(
   "/:id",

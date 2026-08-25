@@ -6,6 +6,9 @@ const { Op } = require("sequelize");
 const seedEvents = async () => {
   try {
     await connectPostgres();
+    await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "is_online" BOOLEAN NOT NULL DEFAULT FALSE;');
+    await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "coordinator_name" VARCHAR(255);');
+    await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "coordinator_phone" VARCHAR(255);');
     console.log("Connected to database for event seeding...");
 
     // Synchronize model schema changes
@@ -15,6 +18,8 @@ const seedEvents = async () => {
       {
         name: "Code Relay",
         description: "A fast-paced collaborative coding challenge where teammates take turns coding and must quickly understand and continue each other’s work. Success depends on coding ability, adaptability, communication, and teamwork.",
+        coordinator_name: "Kartheesvaran S; Sibidharan R",
+        coordinator_phone: "8637635291; 8903289194",
         category: "TECHNICAL",
         team_type: "TEAM",
         min_team_size: 2,
@@ -33,6 +38,8 @@ const seedEvents = async () => {
       {
         name: "Hunt your Treasure — QR Escape Challenge",
         description: "Solve clues, scan hidden QR codes across campus, and answer MCA and GK questions to unlock the next stage.",
+        coordinator_name: "Mowlidharan; Hari Anand",
+        coordinator_phone: "6385703353; 6384996961",
         category: "NON_TECHNICAL",
         team_type: "TEAM",
         min_team_size: 2,
@@ -51,7 +58,9 @@ const seedEvents = async () => {
       {
         name: "Pixel Paradox: AI or Reality?",
         description: "Can you tell AI from reality? Analyze realistic images and media, spot subtle AI-generated artifacts, identify hidden inconsistencies, and reconstruct prompts to prove your observation and AI awareness.",
-        category: "TECHNICAL",
+        coordinator_name: "Vignesh; Yashwanth",
+        coordinator_phone: "9042223938; 7094674171",
+        category: "NON_TECHNICAL",
         team_type: "TEAM",
         min_team_size: 2,
         max_team_size: 2,
@@ -69,6 +78,8 @@ const seedEvents = async () => {
       {
         name: "Project Phoenix: System Recovery",
         description: "Enter a simulated company facing a critical production failure. Work as a Recovery Squad to debug applications, recover hidden services, restore infrastructure, and handle live technical incidents before production goes down.",
+        coordinator_name: "Surya Krishna; Sathish",
+        coordinator_phone: "6369447530; 7305522754",
         category: "TECHNICAL",
         team_type: "TEAM",
         min_team_size: 3,
@@ -87,6 +98,8 @@ const seedEvents = async () => {
       {
         name: "In The Slot",
         description: "Step into the world of IPL-style franchise auctions. Identify players from statistics, manage your budget, decode opponents’ hidden strategies, and make smart bidding decisions to build the strongest squad.",
+        coordinator_name: "Keerthanaa; Deepa",
+        coordinator_phone: "7904872566; 7603879932",
         category: "NON_TECHNICAL",
         team_type: "TEAM",
         min_team_size: 2,
@@ -105,6 +118,8 @@ const seedEvents = async () => {
       {
         name: "Blind Coding",
         description: "When vision fades, logic takes over. Solve programming problems through an intentionally blurred coding interface, relying on your memory, syntax knowledge, algorithms, and problem-solving ability.",
+        coordinator_name: "Chinnaya K; NitheeshMuthu Krishnan",
+        coordinator_phone: "8056576531; 9944725360",
         category: "TECHNICAL",
         team_type: "INDIVIDUAL",
         min_team_size: 1,
@@ -123,6 +138,8 @@ const seedEvents = async () => {
       {
         name: "The Extraction",
         description: "Step into a story-driven cybersecurity mission where you decode encrypted data, analyze digital clues, crack hashes, and solve multi-layered challenges to complete the final extraction.",
+        coordinator_name: "Tino Britty; Srinithi",
+        coordinator_phone: "9786350537; 6369227481",
         category: "TECHNICAL",
         team_type: "TEAM",
         min_team_size: 1,
@@ -141,6 +158,8 @@ const seedEvents = async () => {
       {
         name: "CodeXcape",
         description: "A technical escape-room challenge where teams solve interconnected programming and logic puzzles. Combine clues, communicate with your teammate, and piece together the final six-digit escape code before time runs out.",
+        coordinator_name: "Abishek S; Sivapradeesh M",
+        coordinator_phone: "7092294121; 8139081875",
         category: "TECHNICAL",
         team_type: "TEAM",
         min_team_size: 2,
@@ -159,12 +178,14 @@ const seedEvents = async () => {
       {
         name: "Debug Arena",
         description: "Take the role of a software engineer and hunt down bugs in faulty programs. Identify errors, fix code, optimize solutions, and tackle real-world debugging challenges across programming languages.",
+        coordinator_name: "Sudharsanan G; Thamizh Thilaga",
+        coordinator_phone: "9597055162; 7825007711",
         category: "TECHNICAL",
         team_type: "TEAM",
         min_team_size: 2,
         max_team_size: 2,
-        day: 19,
-        date: "2026-09-19",
+        day: 16,
+        date: "2026-09-16",
         start_time: "10:00:00",
         end_time: "12:00:00",
         venue: "CC Lab",
@@ -177,6 +198,8 @@ const seedEvents = async () => {
       {
         name: "NOSTOS: The Journey Home",
         description: "Embark on an Odyssey-inspired team adventure filled with riddles, wordplay, logic, patterns, and visual puzzles. Work together as a ship’s crew, overcome challenging trials, and find your way back to Ithaca.",
+        coordinator_name: "Dayananda J; Induja E",
+        coordinator_phone: "9524785141; 9791868857",
         category: "NON_TECHNICAL",
         team_type: "TEAM",
         min_team_size: 3,
@@ -186,6 +209,7 @@ const seedEvents = async () => {
         start_time: "13:30:00",
         end_time: "16:30:00",
         venue: "Assembly Hall",
+        is_online: true,
         max_participants: 75,
         is_flagship: false,
         guardian_asset: "/assets/events/nostos.png",
@@ -195,6 +219,8 @@ const seedEvents = async () => {
       {
         name: "Star of LOGIN",
         description: "The headline flagship event of LOGIN 2026. Only winners of other events qualify to compete in this event. Coordinators will communicate directly with qualified participants.",
+        coordinator_name: "Mithulesh; Nandthitasri",
+        coordinator_phone: "9488893193; 6380916334",
         category: "TECHNICAL",
         team_type: "INDIVIDUAL",
         min_team_size: 1,

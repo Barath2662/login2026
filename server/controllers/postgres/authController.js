@@ -61,6 +61,7 @@ const registerUser = async (req, res) => {
       batch_year,
       place,
       current_organization,
+      accommodation_required = false,
     } = req.body;
 
     const isAlumni = String(user_type).toUpperCase() === "ALUMNI";
@@ -99,6 +100,7 @@ const registerUser = async (req, res) => {
       batch_year,
       place,
       current_organization,
+      accommodation_required: Boolean(accommodation_required),
       role: normalizedRole,
     });
 
@@ -136,6 +138,7 @@ const registerUser = async (req, res) => {
         user_type: user.user_type,
         student_id_code: user.student_id_code,
         is_active: user.is_active,
+        accommodation_required: user.accommodation_required,
         must_change_password: user.must_change_password,
         hasPaidFee: false,
         registrations: [],
@@ -227,6 +230,7 @@ const loginUser = async (req, res) => {
         user_type: user.user_type,
         student_id_code: user.student_id_code,
         is_active: user.is_active,
+        accommodation_required: user.accommodation_required,
         must_change_password: user.must_change_password,
         hasPaidFee: !!payment,
         registrations: registrations.map(r => ({ worldId: r.event_id })),

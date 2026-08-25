@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
@@ -21,6 +21,7 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose }) => {
   // Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
 
   useEffect(() => {
@@ -184,14 +185,19 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
               <div className="space-y-1 text-left">
                 <label className="text-xs font-mono text-[#A8A9AD] uppercase tracking-wider ml-1">Access Key (Password)</label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-[#111111]/80 border border-[#A8A9AD]/30 rounded-lg px-4 py-3 text-[#E5E5E5] font-mono focus:outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429] transition-all"
-                  placeholder="••••••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full bg-[#111111]/80 border border-[#A8A9AD]/30 rounded-lg px-4 py-3 pr-11 text-[#E5E5E5] font-mono focus:outline-none focus:border-[#D90429] focus:ring-1 focus:ring-[#D90429] transition-all"
+                    placeholder="••••••••••••"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A8A9AD] hover:text-white">
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
               
               <button 

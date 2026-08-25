@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Info } from 'lucide-react';
+import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,14 +31,18 @@ export const RegisterPage: React.FC = () => {
     batch_year: '',
     place: '',
     current_organization: '',
+    accommodation_required: false,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alumniSuccess, setAlumniSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const target = e.target as HTMLInputElement;
+    setFormData({ ...formData, [target.name]: target.type === 'checkbox' ? target.checked : target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,9 +132,7 @@ export const RegisterPage: React.FC = () => {
           <h1 className="text-2xl font-display font-extrabold text-[#F2F2F4] tracking-wider">
             {userType === 'ALUMNI' ? 'PSG MCA ALUMNI REGISTRATION' : 'REGISTER FOR LOGIN 2026'}
           </h1>
-          <p className="text-xs font-mono text-[#9A9AA2]">
-            {userType === 'ALUMNI' ? 'Inform the organizing committee of your visit' : 'Student Operative / Participant Registration'}
-          </p>
+
         </div>
 
         {/* Dedicated Type Badge Notice */}
@@ -159,7 +161,6 @@ export const RegisterPage: React.FC = () => {
 
         {/* Dynamic Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-xs font-body">
-          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[#9A9AA2] mb-1 font-semibold">Full Name *</label>
@@ -173,7 +174,6 @@ export const RegisterPage: React.FC = () => {
                 className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
             </div>
-
             <div>
               <label className="block text-[#9A9AA2] mb-1 font-semibold">Email Address *</label>
               <input
@@ -181,7 +181,7 @@ export const RegisterPage: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="example@mail.com"
+                placeholder="student@college.edu"
                 required
                 className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
@@ -320,33 +320,48 @@ export const RegisterPage: React.FC = () => {
             </div>
           )}
 
+          <label className="flex items-center gap-3 text-xs text-[#F7F2F2] font-mono cursor-pointer">
+            <input type="checkbox" name="accommodation_required" checked={formData.accommodation_required} onChange={handleChange} className="h-4 w-4 accent-[#E01B22]" />
+            <span>Accommodation required</span>
+          </label>
+
           {/* Password Fields (Participants Only) */}
           {userType !== 'ALUMNI' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[#9A9AA2] mb-1 font-semibold">Password *</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 pr-11 text-[#F7F2F2] outline-none input-glow"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-[#9A9AA2] mb-1 font-semibold">Confirm Password *</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 pr-11 text-[#F7F2F2] outline-none input-glow"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white">
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
           )}

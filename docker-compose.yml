@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -13,6 +11,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-login2026}"]
       interval: 10s
@@ -29,18 +29,20 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
     environment:
       NODE_ENV: development
       PORT: 5000
-      FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-login2026}
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_login_2026}
       SESSION_SECRET: ${SESSION_SECRET:-super_secret_session_key_login_2026}
-    ports:
-      - "${BACKEND_PORT:-5000}:5000"
     volumes:
       - ./server:/app
       - /app/node_modules
+    networks:
+      - app
 
   frontend:
     build:
@@ -50,15 +52,26 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-    environment:
-      VITE_API_BASE_URL: http://localhost:5000/api
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_BASE_URL: /api
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    expose:
+      - "5173"
     volumes:
       - ./client:/app
       - /app/node_modules
+    networks:
+      - app
+      - npm_proxy
 
 volumes:
   postgres_data:
+
+networks:
+  app:
+  npm_proxy:
+    external: true
+    name: ${NPM_NETWORK:-npm_default}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Unlock, Users, MapPin, Clock } from 'lucide-react';
+import { Lock, Unlock, Users, MapPin, Clock, Monitor } from 'lucide-react';
 import { Button } from './Button';
 
 import { WORLD_LORE } from '../../constants/worlds';
@@ -41,6 +41,11 @@ export const EventCard: React.FC<EventCardProps> = ({
           <span className="font-mono text-[10px] text-text-secondary uppercase tracking-widest block mb-1">
             WORLD {paddedNum} // {category}
           </span>
+          {event.is_online && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-color-red font-mono uppercase tracking-widest mb-1">
+              <Monitor size={12} /> ONLINE EVENT
+            </span>
+          )}
           <h3 className="text-xl md:text-2xl font-black text-text-primary uppercase group-hover:text-color-silver transition-colors">
             {title}
           </h3>
@@ -64,14 +69,14 @@ export const EventCard: React.FC<EventCardProps> = ({
               return 'SOLO';
             })()}
           </div>
-          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
+          {!event.is_online && <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <MapPin size={12} className="mr-1 text-color-silver" />
             {event.venue || 'TBA'}
-          </div>
-          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
+          </div>}
+          {!event.is_online && <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <Clock size={12} className="mr-1 text-color-silver" />
             {event.start_time ? `${event.start_time.slice(0, 5)} - ${event.end_time.slice(0, 5)} IST` : (event.time && event.time !== 'TBA' ? event.time : '10:30 - 12:30 IST')}
-          </div>
+          </div>}
         </div>
 
         <div className={`mt-2 flex ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>

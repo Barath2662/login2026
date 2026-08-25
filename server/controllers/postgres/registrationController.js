@@ -1,7 +1,6 @@
 const { Op } = require("sequelize");
 const registrationModel = require("../../models/postgres/registrationModel");
 const eventModel = require("../../models/postgres/eventModel");
-const paymentModel = require("../../models/postgres/paymentModel");
 const userModel = require("../../models/postgres/userModel");
 const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
@@ -57,16 +56,7 @@ const createRegistration = async (req, res) => {
     const student_id = req.user.id;
     const { event_id, team_name, team_members } = req.body;
 
-    // 1. Verify Payment Status
-    const payment = await paymentModel.findOne({
-      where: { student_id: student_id },
-    });
-
-    if (!payment || (payment.status !== "VERIFIED" && payment.status !== "successful" && payment.status !== "PENDING")) {
-      return res.status(403).json({ message: "Event registration is locked until you submit your payment reference." });
-    }
-
-    // 2. Fetch Event & Validate Existence
+    // 1. Fetch Event & Validate Existence
     const event = await eventModel.findByPk(event_id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 

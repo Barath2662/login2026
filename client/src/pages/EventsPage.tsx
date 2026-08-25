@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { Lock, CheckCircle2, Filter, X } from 'lucide-react';
+import { CheckCircle2, Filter, X, Monitor } from 'lucide-react';
 
 interface Event {
   id: number;
@@ -17,12 +17,15 @@ interface Event {
   start_time: string;
   end_time: string;
   venue: string;
+  is_online: boolean;
   max_participants: number;
   is_flagship: boolean;
   guardian_asset: string;
   entry_fee: number;
   rules_url?: string;
   status: string;
+  coordinator_name?: string;
+  coordinator_phone?: string;
 }
 
 interface EventDetail {
@@ -185,7 +188,6 @@ export const EventsPage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
-  const [paymentVerified, setPaymentVerified] = useState(false);
 
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [registering, setRegistering] = useState(false);
@@ -227,11 +229,6 @@ export const EventsPage: React.FC = () => {
         }
       }).catch(() => {});
 
-      api.payments.getMyStatus().then((res) => {
-        if (res.data?.status === 'VERIFIED' || res.data?.status === 'successful' || res.data?.status === 'PENDING') {
-          setPaymentVerified(true);
-        }
-      }).catch(() => {});
     }
   }, [isAuthenticated, user]);
 
@@ -259,11 +256,6 @@ export const EventsPage: React.FC = () => {
   const handleRegisterEvent = async (event: Event) => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
-    }
-
-    if (!paymentVerified) {
-      navigate('/dashboard#payment');
       return;
     }
 
@@ -362,7 +354,6 @@ export const EventsPage: React.FC = () => {
             {filteredEvents.map((event, idx) => {
               const detail = getEventDetail(event.name);
               const isRegistered = userRegistrations.includes(event.id);
-              const isLocked = !paymentVerified;
 
               return (
                 <div
@@ -438,6 +429,10 @@ export const EventsPage: React.FC = () => {
                         >
                           Manage Event
                         </button>
+                      ) : event.is_flagship ? (
+                        <span className="px-3.5 py-2 bg-[#1A1114] border border-[#E01B22] text-[#E01B22] font-mono text-xs font-bold rounded-[2px]">
+                          Invite-Only
+                        </span>
                       ) : !isAuthenticated ? (
                         <button
                           onClick={() => navigate('/login')}
@@ -449,14 +444,6 @@ export const EventsPage: React.FC = () => {
                         <span className="chip-registered px-3.5 py-2 flex items-center gap-1 text-xs font-mono">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Registered ✓
                         </span>
-                      ) : isLocked ? (
-                        <button
-                          onClick={() => navigate('/dashboard#payment')}
-                          className="chip-pending px-3.5 py-2 flex items-center gap-1 text-xs font-mono"
-                          title="Verify payment first to unlock event registrations"
-                        >
-                          <Lock className="w-3.5 h-3.5" /> Pay First
-                        </button>
                       ) : (
                         <button
                           onClick={() => setSelectedEvent(event)}
@@ -521,6 +508,11 @@ export const EventsPage: React.FC = () => {
                       {selectedEvent.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical'} • DAY {selectedEvent.day} SEP
                     </span>
                     <h2 className="display-l text-[#F7F2F2] mt-1">{selectedEvent.name}</h2>
+                    {selectedEvent.is_online && (
+                      <span className="inline-flex items-center gap-1 text-[#FF2A2A] font-mono text-xs tracking-widest mt-2">
+                        <Monitor className="w-4 h-4" /> ONLINE EVENT
+                      </span>
+                    )}
                     <p className="text-xs font-mono text-[#FF2A2A] mt-1">
                       {selectedEvent.team_type === 'TEAM' ? `Team (${selectedEvent.min_team_size}${selectedEvent.max_team_size > selectedEvent.min_team_size ? `–${selectedEvent.max_team_size}` : ''} Members)` : 'Individual'} • Duration: {detail.durationText}
                     </p>
@@ -533,6 +525,19 @@ export const EventsPage: React.FC = () => {
                       {detail.fullDesc}
                     </p>
                   </div>
+
+                  {(selectedEvent.coordinator_name || selectedEvent.coordinator_phone) && (
+                    <div className="space-y-2">
+                      <span className="mono-label text-[#A79798]">EVENT COORDINATORS</span>
+                      <div className="text-xs text-[#F7F2F2] leading-relaxed space-y-1">
+                        {(selectedEvent.coordinator_name || '').split(';').map((name, index) => (
+                          <div key={name}>
+                            Coordinator {index + 1} - {name.trim()} {selectedEvent.coordinator_phone?.split(';')[index]?.trim() && `- ${selectedEvent.coordinator_phone.split(';')[index].trim()}`}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Skills Tags */}
                   <div className="space-y-2">
@@ -565,7 +570,7 @@ export const EventsPage: React.FC = () => {
                     </div>
                     <div>
                       <span className="mono-label block">VENUE</span>
-                      <strong className="text-[#F7F2F2]">{selectedEvent.venue || 'TBA'}</strong>
+                      <strong className="text-[#F7F2F2]">{selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'TBA')}</strong>
                     </div>
                     <div>
                       <span className="mono-label block">START TIME</span>
@@ -578,7 +583,7 @@ export const EventsPage: React.FC = () => {
                   </div>
 
                   {/* Team Registration Input if applicable */}
-                  {selectedEvent.team_type === 'TEAM' && !isRegistered && paymentVerified && user?.role !== 'admin' && user?.role !== 'event_coordinator' && user?.role !== 'super_admin' && user?.role !== 'admin_power' && (
+                  {selectedEvent.team_type === 'TEAM' && !isRegistered && user?.role !== 'admin' && user?.role !== 'event_coordinator' && user?.role !== 'super_admin' && user?.role !== 'admin_power' && (
                     <div className="space-y-3 pt-2 border-t border-[#2A1A1D]">
                       <div className="space-y-2">
                         <label className="mono-label text-[#F7F2F2] block">ENTER YOUR SQUAD / TEAM NAME:</label>

@@ -46,7 +46,7 @@ export default function Payment() {
     setErrorMsg('');
 
     try {
-      await api.post('/payments/', { transaction_reference: utr.trim() });
+      const paymentResponse = await api.post('/payments/', { transaction_reference: utr.trim() });
       
       // Update global user state immediately so they can register for events
       const profileRes = await api.get('/users/profile');
@@ -54,6 +54,7 @@ export default function Payment() {
         setSurvivor(profileRes.data);
       }
       
+      setUtr(paymentResponse.data?.payment?.transaction_reference || utr.trim());
       setPaymentState('in_progress');
     } catch (err) {
       console.error(err);
@@ -73,7 +74,7 @@ export default function Payment() {
           Participation Fee
         </GlitchText>
         <p className="text-text-secondary mt-2">
-          Secure your access pass. A one-time payment of Rs. 100 is required for Multiverse Hub entry and event registration.
+          The Rs. 100 registration fee includes event access for both days, lunch, and refreshments.
         </p>
       </div>
 

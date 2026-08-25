@@ -47,4 +47,11 @@ router.get(
   exportController.exportTeams
 );
 
+router.get(
+  "/alumni",
+  verifyJwt,
+  allowRoles("admin"),
+  exportController.exportAlumni
+);
+
 module.exports = router;
