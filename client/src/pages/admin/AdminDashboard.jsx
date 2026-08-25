@@ -38,10 +38,10 @@ const AdminDashboard = () => {
   }, []);
 
   const statCards = [
-    { label: 'Total Users', value: stats.users, icon: <Users size={24} />, color: 'text-blue-500', border: 'border-blue-500' },
-    { label: 'Total Events', value: stats.events, icon: <Calendar size={24} />, color: 'text-purple-500', border: 'border-purple-500' },
-    { label: 'Total Registrations', value: stats.registrations, icon: <ClipboardCheck size={24} />, color: 'text-green-500', border: 'border-green-500' },
-    { label: 'Total Payments', value: stats.payments, icon: <DollarSign size={24} />, color: 'text-yellow-500', border: 'border-yellow-500' },
+    { label: 'Total Users', value: stats.users, icon: <Users size={24} />, color: 'text-zinc-400', border: 'border-zinc-400' },
+    { label: 'Total Events', value: stats.events, icon: <Calendar size={24} />, color: 'text-red-500', border: 'border-red-500' },
+    { label: 'Total Registrations', value: stats.registrations, icon: <ClipboardCheck size={24} />, color: 'text-red-500', border: 'border-red-500' },
+    { label: 'Total Payments', value: stats.payments, icon: <DollarSign size={24} />, color: 'text-zinc-500', border: 'border-zinc-500' },
   ];
 
   if (isLoading) {

@@ -1,7 +1,49 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("../../models/postgres/userModel");
+const paymentModel = require("../../models/postgres/paymentModel");
+const registrationModel = require("../../models/postgres/registrationModel");
+const teamModel = require("../../models/postgres/teamModel");
+const teamMemberModel = require("../../models/postgres/teamMemberModel");
 const { sendEmail } = require("../../services/emailService");
+
+const jwtSecret = process.env.JWT_SECRET || "super_secret_jwt_key_login_2026";
+
+const parseStoredTeamEmails = (value) => {
+  if (!value) return [];
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((email) => String(email).trim().toLowerCase()).filter(Boolean);
+  } catch (error) {
+    return [];
+  }
+};
+
+const pairPendingTeamInvite = async (userId, email) => {
+  const normalizedEmail = String(email).trim().toLowerCase();
+  if (!normalizedEmail) return null;
+
+  const teams = await teamModel.findAll();
+  let pairedTeam = null;
+
+  for (const team of teams) {
+    const pendingEmails = parseStoredTeamEmails(team.member_emails);
+    if (!pendingEmails.includes(normalizedEmail)) continue;
+
+    pairedTeam = team;
+    await teamMemberModel.findOrCreate({
+      where: { team_id: team.id, student_id: userId },
+      defaults: { team_id: team.id, student_id: userId, status: "active" },
+    });
+
+    const updatedEmails = pendingEmails.filter((item) => item !== normalizedEmail);
+    await team.update({ member_emails: JSON.stringify(updatedEmails) });
+    break;
+  }
+
+  return pairedTeam;
+};
 
 const registerUser = async (req, res) => {
   try {
@@ -19,11 +61,14 @@ const registerUser = async (req, res) => {
       batch_year,
       place,
       current_organization,
+      accommodation_required = false,
     } = req.body;
 
-    if (!name || !email || !password) {
+    const isAlumni = String(user_type).toUpperCase() === "ALUMNI";
+
+    if (!name || !email || (!isAlumni && !password)) {
       return res.status(400).json({
-        message: "Name, email and password are required",
+        message: isAlumni ? "Name and email are required" : "Name, email and password are required",
       });
     }
 
@@ -37,8 +82,10 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const rawPassword = password || `AlumniRSVP_${Math.random().toString(36).slice(-8)}`;
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
+    const normalizedRole = "student";
     const user = await userModel.create({
       name,
       email,
@@ -53,16 +100,19 @@ const registerUser = async (req, res) => {
       batch_year,
       place,
       current_organization,
-      role: "student",
+      accommodation_required: Boolean(accommodation_required),
+      role: normalizedRole,
     });
+
+    await pairPendingTeamInvite(user.id, user.email);
 
     const token = jwt.sign(
       {
         id: user.id,
-        role: user.role,
+        role: normalizedRole,
         user_type: user.user_type,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: "7d" }
     );
 
@@ -88,7 +138,10 @@ const registerUser = async (req, res) => {
         user_type: user.user_type,
         student_id_code: user.student_id_code,
         is_active: user.is_active,
+        accommodation_required: user.accommodation_required,
         must_change_password: user.must_change_password,
+        hasPaidFee: false,
+        registrations: [],
       },
     });
   } catch (error) {
@@ -133,13 +186,15 @@ const loginUser = async (req, res) => {
       });
     }
 
+    const normalizedRole = String(user.role || "student").toLowerCase();
+
     const token = jwt.sign(
       {
         id: user.id,
-        role: user.role,
+        role: normalizedRole,
         user_type: user.user_type,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       {
         expiresIn: "7d",
       }
@@ -150,6 +205,14 @@ const loginUser = async (req, res) => {
       secure: false,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const payment = await paymentModel.findOne({
+      where: { student_id: user.id, status: ["PENDING", "VERIFIED"] }
+    });
+
+    const registrations = await registrationModel.findAll({
+      where: { student_id: user.id }
     });
 
     return res.status(200).json({
@@ -167,7 +230,10 @@ const loginUser = async (req, res) => {
         user_type: user.user_type,
         student_id_code: user.student_id_code,
         is_active: user.is_active,
+        accommodation_required: user.accommodation_required,
         must_change_password: user.must_change_password,
+        hasPaidFee: !!payment,
+        registrations: registrations.map(r => ({ worldId: r.event_id })),
       },
     });
   } catch (error) {
@@ -204,7 +270,7 @@ const forgotPassword = async (req, res) => {
       return res.status(200).json({ message: "If account exists, password reset token has been sent to email." });
     }
 
-    const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const resetToken = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: "1h" });
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`;
 
     await sendEmail({
@@ -229,7 +295,7 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Token and new password are required" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
     const user = await userModel.findByPk(decoded.id);
 
     if (!user) {

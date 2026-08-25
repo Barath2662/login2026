@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Unlock, Users, MapPin, Clock } from 'lucide-react';
+import { Lock, Unlock, Users, MapPin, Clock, Monitor } from 'lucide-react';
 import { Button } from './Button';
 
 import { WORLD_LORE } from '../../constants/worlds';
@@ -33,7 +33,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <div 
-      className={`w-full p-4 md:p-5 bg-bg-primary border border-border-color rounded-sm transition-all duration-300 hover:border-color-red hover:shadow-[0_0_20px_rgba(239,35,60,0.15)] group ${className}`}
+      className={`w-full p-4 md:p-5 bg-bg-primary border border-[#E5E5E5] rounded-sm transition-all duration-300 hover:border-color-red hover:shadow-[0_0_20px_rgba(239,35,60,0.15)] group ${className}`}
     >
       <div className={`flex flex-col gap-2 md:gap-3 ${isLeftAligned ? 'md:text-right' : 'md:text-left'}`}>
         
@@ -41,6 +41,11 @@ export const EventCard: React.FC<EventCardProps> = ({
           <span className="font-mono text-[10px] text-text-secondary uppercase tracking-widest block mb-1">
             WORLD {paddedNum} // {category}
           </span>
+          {event.is_online && (
+            <span className="inline-flex items-center gap-1 text-[10px] text-color-red font-mono uppercase tracking-widest mb-1">
+              <Monitor size={12} /> ONLINE EVENT
+            </span>
+          )}
           <h3 className="text-xl md:text-2xl font-black text-text-primary uppercase group-hover:text-color-silver transition-colors">
             {title}
           </h3>
@@ -52,18 +57,26 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         {/* Tactical Mini-Specs */}
         <div className={`flex flex-wrap gap-3 mt-1 ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>
-          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
-            <Users size={12} className="mr-1 text-color-red" />
-            {event.isTeam ? `${event.minTeamSize}-${event.maxTeamSize} OP` : 'SOLO'}
+          <div className="flex items-center text-[10px] md:text-xs text-color-red font-mono">
+            <Users size={12} className="mr-1" />
+            {(() => {
+              const minSize = event.min_team_size || event.minTeamSize || 1;
+              const maxSize = event.max_team_size || event.maxTeamSize || 1;
+              const isTeam = maxSize > 1 || event.team_type === 'TEAM' || event.isTeam;
+              if (isTeam) {
+                return minSize === maxSize ? `TEAM (${maxSize} MEMBERS)` : `TEAM (${minSize}-${maxSize} MEMBERS)`;
+              }
+              return 'SOLO';
+            })()}
           </div>
-          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
+          {!event.is_online && <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <MapPin size={12} className="mr-1 text-color-silver" />
             {event.venue || 'TBA'}
-          </div>
-          <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
+          </div>}
+          {!event.is_online && <div className="flex items-center text-[10px] md:text-xs text-text-muted font-mono">
             <Clock size={12} className="mr-1 text-color-silver" />
-            {event.time || 'TBA'}
-          </div>
+            {event.start_time ? `${event.start_time.slice(0, 5)} - ${event.end_time.slice(0, 5)} IST` : (event.time && event.time !== 'TBA' ? event.time : '10:30 - 12:30 IST')}
+          </div>}
         </div>
 
         <div className={`mt-2 flex ${isLeftAligned ? 'md:justify-end' : 'md:justify-start'}`}>

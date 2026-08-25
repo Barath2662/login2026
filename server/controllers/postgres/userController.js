@@ -1,4 +1,8 @@
-﻿const userModel = require("../../models/postgres/userModel");
+const userModel = require("../../models/postgres/userModel");
+const paymentModel = require("../../models/postgres/paymentModel");
+const registrationModel = require("../../models/postgres/registrationModel");
+const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
+const eventModel = require("../../models/postgres/eventModel");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -6,6 +10,13 @@ const getAllUsers = async (req, res) => {
       attributes: {
         exclude: ["password"],
       },
+      include: [
+        {
+          model: eventCoordinatorModel,
+          as: "eventAssignments",
+          include: [{ model: eventModel, as: "event", attributes: ["id", "name"] }],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
@@ -23,7 +34,19 @@ const getMyProfile = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    return res.json(user);
+    const payment = await paymentModel.findOne({
+      where: { student_id: user.id, status: ["PENDING", "VERIFIED"] }
+    });
+
+    const registrations = await registrationModel.findAll({
+      where: { student_id: user.id }
+    });
+
+    const userData = user.toJSON();
+    userData.hasPaidFee = !!payment;
+    userData.registrations = registrations.map((r) => ({ worldId: r.event_id }));
+
+    return res.json(userData);
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch profile", error: error.message });
   }
@@ -73,13 +96,23 @@ const updateUserRole = async (req, res) => {
       "junior_attendance",
       "special_user",
       "admin",
+      "super_admin",
+      "admin_power",
     ];
 
     if (!allowedRoles.includes(req.body.role)) {
       return res.status(400).json({ message: "Invalid role" });
     }
 
-    await user.update({ role: req.body.role });
+    await user.update({
+      role: req.body.role,
+      user_type: req.body.role === "student" ? "PARTICIPANT" : "STAFF",
+    });
+
+    if (req.body.role !== "student") {
+      await paymentModel.destroy({ where: { student_id: user.id } });
+    }
+
     return res.json({ message: "User role updated", user });
   } catch (error) {
     return res.status(500).json({ message: "Failed to update role", error: error.message });
@@ -106,6 +139,50 @@ const getUserById = async (req, res) => {
       message: "Failed to fetch user",
       error: error.message,
     });
+  }
+};
+
+const updateUserDetails = async (req, res) => {
+  try {
+    const user = await userModel.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!["PARTICIPANT", "ALUMNI"].includes(user.user_type)) {
+      return res.status(403).json({ message: "Staff account details cannot be edited here" });
+    }
+
+    const allowedFields = [
+      "name", "email", "phone", "college_name", "department", "roll_no",
+      "gender", "year_of_study", "batch_year", "place", "current_organization",
+    ];
+    const updates = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+    if (!updates.name || !updates.email) {
+      return res.status(400).json({ message: "Name and email are required" });
+    }
+
+    await user.update(updates);
+    const safeUser = user.toJSON();
+    delete safeUser.password;
+    return res.json({ message: "User details updated", user: safeUser });
+  } catch (error) {
+    return res.status(400).json({ message: "Failed to update user details", error: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await userModel.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!["PARTICIPANT", "ALUMNI"].includes(user.user_type)) {
+      return res.status(403).json({ message: "Staff accounts cannot be deleted here" });
+    }
+
+    await user.destroy();
+    return res.json({ message: "User deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
 };
 
@@ -146,12 +223,86 @@ const updateUserStatus = async (req, res) => {
   }
 };
 
+const createUserByAdmin = async (req, res) => {
+  try {
+    const { name, email, phone, password, role, college_name, department, event_id } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Name, email, and password are required" });
+    }
+
+    const allowedRoles = [
+      "student",
+      "event_coordinator",
+      "junior_attendance",
+      "special_user",
+      "admin",
+      "super_admin",
+      "admin_power",
+    ];
+    const assignedRole = role || "student";
+    if (!allowedRoles.includes(assignedRole)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+    if (assignedRole === "event_coordinator" && !event_id) {
+      return res.status(400).json({ message: "An event is required for event coordinators" });
+    }
+
+    const existing = await userModel.findOne({ where: { email: email.toLowerCase().trim() } });
+    if (existing) {
+      return res.status(400).json({ message: "User with this email already exists" });
+    }
+
+    const bcrypt = require("bcryptjs");
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await userModel.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone ? phone.trim() : "9876543210",
+      password: hashedPassword,
+      role: assignedRole,
+      college_name: college_name ? college_name.trim() : "PSG College of Technology",
+      department: department ? department.trim() : "Computer Applications",
+      user_type: assignedRole === "student" ? "PARTICIPANT" : "STAFF",
+      must_change_password: false,
+    });
+
+    const paddedId = String(newUser.id).padStart(4, "0");
+    const student_id_code = `LGN26-${paddedId}`;
+    await newUser.update({ student_id_code });
+
+    if (assignedRole === "event_coordinator") {
+      const event = await eventModel.findByPk(event_id);
+      if (!event) {
+        await newUser.destroy();
+        return res.status(400).json({ message: "Selected event was not found" });
+      }
+
+      await eventCoordinatorModel.create({ event_id, user_id: newUser.id });
+    }
+
+    return res.status(201).json({
+      message: "User created successfully",
+      user: {
+        ...newUser.toJSON(),
+        student_id_code,
+        password: undefined,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to create user", error: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getMyProfile,
   updateMyProfile,
   updateUserRole,
   getUserById,
-  updateUserRole,
-  updateUserStatus
+  updateUserDetails,
+  deleteUser,
+  updateUserStatus,
+  createUserByAdmin,
 };
+

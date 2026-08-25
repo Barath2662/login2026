@@ -122,7 +122,7 @@ const AdminAttendance = () => {
                   <td className="px-6 py-4 font-mono text-xs">{record.marked_at ? new Date(record.marked_at).toLocaleString() : 'N/A'}</td>
                   <td className="px-6 py-4 text-center">
                     <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-sm border ${
-                      record.status === 'present' ? 'text-green-500 bg-green-500/10 border-green-500/30' :
+                      record.status === 'present' ? 'text-red-500 bg-red-500/10 border-red-500/30' :
                       record.status === 'absent' ? 'text-color-danger bg-color-danger/10 border-color-danger/30' :
                       'text-color-silver bg-color-silver/10 border-color-silver/30'
                     }`}>

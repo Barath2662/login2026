@@ -1,0 +1,28 @@
+
+
+
+
+              {
+        name: "Event Coordinator Desk",
+        email: "coordinator@psgtech.ac.in",
+        phone: "9876543212",
+        password: process.env.STANDARD_ROLE_PASSWORD || "CoordinatorPass2026!",
+        college_name: "PSG College of Technology",
+        department: "Computer Applications",
+        role: "event_coordinator",
+        user_type: "PARTICIPANT",
+        student_id_code: "LGN26-0003",
+        must_change_password: false,
+      },
+      {
+        name: "Verified Participant Survivor",
+        email: "participant@psgtech.ac.in",
+        phone: "9876543213",
+        password: "ParticipantPass2026!",
+        college_name: "PSG College of Technology",
+        department: "Computer Applications",
+        role: "student",
+        user_type: "PARTICIPANT",
+        student_id_code: "LGN26-0004",
+        must_change_password: false,
+      },

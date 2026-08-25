@@ -145,7 +145,7 @@ router.post('/events/:slug/register', async (req, res) => {
       status: 'registered'
     });
 
-    // Send confirmation email from adminpsgtech@gmail.com
+    // Send confirmation email from login@psgtech.ac.in
     const user = await User.findByPk(req.session.user.id);
     if (user) {
       await sendEventRegistrationConfirmation(user, event, team_name ? { name: team_name } : null);
@@ -236,9 +236,11 @@ router.post('/admin/events/:id/update', async (req, res) => {
     if (EventChangeLog) {
       await EventChangeLog.create({
         event_id: event.id,
-        change_type: 'VENUE_OR_TIME_UPDATED',
-        previous_details: JSON.stringify({ venue: oldVenue, start_time: oldTime }),
-        new_details: JSON.stringify({ venue: event.venue, start_time: event.start_time }),
+        changed_by: req.session.user.id,
+        fields_changed: {
+          venue: { old: oldVenue, new: event.venue },
+          start_time: { old: oldTime, new: event.start_time }
+        },
         notified: true
       });
     }
@@ -250,7 +252,7 @@ router.post('/admin/events/:id/update', async (req, res) => {
       is_active: true
     });
 
-    // Dispatch Emails to all registered students from adminpsgtech@gmail.com
+    // Dispatch Emails to all registered students from login@psgtech.ac.in
     const registrations = await Registration.findAll({
       where: { event_id: event.id },
       include: [{ model: User, as: 'student' }]

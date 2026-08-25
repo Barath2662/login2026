@@ -1,7 +1,9 @@
-﻿const { stringify } = require("csv-stringify/sync");
+const { stringify } = require("csv-stringify/sync");
 const registrationModel = require("../../models/postgres/registrationModel");
 const attendanceModel = require("../../models/postgres/attendanceModel");
 const userModel = require("../../models/postgres/userModel");
+const paymentModel = require("../../models/postgres/paymentModel");
+const teamModel = require("../../models/postgres/teamModel");
 
 const exportEventStudents = async (req, res) => {
   try {
@@ -63,7 +65,130 @@ const exportAttendance = async (req, res) => {
   }
 };
 
+const exportUsers = async (req, res) => {
+  try {
+    const users = await userModel.findAll({ order: [["id", "ASC"]] });
+    const rows = users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      college: u.college_name,
+      department: u.department,
+      roll_no: u.roll_no,
+      role: u.role,
+      status: u.is_active ? 'ACTIVE' : 'INACTIVE',
+      created_at: u.created_at
+    }));
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="users_roster.csv"');
+    return res.send(stringify(rows, { header: true }));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export", error: error.message });
+  }
+};
+
+const exportRegistrations = async (req, res) => {
+  try {
+    const registrations = await registrationModel.findAll({
+      include: [{ model: userModel, as: "student" }],
+      order: [["created_at", "DESC"]]
+    });
+    const rows = registrations.map((r) => ({
+      reg_id: r.id,
+      event_id: r.event_id,
+      student_name: r.student?.name || '',
+      student_email: r.student?.email || '',
+      team_id: r.team_id || '',
+      status: r.status,
+      created_at: r.created_at
+    }));
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="all_registrations.csv"');
+    return res.send(stringify(rows, { header: true }));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export", error: error.message });
+  }
+};
+
+const exportPayments = async (req, res) => {
+  try {
+    const payments = await paymentModel.findAll({
+      include: [{ model: userModel, as: "user" }],
+      order: [["created_at", "DESC"]]
+    });
+    const rows = payments.map((p) => ({
+      payment_id: p.id,
+      amount: p.amount,
+      user_name: p.user?.name || '',
+      user_email: p.user?.email || '',
+      transaction_ref: p.transaction_reference,
+      status: p.status,
+      created_at: p.created_at
+    }));
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="financial_ledger.csv"');
+    return res.send(stringify(rows, { header: true }));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export", error: error.message });
+  }
+};
+
+const exportTeams = async (req, res) => {
+  try {
+    const teams = await teamModel.findAll({
+      include: [{ model: userModel, as: "leader" }],
+      order: [["created_at", "DESC"]]
+    });
+    const rows = teams.map((t) => ({
+      team_id: t.id,
+      event_id: t.event_id,
+      team_name: t.name,
+      leader_name: t.leader?.name || '',
+      leader_email: t.leader?.email || '',
+      created_at: t.created_at
+    }));
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="squad_formations.csv"');
+    return res.send(stringify(rows, { header: true }));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export", error: error.message });
+  }
+};
+
+const exportAlumni = async (req, res) => {
+  try {
+    const alumni = await userModel.findAll({
+      where: { user_type: "ALUMNI" },
+      order: [["createdAt", "ASC"]],
+    });
+
+    const rows = alumni.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || "",
+      department: user.department || "",
+      batch_year: user.batch_year || "",
+      place: user.place || "",
+      current_organization: user.current_organization || "",
+      registered_at: user.createdAt || "",
+    }));
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", 'attachment; filename="alumni_roster.csv"');
+    return res.send(stringify(rows, { header: true }));
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export alumni roster", error: error.message });
+  }
+};
+
 module.exports = {
   exportEventStudents,
   exportAttendance,
+  exportUsers,
+  exportRegistrations,
+  exportPayments,
+  exportTeams,
+  exportAlumni,
 };

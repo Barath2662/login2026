@@ -46,6 +46,10 @@ const createPayment = async (req, res) => {
       return res.status(409).json({ message: "This transaction reference number has already been submitted by another account." });
     }
 
+    if (!existingRef && trimmedRef.length < 4) {
+      return res.status(400).json({ message: "Transaction reference looks incomplete. Please verify the UTR or reference number." });
+    }
+
     const existing = await paymentModel.findOne({
       where: { student_id: req.user.id },
     });
@@ -93,6 +97,7 @@ const getAllPayments = async (req, res) => {
           model: userModel,
           as: "student",
           attributes: ["id", "name", "email", "phone", "college_name", "department", "roll_no", "student_id_code"],
+          where: { user_type: "PARTICIPANT" },
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -131,12 +136,15 @@ const verifyPayment = async (req, res) => {
       }
       return res.json({ message: "Payment verified successfully", payment });
     } else if (targetStatus === "REJECTED") {
-      await payment.update({
-        status: "REJECTED",
-        verified_by: req.user.id,
-        rejection_reason: rejection_reason || "Transaction reference could not be verified.",
-      });
-      return res.json({ message: "Payment rejected", payment });
+      const studentId = payment.student_id;
+      const registrationModel = require("../../models/postgres/registrationModel");
+      
+      // Ban/Delete user from system on false UTR
+      await registrationModel.destroy({ where: { student_id: studentId } });
+      await payment.destroy();
+      await userModel.destroy({ where: { id: studentId } });
+      
+      return res.json({ message: "Payment rejected. Participant provided false UTR and has been banned." });
     } else {
       return res.status(400).json({ message: "Invalid verification status. Must be VERIFIED or REJECTED." });
     }

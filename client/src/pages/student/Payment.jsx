@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Loader2, Lock, FileText } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, Lock, FileText, ExternalLink } from 'lucide-react';
 import { GlitchText } from '../../components/ui/GlitchText';
 import { useAuthStore } from '../../store/authStore';
 import { api } from '../../services/api';
@@ -16,10 +16,13 @@ export default function Payment() {
     const fetchStatus = async () => {
       try {
         const { data } = await api.get('/payments/my');
-        if (data.status === 'successful') {
+        if (data.status === 'VERIFIED') {
            setPaymentState('success');
-        } else if (data.status === 'in_progress' || data.status === 'review') {
+        } else if (data.status === 'PENDING') {
            setPaymentState('in_progress');
+        } else if (data.status === 'REJECTED') {
+           setPaymentState('failed');
+           setErrorMsg(data.rejection_reason || 'Payment was rejected.');
         } else {
            setPaymentState('idle');
         }
@@ -43,7 +46,15 @@ export default function Payment() {
     setErrorMsg('');
 
     try {
-      await api.post('/payments/', { transaction_reference: utr.trim() });
+      const paymentResponse = await api.post('/payments/', { transaction_reference: utr.trim() });
+      
+      // Update global user state immediately so they can register for events
+      const profileRes = await api.get('/users/profile');
+      if (profileRes.data) {
+        setSurvivor(profileRes.data);
+      }
+      
+      setUtr(paymentResponse.data?.payment?.transaction_reference || utr.trim());
       setPaymentState('in_progress');
     } catch (err) {
       console.error(err);
@@ -53,7 +64,7 @@ export default function Payment() {
   };
 
   const handleProceedToDashboard = () => {
-    navigate('/student/home');
+    navigate('/dashboard');
   };
 
   return (
@@ -63,7 +74,7 @@ export default function Payment() {
           Participation Fee
         </GlitchText>
         <p className="text-text-secondary mt-2">
-          Secure your access pass. A one-time payment of Rs. 100 is required for Multiverse Hub entry and event registration.
+          The Rs. 100 registration fee includes event access for both days, lunch, and refreshments.
         </p>
       </div>
 
@@ -103,35 +114,61 @@ export default function Payment() {
 
             {paymentState === 'idle' && (
               <form onSubmit={handlePayment} className="space-y-6 w-full">
-                <p className="text-text-secondary mb-4 text-sm">
-                  Please pay the fee via the college payment gateway. Then enter the Transaction Reference (UTR) below.
-                </p>
                 
-                {errorMsg && (
-                  <div className="p-2 bg-color-danger/10 border border-color-danger text-color-danger text-xs font-mono text-left">
-                    {errorMsg}
+                <div className="space-y-4">
+                  {/* Step 1 */}
+                  <div className="bg-black/40 border border-border-color/50 p-4 rounded-sm text-left">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <div className="bg-color-red text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-sm">1</div>
+                      <h3 className="text-white font-bold uppercase tracking-wider text-sm">Initiate Payment</h3>
+                    </div>
+                    <p className="text-text-secondary text-xs mb-3">Pay the Rs. 100 fee via the official college gateway.</p>
+                    <a
+                      href="https://events.psginstitutions.in/EMS/register/E5294158179"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-2 bg-[#E8A317]/10 text-[#E8A317] border border-[#E8A317]/30 hover:bg-[#E8A317]/20 px-4 py-2 rounded-sm text-xs font-bold transition-colors uppercase tracking-wider"
+                    >
+                      <span>PSG Payment Portal</span>
+                      <ExternalLink size={14} />
+                    </a>
                   </div>
-                )}
-                
-                <div className="space-y-2 text-left">
-                  <label className="text-xs text-[#A8A9AD] font-mono tracking-wider">TRANSACTION REFERENCE / UTR</label>
-                  <input
-                    type="text"
-                    required
-                    value={utr}
-                    onChange={(e) => setUtr(e.target.value)}
-                    placeholder="e.g. UPI/1234567890"
-                    className="w-full bg-transparent border-0 border-b border-[#A8A9AD] px-0 py-2 text-white font-mono focus:ring-0 focus:border-[#D90429] outline-none"
-                  />
+                  
+                  {/* Step 2 */}
+                  <div className="bg-black/40 border border-border-color/50 p-4 rounded-sm text-left">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="bg-color-red text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-sm">2</div>
+                      <h3 className="text-white font-bold uppercase tracking-wider text-sm">Submit Reference</h3>
+                    </div>
+                    <p className="text-text-secondary text-xs mb-3">Enter the Transaction Reference (UTR) from your payment receipt.</p>
+                    
+                    {errorMsg && (
+                      <div className="p-2 mb-3 bg-color-danger/10 border border-color-danger text-color-danger text-xs font-mono text-left">
+                        {errorMsg}
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <label className="text-xs text-[#A8A9AD] font-mono tracking-wider block">TRANSACTION REFERENCE / UTR</label>
+                      <input
+                        type="text"
+                        required
+                        value={utr}
+                        onChange={(e) => setUtr(e.target.value)}
+                        placeholder="e.g. UPI/1234567890"
+                        className="w-full bg-transparent border-0 border-b border-[#A8A9AD] px-0 py-2 text-white font-mono focus:ring-0 focus:border-[#D90429] outline-none text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="flex flex-col items-center space-y-3 pt-4">
+                <div className="flex flex-col items-center space-y-3 pt-2">
                   <button 
                     type="submit"
                     className="w-full flex items-center justify-center space-x-2 px-6 py-4 rounded-md bg-color-red text-white hover:bg-color-red/90 hover:shadow-[0_0_20px_rgba(217,4,41,0.4)] transition-all duration-300 font-bold tracking-widest uppercase"
                   >
                     <FileText size={18} className="flex-shrink-0" />
-                    <span>SUBMIT REFERENCE</span>
+                    <span>SUBMIT UTR</span>
                   </button>
                 </div>
               </form>
@@ -150,9 +187,9 @@ export default function Payment() {
                 <div className="w-20 h-20 bg-color-silver/20 border border-color-silver rounded-full flex items-center justify-center mb-2">
                   <Loader2 size={40} className="text-color-silver animate-spin" />
                 </div>
-                <h3 className="text-2xl font-bold text-white uppercase">VERIFICATION PENDING</h3>
+                <h3 className="text-2xl font-bold text-white uppercase">UTR SUBMITTED</h3>
                 <p className="text-text-secondary text-sm px-4">
-                  Your transaction reference has been submitted and is awaiting verification by the administration.
+                  Your transaction reference has been recorded. You can now proceed to register for events while the administration verifies your payment in the background.
                 </p>
                 <button 
                   onClick={handleProceedToDashboard} 

@@ -13,7 +13,7 @@ const EventDashboard = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const { data } = await api.events.getCoordinatorEvents();
+        const { data } = await api.events.getAssigned();
         const eventsData = Array.isArray(data) ? data : (data.data || []);
         setEvents(eventsData);
         if (eventsData.length > 0) {
@@ -60,8 +60,8 @@ const EventDashboard = () => {
 
   const stats = [
     { label: 'Total Registrations', value: statsData.total, icon: <Users size={24} />, color: 'text-color-silver', border: 'border-color-silver' },
-    { label: 'Verified Bonafides', value: statsData.verified, icon: <UserCheck size={24} />, color: 'text-green-500', border: 'border-green-500' },
-    { label: 'Pending Verifications', value: statsData.pending, icon: <AlertTriangle size={24} />, color: 'text-yellow-500', border: 'border-yellow-500' },
+    { label: 'Verified Bonafides', value: statsData.verified, icon: <UserCheck size={24} />, color: 'text-red-500', border: 'border-red-500' },
+    { label: 'Pending Verifications', value: statsData.pending, icon: <AlertTriangle size={24} />, color: 'text-zinc-500', border: 'border-zinc-500' },
     { label: 'Current Attendance', value: statsData.attendance, icon: <UserCheck size={24} />, color: 'text-color-red', border: 'border-color-red' },
   ];
 

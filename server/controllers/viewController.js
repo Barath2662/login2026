@@ -44,7 +44,7 @@ module.exports = {
 
       res.render('pages/landing', {
         layout: 'layouts/layout-ink',
-        title: 'LOGIN 2026 — Last Man Standing',
+        title: 'LOGIN 2026 — THE LAST HUMAN',
         sectionName: 'COMMAND CONSOLE',
         pageId: 'SYS-01',
         user: req.session.user || null,

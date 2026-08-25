@@ -29,10 +29,19 @@ This repository contains the complete server-rendered Multi-Page Application (MP
    node server/server.js
    ```
 5. Access the site in your browser:
-   - Command Console & Hero: `http://localhost:5000/`
-   - Events Index (11): `http://localhost:5000/events`
-   - Timeline Schedule Grid: `http://localhost:5000/timeline`
-   - Admin Panel: `http://localhost:5000/admin`
+   - Public site: `https://login.psgtech.ac.in/`
+   - Command Console & Hero: `https://login.psgtech.ac.in/`
+   - Events Index (11): `https://login.psgtech.ac.in/events`
+   - Timeline Schedule Grid: `https://login.psgtech.ac.in/timeline`
+   - Admin Panel: `https://login.psgtech.ac.in/admin`
+
+   This Compose project does not run Nginx. The frontend listens on its
+   internal port `5173` and joins the external Nginx Proxy Manager network
+   `npm_default`. Configure Nginx Proxy Manager for `login.psgtech.ac.in` with:
+   `login2k26-frontend` as the forward hostname and `5173` as the forward port.
+   Nginx Proxy Manager should terminate HTTPS on ports `80` and `443` and
+   redirect HTTP to HTTPS. The frontend proxies `/api` internally to the
+   private backend container.
 
 ---
 

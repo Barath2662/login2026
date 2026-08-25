@@ -82,7 +82,7 @@ export const LevelPortalNode: React.FC<LevelPortalNodeProps> = ({
     switch (state.status) {
       case 'UPCOMING':
         return (
-          <div className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-0.5 rounded border border-orange-500/40 flex items-center gap-1 uppercase tracking-wider font-mono">
+          <div className="bg-zinc-500/20 text-zinc-400 text-[10px] px-2 py-0.5 rounded border border-zinc-500/40 flex items-center gap-1 uppercase tracking-wider font-mono">
             <Lock size={10} /> OPENS SOON
           </div>
         );

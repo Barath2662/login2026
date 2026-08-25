@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { UserCheck, GraduationCap, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setAuth } = useAuthStore();
 
   const [userType, setUserType] = useState<'PARTICIPANT' | 'ALUMNI'>('PARTICIPANT');
+
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if ((typeParam && typeParam.toUpperCase() === 'ALUMNI') || window.location.pathname.includes('alumni')) {
+      setUserType('ALUMNI');
+    }
+  }, [searchParams]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,19 +26,23 @@ export const RegisterPage: React.FC = () => {
     college_name: '',
     department: '',
     roll_no: '',
-    gender: 'Male',
-    year_of_study: '3rd Year',
-    batch_year: '2022',
+    gender: '',
+    year_of_study: '',
+    batch_year: '',
     place: '',
     current_organization: '',
+    accommodation_required: false,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alumniSuccess, setAlumniSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const target = e.target as HTMLInputElement;
+    setFormData({ ...formData, [target.name]: target.type === 'checkbox' ? target.checked : target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,19 +50,24 @@ export const RegisterPage: React.FC = () => {
     setError(null);
 
     // Form validations
-    if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
-      setError('Name, email, and password are required fields.');
+    if (!formData.name.trim() || !formData.email.trim()) {
+      setError('Name and email are required fields.');
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
+    if (userType !== 'ALUMNI') {
+      if (!formData.password) {
+        setError('Password is required.');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match.');
+        return;
+      }
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+      }
     }
 
     if (userType === 'PARTICIPANT' && !formData.college_name.trim()) {
@@ -102,46 +119,37 @@ export const RegisterPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#0A0A0C]">
-      <div className="max-w-xl w-full bg-[#141418] border border-[#2A1416] p-8 rounded-2xl shadow-2xl space-y-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#0A0607] relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#4A050A]/15 via-transparent to-transparent pointer-events-none" />
+      <div className="max-w-xl w-full bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] shadow-2xl space-y-7 animate-scale-in relative corner-bracket-container">
+        <div className="corner-bracket-tl" />
+        <div className="corner-bracket-br" />
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <img src="/assets/logo.svg" alt="LOGIN 2026 Logo" className="h-12 w-auto mx-auto" />
-          <h1 className="text-2xl font-display font-extrabold text-[#F2F2F4] tracking-wider">REGISTER FOR LOGIN 2026</h1>
-          <p className="text-xs font-mono text-[#9A9AA2]">Select registration type to begin</p>
+          <img src="/assets/login.png" alt="LOGIN 2026 Logo" className="h-14 w-auto mx-auto drop-shadow-[0_0_15px_rgba(224,27,34,0.4)]" />
+          <h1 className="text-2xl font-display font-extrabold text-[#F2F2F4] tracking-wider">
+            {userType === 'ALUMNI' ? 'PSG MCA ALUMNI REGISTRATION' : 'REGISTER FOR LOGIN 2026'}
+          </h1>
+
         </div>
 
-        {/* Registration Type Selector */}
-        <div className="grid grid-cols-2 gap-4">
-          <button
-            type="button"
-            onClick={() => setUserType('PARTICIPANT')}
-            className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
-              userType === 'PARTICIPANT'
-                ? 'bg-[#E01B24]/10 border-[#E01B24] text-[#E01B24] shadow-lg shadow-[#E01B24]/10'
-                : 'bg-[#0A0A0C] border-[#2A1416] text-[#9A9AA2] hover:border-[#9A9AA2]'
-            }`}
-          >
-            <UserCheck className="w-6 h-6" />
-            <span className="text-xs font-bold font-display">Student Participant</span>
-            <span className="text-[10px] font-mono text-[#9A9AA2]">Compete in 11 Events</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setUserType('ALUMNI')}
-            className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
-              userType === 'ALUMNI'
-                ? 'bg-[#E8A317]/10 border-[#E8A317] text-[#E8A317] shadow-lg shadow-[#E8A317]/10'
-                : 'bg-[#0A0A0C] border-[#2A1416] text-[#9A9AA2] hover:border-[#9A9AA2]'
-            }`}
-          >
-            <GraduationCap className="w-6 h-6" />
-            <span className="text-xs font-bold font-display">PSG Alumni</span>
-            <span className="text-[10px] font-mono text-[#9A9AA2]">Guest / Attendee Record</span>
-          </button>
-        </div>
+        {/* Dedicated Type Badge Notice */}
+        {userType === 'ALUMNI' ? (
+          <div >
+           
+            
+          </div>
+        ) : (
+          <div className="bg-[#E01B24]/10 border border-[#E01B24]/40 p-3.5 rounded-xl flex items-center gap-3 text-xs text-[#E01B24]">
+            <UserCheck className="w-5 h-5 shrink-0" />
+            <div>
+              <div className="font-bold uppercase tracking-wider text-[11px]">STUDENT SYMPOSIUM PARTICIPANT</div>
+              <p className="text-[11px] text-[#9A9AA2]">Compete across 11 technical & non-technical symposium events.</p>
+            </div>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
@@ -153,7 +161,6 @@ export const RegisterPage: React.FC = () => {
 
         {/* Dynamic Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-xs font-body">
-          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[#9A9AA2] mb-1 font-semibold">Full Name *</label>
@@ -162,12 +169,11 @@ export const RegisterPage: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="e.g. Sabarish K"
+                placeholder="e.g. Arun"
                 required
-                className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
             </div>
-
             <div>
               <label className="block text-[#9A9AA2] mb-1 font-semibold">Email Address *</label>
               <input
@@ -175,9 +181,9 @@ export const RegisterPage: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="student@domain.edu"
+                placeholder="student@college.edu"
                 required
-                className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
             </div>
           </div>
@@ -192,7 +198,7 @@ export const RegisterPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="9876543210"
                 required
-                className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
             </div>
 
@@ -202,7 +208,7 @@ export const RegisterPage: React.FC = () => {
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -224,7 +230,7 @@ export const RegisterPage: React.FC = () => {
                     onChange={handleChange}
                     placeholder="PSG College of Technology"
                     required
-                    className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                   />
                 </div>
 
@@ -236,7 +242,7 @@ export const RegisterPage: React.FC = () => {
                     value={formData.department}
                     onChange={handleChange}
                     placeholder="Computer Applications (MCA)"
-                    className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                   />
                 </div>
               </div>
@@ -250,7 +256,7 @@ export const RegisterPage: React.FC = () => {
                     value={formData.roll_no}
                     onChange={handleChange}
                     placeholder="24MX101"
-                    className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                   />
                 </div>
 
@@ -260,7 +266,7 @@ export const RegisterPage: React.FC = () => {
                     name="year_of_study"
                     value={formData.year_of_study}
                     onChange={handleChange}
-                    className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                   >
                     <option value="1st Year">1st Year</option>
                     <option value="2nd Year">2nd Year</option>
@@ -284,7 +290,7 @@ export const RegisterPage: React.FC = () => {
                   value={formData.batch_year}
                   onChange={handleChange}
                   placeholder="e.g. 2018"
-                  className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                  className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                 />
               </div>
 
@@ -296,7 +302,7 @@ export const RegisterPage: React.FC = () => {
                   value={formData.place}
                   onChange={handleChange}
                   placeholder="Coimbatore / Bengaluru"
-                  className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                  className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                 />
               </div>
 
@@ -308,57 +314,76 @@ export const RegisterPage: React.FC = () => {
                   value={formData.current_organization}
                   onChange={handleChange}
                   placeholder="Company Name"
-                  className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
+                  className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                 />
               </div>
             </div>
           )}
 
-          {/* Password Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[#9A9AA2] mb-1 font-semibold">Password *</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
-              />
-            </div>
+          <label className="flex items-center gap-3 text-xs text-[#F7F2F2] font-mono cursor-pointer">
+            <input type="checkbox" name="accommodation_required" checked={formData.accommodation_required} onChange={handleChange} className="h-4 w-4 accent-[#E01B22]" />
+            <span>Accommodation required</span>
+          </label>
 
-            <div>
-              <label className="block text-[#9A9AA2] mb-1 font-semibold">Confirm Password *</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-lg px-3 py-2 text-[#F2F2F4] outline-none"
-              />
+          {/* Password Fields (Participants Only) */}
+          {userType !== 'ALUMNI' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[#9A9AA2] mb-1 font-semibold">Password *</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 pr-11 text-[#F7F2F2] outline-none input-glow"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[#9A9AA2] mb-1 font-semibold">Confirm Password *</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 pr-11 text-[#F7F2F2] outline-none input-glow"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white">
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#E01B24] hover:bg-[#FF3B30] text-[#F2F2F4] font-bold font-mono rounded-lg transition-transform hover:scale-[1.01] shadow-lg shadow-[#E01B24]/20 flex items-center justify-center gap-2 mt-4"
+            className="shimmer-btn w-full py-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-bold font-mono rounded-[2px] transition-all hover:shadow-[0_0_25px_rgba(224,27,34,0.4)] flex items-center justify-center gap-2 mt-4 text-sm disabled:opacity-60"
           >
             {loading ? 'PROCESSING...' : `COMPLETE REGISTRATION (${userType})`}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center text-xs text-[#9A9AA2]">
-          Already have an account?{' '}
-          <Link to="/login" className="text-[#E01B24] hover:underline font-bold">
-            Sign In Here
-          </Link>
-        </div>
+        {userType !== 'ALUMNI' && (
+          <div className="text-center text-xs text-[#9A9AA2]">
+            Already have an account?{' '}
+            <Link to="/login" className="text-[#E01B24] hover:underline font-bold">
+              Sign In Here
+            </Link>
+          </div>
+        )}
 
       </div>
     </div>

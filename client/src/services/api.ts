@@ -27,6 +27,9 @@ export const api = {
     profile: async () => await axiosInstance.get('/users/profile'),
     updateProfile: async (data: any) => await axiosInstance.put('/users/profile', data),
     getAll: async () => await axiosInstance.get('/users/'),
+    create: async (data: any) => await axiosInstance.post('/users/', data),
+    updateDetails: async (id: number | string, data: any) => await axiosInstance.put(`/users/${id}/details`, data),
+    delete: async (id: number | string) => await axiosInstance.delete(`/users/${id}`),
     getById: async (id: number | string) => await axiosInstance.get(`/users/${id}`),
     updateRole: async (id: number | string, role: string) => await axiosInstance.put(`/users/${id}/role`, { role }),
     updateStatus: async (id: number | string, is_active: boolean) => await axiosInstance.put(`/users/${id}/status`, { is_active }),
@@ -35,6 +38,7 @@ export const api = {
   // Events Module
   events: {
     getAll: async () => await axiosInstance.get('/events/'),
+    getAssigned: async () => await axiosInstance.get('/events/assigned'),
     getTimeline: async (date?: string) => await axiosInstance.get('/events/timeline', { params: { date } }),
     getDetails: async (id: number | string) => await axiosInstance.get(`/events/${id}`),
     create: async (data: any) => await axiosInstance.post('/events/', data),
@@ -100,5 +104,23 @@ export const api = {
   // Stats Telemetry
   stats: {
     getParticipantStats: async () => await axiosInstance.get('/stats/participants'),
+  },
+
+  // Bonafides Module
+  bonafides: {
+    getMy: async () => await axiosInstance.get('/bonafides/my'),
+    upload: async (data: any) => await axiosInstance.post('/bonafides/', data),
+    verify: async (id: number | string, data?: any) => await axiosInstance.put(`/bonafides/${id}/verify`, data),
+  },
+
+  // Exports Module (Reports)
+  exports: {
+    getEventStudents: async (eventId: number | string) => await axiosInstance.get(`/exports/event/${eventId}/students`, { responseType: 'blob' }),
+    getAttendance: async () => await axiosInstance.get('/exports/attendance', { responseType: 'blob' }),
+    getMasterRoster: async () => await axiosInstance.get('/exports/users', { responseType: 'blob' }),
+    getRegistrations: async () => await axiosInstance.get('/exports/registrations', { responseType: 'blob' }),
+    getPayments: async () => await axiosInstance.get('/exports/payments', { responseType: 'blob' }),
+    getTeams: async () => await axiosInstance.get('/exports/teams', { responseType: 'blob' }),
+    getAlumni: async () => await axiosInstance.get('/exports/alumni', { responseType: 'blob' }),
   },
 };

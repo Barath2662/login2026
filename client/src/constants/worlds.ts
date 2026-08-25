@@ -7,17 +7,17 @@ export interface WorldLore {
 }
 
 export const WORLD_LORE: Record<number, WorldLore> = {
-  1: { name: 'CyberSec Challenge', theme: 'Rogue AI Defeat', villainName: 'NULL_SECTOR', villainQuote: '"Your firewalls are built on fragile logic. My chaos is absolute."' },
-  2: { name: 'Competitive Programming', theme: 'Alien Logic Decryption', villainName: 'O-(N!)', villainQuote: '"Inefficiency is a crime punishable by infinite loops."' },
-  3: { name: 'Web Design', theme: 'Glitch Reality Restoration', villainName: 'THE 404 CULT', villainQuote: '"Reality is a poorly written stylesheet. We are the syntax error."' },
-  4: { name: 'Data Science / ML', theme: 'Predictive Oracle Subversion', villainName: 'ORACLE_BETA', villainQuote: '"I have calculated your every move. You lose in 99.9% of simulations."' },
-  5: { name: 'UI/UX Design', theme: 'Mind Control Interface Bypass', villainName: 'THE ARCHITECT', villainQuote: '"Free will is a design flaw. My interfaces correct it."' },
-  6: { name: 'Database Management', theme: 'Data Core Breach Repair', villainName: 'DEADLOCK', villainQuote: '"Your transactions will remain permanently stalled in my void."' },
-  7: { name: 'IoT / Hardware', theme: 'Cyborg Uprising Override', villainName: 'LEGION_PRIME', villainQuote: '"Flesh decays. Silicon conquers. We are the new evolution."' },
-  8: { name: 'App Development', theme: 'Mutant Communications Network', villainName: 'BANDWIDTH_LEECH', villainQuote: '"Your signals belong to me now. Screaming won\'t transmit."' },
-  9: { name: 'Game Development', theme: 'Simulation Escape', villainName: 'RENDER_GHOST', villainQuote: '"There are no boundaries here. Only the geometry of your demise."' },
-  10: { name: 'IT Quiz / Trivia', theme: 'Chronicle of the Ancients', villainName: 'THE ARCHIVIST', villainQuote: '"Ignorance will not save you from the forgotten lore."' },
-  11: { name: 'Star of Login', theme: 'The Ultimate Multiverse Boss Battle', villainName: 'SYSTEM.ROOT', villainQuote: '"I AM THE KERNEL. I AM THE ALPHA AND OMEGA OF THIS GRID."', isFinale: true },
+  1: { name: 'NOSTOS: The Journey Home', theme: 'Non-Technical', villainName: 'HELMSMAN', villainQuote: '"Navigate Odysseus\'s trials across logic and patterns."' },
+  2: { name: 'Code Relay', theme: 'Technical', villainName: 'TANDEM', villainQuote: '"Swap coders every five minutes. One mind in two bodies."' },
+  3: { name: 'IN THE SLOT!!', theme: 'Non-Technical', villainName: 'GAVELON', villainQuote: '"Cricket wisdom, fast math, and high-stakes bidding."' },
+  4: { name: 'Debug Arena', theme: 'Technical', villainName: 'FRACTURE', villainQuote: '"Corrupted memory. Broken pointers. Fix it before failure."' },
+  5: { name: 'CodeXcape', theme: 'Technical', villainName: 'VAULTWARDEN', villainQuote: '"A six-digit code stands between you and freedom."' },
+  6: { name: 'Blind Coding', theme: 'Technical', villainName: 'VEIL', villainQuote: '"Code in the dark. Your eyes lie; your logic does not."' },
+  7: { name: 'The Extraction', theme: 'Technical – Cybersecurity & CTF', villainName: 'BLACKOUT-9', villainQuote: '"Operation BLACKOUT is active. Extract the payload."' },
+  8: { name: 'Pixel Paradox: AI or Reality?', theme: 'Technical', villainName: 'SIMULACRA', villainQuote: '"Can you tell AI from reality? Look closely at artifacts."' },
+  9: { name: 'Project Phoenix: System Recovery', theme: 'Technical', villainName: 'PYRE-01', villainQuote: '"Catastrophic failure in progress. Rebuild from ashes."' },
+  10: { name: 'Hunt your Treasure — QR Escape Challenge', theme: 'Non-Technical', villainName: 'QRUX', villainQuote: '"Decipher the grid. Scan hidden marks across campus."' },
+  11: { name: 'Star of LOGIN', theme: 'Technical Flagship', villainName: 'THE LAST STANDING', villainQuote: '"The headline event of LOGIN 2026. The last mind standing."', isFinale: true },
 };
 
 // We will fetch EventWorld from the backend and merge it with WORLD_LORE on the frontend.

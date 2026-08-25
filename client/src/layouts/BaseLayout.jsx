@@ -18,7 +18,7 @@ export const BaseLayout = () => {
   
   // Only update the animation key if navigating between fundamentally different pages (not SPA sections)
   const getBaseKey = (path) => {
-    const spaPaths = ['/', '/home', '/events', '/about', '/legacy', '/contact'];
+    const spaPaths = ['/', '/home', '/events', '/about', '/legacy', '/teams', '/sponsors', '/alumni', '/contact'];
     return spaPaths.includes(path) ? 'spa-container' : path;
   };
 

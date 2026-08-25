@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { InstrumentRail } from '../components/InstrumentRail';
 import { Ticker } from '../components/Ticker';
@@ -11,9 +11,14 @@ import { useAuthStore } from '../store/authStore';
 import { api } from '../services/api';
 
 export const MainLayout: React.FC = () => {
+  const location = useLocation();
   const { token, user, setUser, resetAuth, setInitialized } = useAuthStore();
   const [showIntro, setShowIntro] = useState<boolean>(() => sessionStorage.getItem('hasPlayedIntro') !== 'true');
   const [commandSearchOpen, setCommandSearchOpen] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   useEffect(() => {
     const syncProfile = async () => {

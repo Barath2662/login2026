@@ -55,14 +55,16 @@ const userModel = sequelize.define(
         "event_coordinator",
         "junior_attendance",
         "special_user",
-        "admin"
+        "admin",
+        "super_admin",
+        "admin_power"
       ),
       allowNull: false,
       defaultValue: "student",
     },
 
     user_type: {
-      type: DataTypes.ENUM("PARTICIPANT", "ALUMNI"),
+      type: DataTypes.ENUM("PARTICIPANT", "ALUMNI", "STAFF"),
       allowNull: false,
       defaultValue: "PARTICIPANT",
     },
@@ -96,6 +98,12 @@ const userModel = sequelize.define(
     current_organization: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+
+    accommodation_required: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
 
     must_change_password: {

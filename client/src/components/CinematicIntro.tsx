@@ -1,181 +1,143 @@
-import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import * as THREE from 'three';
-import { NarrativeOverlay } from './ui/NarrativeOverlay';
-import { motion } from 'framer-motion';
-
-const ParticleExplosion = () => {
-  const pointsRef = useRef<THREE.Points>(null);
-  const { camera } = useThree();
-  
-  const particleCount = 25000;
-  
-  const { positions, velocities, colors } = useMemo(() => {
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-
-    const baseColor = new THREE.Color('#E5E5E5');
-
-    for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * 2 * Math.PI;
-      const phi = Math.acos((Math.random() * 2) - 1);
-      const r = Math.cbrt(Math.random()) * 4;
-
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      const speed = Math.random() * 20 + 10;
-      velocities[i * 3] = (x / r) * speed;
-      velocities[i * 3 + 1] = (y / r) * speed;
-      velocities[i * 3 + 2] = (z / r) * speed;
-
-      colors[i * 3] = baseColor.r;
-      colors[i * 3 + 1] = baseColor.g;
-      colors[i * 3 + 2] = baseColor.b;
-    }
-
-    return { positions, velocities, colors };
-  }, [particleCount]);
-
-  const targetColor = useMemo(() => new THREE.Color('#D90429'), []);
-
-  useFrame((state, delta) => {
-    if (!pointsRef.current) return;
-    
-    const time = state.clock.elapsedTime;
-    
-    if (time > 1.5) {
-      const geometry = pointsRef.current.geometry;
-      const positionsArray = geometry.attributes.position.array as Float32Array;
-      const colorsArray = geometry.attributes.color.array as Float32Array;
-      
-      const explosionProgress = Math.min((time - 1.5) * 0.4, 1);
-
-      for (let i = 0; i < particleCount; i++) {
-        const drag = 1 - explosionProgress * 0.95;
-        positionsArray[i * 3] += velocities[i * 3] * delta * drag;
-        positionsArray[i * 3 + 1] += velocities[i * 3 + 1] * delta * drag;
-        positionsArray[i * 3 + 2] += velocities[i * 3 + 2] * delta * drag;
-
-        if (Math.random() > 0.9) {
-           const currentColor = new THREE.Color(
-             colors[i * 3], 
-             colors[i * 3 + 1], 
-             colors[i * 3 + 2]
-           );
-           currentColor.lerp(targetColor, delta * 5);
-           
-           colorsArray[i * 3] = currentColor.r;
-           colorsArray[i * 3 + 1] = currentColor.g;
-           colorsArray[i * 3 + 2] = currentColor.b;
-           
-           colors[i * 3] = currentColor.r;
-           colors[i * 3 + 1] = currentColor.g;
-           colors[i * 3 + 2] = currentColor.b;
-        }
-      }
-      
-      geometry.attributes.position.needsUpdate = true;
-      geometry.attributes.color.needsUpdate = true;
-      
-      if (time > 1.5 && time < 2.5) {
-        const intensity = (2.5 - time) * 0.5;
-        camera.position.x = (Math.random() - 0.5) * intensity;
-        camera.position.y = (Math.random() - 0.5) * intensity;
-      } else {
-        camera.position.lerp(new THREE.Vector3(0, 0, 15), 0.1);
-      }
-    } else {
-      const scale = 1 + Math.sin(time * 10) * 0.05;
-      pointsRef.current.scale.set(scale, scale, scale);
-    }
-    
-    pointsRef.current.rotation.y += delta * 0.5;
-    pointsRef.current.rotation.x += delta * 0.3;
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-          count={particleCount}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[colors, 3]}
-          count={particleCount}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.08}
-        vertexColors
-        transparent
-        opacity={0.9}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </points>
-  );
-};
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { VolumeX, Volume2 } from 'lucide-react';
 
 export const CinematicIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleComplete = () => {
+    setIsFadingOut(true);
+    setTimeout(onComplete, 1000);
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsFadingOut(true);
-      setTimeout(onComplete, 1000); 
-    }, 7000);
+    const attemptPlay = async () => {
+      if (videoRef.current) {
+        try {
+          videoRef.current.muted = false;
+          await videoRef.current.play();
+          setIsMuted(false);
+        } catch (error) {
+          console.warn("Autoplay with audio blocked, falling back to muted autoplay.", error);
+          if (videoRef.current) {
+            videoRef.current.muted = true;
+            try {
+              await videoRef.current.play();
+              setIsMuted(true);
+            } catch (fallbackError) {
+              console.error("Muted autoplay also failed.", fallbackError);
+              handleComplete();
+            }
+          }
+        }
+      }
+    };
+    
+    attemptPlay();
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [onComplete]);
+  // Track video progress for progress bar
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleTime = () => {
+      if (video.duration) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+    video.addEventListener('timeupdate', handleTime);
+    return () => video.removeEventListener('timeupdate', handleTime);
+  }, []);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
 
   return (
     <motion.div 
       initial={{ opacity: 1 }}
       animate={{ opacity: isFadingOut ? 0 : 1 }}
       transition={{ duration: 1, ease: "easeInOut" }}
-      className="fixed inset-0 z-[100] bg-bg-primary overflow-hidden"
+      className="fixed inset-0 z-[100] bg-bg-primary overflow-hidden flex items-center justify-center"
     >
+      {/* Scanlines overlay */}
       <div className="absolute inset-0 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay pointer-events-none z-10" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050505_100%)] pointer-events-none z-10" />
 
-      <Canvas camera={{ position: [0, 0, 15], fov: 60 }} gl={{ antialias: false }}>
-        <color attach="background" args={['#050505']} />
-        <ParticleExplosion />
-      </Canvas>
+      {/* Video — responsive: contain on mobile, cover on desktop */}
+      <video
+        ref={videoRef}
+        src="/assets/intro.mp4"
+        playsInline
+        onEnded={handleComplete}
+        className="absolute inset-0 w-full h-full object-contain sm:object-cover z-0"
+        style={{ backgroundColor: '#0A0607' }}
+        onError={(e) => {
+          console.error("Video failed to load.", e);
+          handleComplete();
+        }}
+      />
       
-      {/* Glitch Overlay effects */}
+      {/* Subtle glitch overlay */}
       <motion.div 
         animate={{ 
-          opacity: [0, 0.1, 0, 0.2, 0],
-          scale: [1, 1.05, 1, 1.02, 1]
+          opacity: [0, 0.05, 0, 0.08, 0],
         }}
-        transition={{ duration: 0.5, repeat: Infinity, repeatType: "mirror", delay: 1.5 }}
-        className="absolute inset-0 bg-color-red/20 mix-blend-overlay pointer-events-none z-20" 
+        transition={{ duration: 0.8, repeat: Infinity, repeatType: "mirror", delay: 2 }}
+        className="absolute inset-0 bg-color-red/10 mix-blend-overlay pointer-events-none z-20" 
       />
 
-      <NarrativeOverlay />
+      {/* Top-right controls — responsive positioning */}
+      <div className="absolute top-4 right-4 sm:top-8 sm:right-8 z-50 flex items-center gap-3">
+        {/* Mute/Unmute */}
+        <AnimatePresence>
+          <motion.button 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            onClick={toggleMute}
+            className="flex items-center gap-2 bg-black/50 backdrop-blur-sm border border-[#2A1A1D] text-white px-3 py-2 sm:px-4 sm:py-2 rounded-[2px] hover:bg-[#E01B22]/20 hover:border-[#E01B22]/50 transition-colors font-mono text-[10px] sm:text-xs tracking-wider"
+          >
+            {isMuted ? <VolumeX size={16} className="text-[#E01B22]" /> : <Volume2 size={16} className="text-[#F7F2F2]" />}
+            <span className="hidden sm:inline">{isMuted ? 'UNMUTE' : 'MUTED'}</span>
+          </motion.button>
+        </AnimatePresence>
+      </div>
       
-      {/* Skip Button */}
-      <button 
-        onClick={() => {
-          setIsFadingOut(true);
-          setTimeout(onComplete, 500);
-        }}
-        className="absolute bottom-10 right-10 z-50 text-text-muted font-mono tracking-widest text-sm hover:text-white hover:drop-shadow-[0_0_10px_rgba(217,4,41,0.8)] transition-all cursor-pointer overflow-hidden group"
-      >
-        <span className="relative z-10">[ SKIP SEQUENCE ]</span>
-        <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-color-red transition-all duration-300 group-hover:w-full" />
-      </button>
+      {/* Bottom bar — progress + skip */}
+      <div className="absolute bottom-0 left-0 right-0 z-50">
+        {/* Progress bar */}
+        <div className="w-full h-[2px] bg-[#2A1A1D]">
+          <div 
+            className="h-full bg-[#E01B22] transition-[width] duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between px-4 py-3 sm:px-8 sm:py-4 bg-gradient-to-t from-black/80 to-transparent">
+          {/* Left branding */}
+          <div>
+            <h2 className="text-[#E01B22] font-bold text-sm sm:text-base tracking-widest uppercase font-display">LOGIN 2026</h2>
+            <p className="text-[#6B5A5C] text-[10px] sm:text-xs font-mono">35th Edition • PSG College of Technology</p>
+          </div>
+
+          {/* Skip button */}
+          <button 
+            onClick={() => {
+              if (videoRef.current) videoRef.current.pause();
+              handleComplete();
+            }}
+            className="text-[#A79798] font-mono tracking-widest text-[10px] sm:text-xs hover:text-white transition-all cursor-pointer group flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 border border-[#2A1A1D] hover:border-[#E01B22]/50 rounded-[2px] bg-black/30 backdrop-blur-sm"
+          >
+            SKIP <span className="text-[#E01B22]">▶</span>
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 };

@@ -129,7 +129,7 @@ const AdminRegistrations = () => {
                   <td className="px-6 py-4">{currentEventName}</td>
                   <td className="px-6 py-4 font-mono text-xs">{new Date(reg.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 font-mono text-xs text-center uppercase">
-                    <span className={`px-2 py-1 rounded-sm border ${reg.status === 'registered' ? 'bg-color-silver/10 text-color-silver border-color-silver/30' : 'bg-green-500/10 text-green-500 border-green-500/30'}`}>
+                    <span className={`px-2 py-1 rounded-sm border ${reg.status === 'registered' ? 'bg-color-silver/10 text-color-silver border-color-silver/30' : 'bg-red-500/10 text-red-500 border-red-500/30'}`}>
                       {reg.status}
                     </span>
                   </td>

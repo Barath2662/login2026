@@ -255,8 +255,8 @@ export const ProfileCompletionModal: FC<ProfileCompletionModalProps> = ({ isOpen
                     </div>
                   ) : bonafideUrl ? (
                     <div className="flex flex-col items-center space-y-3 z-10">
-                      <CheckCircle2 className="w-10 h-10 text-green-500" />
-                      <span className="text-xs text-green-500 font-mono">UPLOAD SECURED</span>
+                      <CheckCircle2 className="w-10 h-10 text-red-500" />
+                      <span className="text-xs text-red-500 font-mono">UPLOAD SECURED</span>
                       <button 
                         type="button"
                         onClick={(e) => {

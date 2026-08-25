@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 
+const jwtSecret = process.env.JWT_SECRET || "super_secret_jwt_key_login_2026";
+
 const verifyJwt = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -11,7 +13,7 @@ const verifyJwt = (req, res, next) => {
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "super_secret_jwt_key_login_2k26_change_in_production");
+    const decoded = jwt.verify(token, jwtSecret);
 
     req.user = decoded;
     next();

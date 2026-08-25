@@ -63,11 +63,11 @@ const PaymentVerification = () => {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 relative min-h-[80vh]">
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-zinc-500/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="mb-10">
         <GlitchText as="h1" className="text-3xl font-mono font-bold uppercase tracking-widest text-white mb-2">
-          Transaction <span className="text-yellow-500">Validation</span>
+          Transaction <span className="text-zinc-500">Validation</span>
         </GlitchText>
         <p className="text-text-secondary font-mono text-sm max-w-2xl">
           Review manual payment submissions. Verify cleared transactions or initiate refunds for anomalies.
@@ -81,16 +81,16 @@ const PaymentVerification = () => {
               placeholder="Search by Student Name or TXN ID..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-black/50 border-yellow-500/30 focus:border-yellow-500"
+              className="pl-10 bg-black/50 border-zinc-500/30 focus:border-zinc-500"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
           </div>
           
           <div className="flex gap-4 text-xs font-mono">
-            <div className="flex items-center gap-2 text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-sm border border-yellow-500/30">
+            <div className="flex items-center gap-2 text-zinc-500 bg-zinc-500/10 px-3 py-1.5 rounded-sm border border-zinc-500/30">
               <RefreshCw size={14} /> PENDING: {transactions.filter(t => t.status === 'in_progress').length}
             </div>
-            <div className="flex items-center gap-2 text-green-500 bg-green-500/10 px-3 py-1.5 rounded-sm border border-green-500/30">
+            <div className="flex items-center gap-2 text-red-500 bg-red-500/10 px-3 py-1.5 rounded-sm border border-red-500/30">
               <CheckCircle2 size={14} /> VERIFIED: {transactions.filter(t => t.status === 'successful').length}
             </div>
           </div>
@@ -122,8 +122,8 @@ const PaymentVerification = () => {
                     <td className="px-6 py-4 font-mono text-white">₹ {txn.amount}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-sm border ${
-                        txn.status === 'successful' ? 'text-green-500 bg-green-500/10 border-green-500/30' :
-                        txn.status === 'in_progress' ? 'text-yellow-500 bg-yellow-500/10 border-yellow-500/30' :
+                        txn.status === 'successful' ? 'text-red-500 bg-red-500/10 border-red-500/30' :
+                        txn.status === 'in_progress' ? 'text-zinc-500 bg-zinc-500/10 border-zinc-500/30' :
                         'text-color-danger bg-color-danger/10 border-color-danger/30'
                       }`}>
                         {txn.status === 'successful' && <CheckCircle2 size={12} />}
@@ -146,7 +146,7 @@ const PaymentVerification = () => {
                           <Button 
                             size="sm"
                             onClick={() => updateStatus(txn.id, 'successful')}
-                            className="bg-green-500 text-black hover:bg-green-400 border-none text-xs h-8"
+                            className="bg-red-500 text-black hover:bg-red-400 border-none text-xs h-8"
                           >
                             VERIFY
                           </Button>

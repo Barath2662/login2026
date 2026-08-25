@@ -9,7 +9,7 @@ export interface UserProfile {
   college_name: string | null;
   department: string | null;
   roll_no: string | null;
-  role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin';
+  role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin' | 'super_admin' | 'admin_power';
   user_type: 'PARTICIPANT' | 'ALUMNI';
   student_id_code?: string | null;
   must_change_password?: boolean;
@@ -39,12 +39,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   survivor: null,
   setInitialized: (isInitialized) => set({ isInitialized }),
   setAuth: (isAuthenticated, token, user = null) => {
+    const safeUser = user ? {
+      ...user,
+      role: String(user.role || 'student').toLowerCase(),
+    } : null;
+
     if (token) {
       localStorage.setItem('token', token);
     } else {
       localStorage.removeItem('token');
     }
-    set({ isAuthenticated, token, user: user || null, survivor: user || null });
+    set({ isAuthenticated, token, user: safeUser, survivor: safeUser });
   },
   setUser: (user) => set({ user, survivor: user }),
   setSurvivor: (survivor) => set({ user: survivor, survivor }),

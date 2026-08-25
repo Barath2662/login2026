@@ -77,7 +77,7 @@ async function testEmailAndVenueUpdates() {
   });
 
   const dashboardPage = await getPage('/dashboard', studentLogin.cookie);
-  const noticeFound = dashboardPage.body.includes('LIVE BROADCAST') || dashboardPage.body.includes('adminpsgtech@gmail.com') || dashboardPage.body.includes('CC Block Lab 4');
+  const noticeFound = dashboardPage.body.includes('LIVE BROADCAST') || dashboardPage.body.includes('login@psgtech.ac.in') || dashboardPage.body.includes('CC Block Lab 4');
   console.log('Participant Dashboard Notice Status:', dashboardPage.status, noticeFound ? '✓ Live Venue Notice Displayed!' : '✗ Notice Missing');
   if (!noticeFound) {
     console.log('Dashboard snippet:', dashboardPage.body.slice(0, 1000));

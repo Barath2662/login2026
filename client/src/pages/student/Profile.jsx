@@ -171,20 +171,20 @@ const Profile = () => {
             <div className="flex-1 flex flex-col">
               {/* Status Banner */}
               <div className={`p-4 rounded-sm border mb-6 flex items-start gap-3 ${
-                bonafideStatus === 'VERIFIED' ? 'bg-green-500/10 border-green-500/30' :
-                bonafideStatus === 'PENDING' ? 'bg-yellow-500/10 border-yellow-500/30' :
+                bonafideStatus === 'VERIFIED' ? 'bg-red-500/10 border-red-500/30' :
+                bonafideStatus === 'PENDING' ? 'bg-zinc-500/10 border-zinc-500/30' :
                 bonafideStatus === 'REJECTED' ? 'bg-color-danger/10 border-color-danger/30' :
                 'bg-color-red/10 border-color-red/30'
               }`}>
-                {bonafideStatus === 'VERIFIED' && <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={20} />}
-                {bonafideStatus === 'PENDING' && <AlertTriangle className="text-yellow-500 shrink-0 mt-0.5" size={20} />}
+                {bonafideStatus === 'VERIFIED' && <CheckCircle2 className="text-red-500 shrink-0 mt-0.5" size={20} />}
+                {bonafideStatus === 'PENDING' && <AlertTriangle className="text-zinc-500 shrink-0 mt-0.5" size={20} />}
                 {bonafideStatus === 'REJECTED' && <X className="text-color-danger shrink-0 mt-0.5" size={20} />}
                 {bonafideStatus === 'MISSING' && <AlertTriangle className="text-color-red shrink-0 mt-0.5" size={20} />}
                 
                 <div>
                   <div className={`text-sm font-bold tracking-wider font-mono uppercase mb-1 ${
-                    bonafideStatus === 'VERIFIED' ? 'text-green-500' :
-                    bonafideStatus === 'PENDING' ? 'text-yellow-500' :
+                    bonafideStatus === 'VERIFIED' ? 'text-red-500' :
+                    bonafideStatus === 'PENDING' ? 'text-zinc-500' :
                     bonafideStatus === 'REJECTED' ? 'text-color-danger' :
                     'text-color-red'
                   }`}>
