@@ -190,6 +190,7 @@ export const EventsPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [registering, setRegistering] = useState(false);
   const [teamNameInput, setTeamNameInput] = useState('');
+  const [teamMemberEmails, setTeamMemberEmails] = useState<string[]>(['']);
 
   // Category Filter state from URL query parameter ?category=
   const categoryParam = searchParams.get('category')?.toUpperCase() || 'ALL';
@@ -249,6 +250,12 @@ export const EventsPage: React.FC = () => {
     return true;
   });
 
+  useEffect(() => {
+    if (!selectedEvent) return;
+    setTeamNameInput('');
+    setTeamMemberEmails(Array.from({ length: Math.max(1, (selectedEvent.max_team_size || 2) - 1) }, () => ''));
+  }, [selectedEvent]);
+
   const handleRegisterEvent = async (event: Event) => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -260,17 +267,34 @@ export const EventsPage: React.FC = () => {
       return;
     }
 
+    const minMembers = Math.max(1, event.min_team_size || 1);
+    const maxMembers = Math.max(minMembers, event.max_team_size || minMembers);
+    const enteredTeammates = teamMemberEmails.map((email) => email.trim()).filter(Boolean);
+    const totalMembers = 1 + enteredTeammates.length;
+
+    if (event.team_type === 'TEAM' && (totalMembers < minMembers || totalMembers > maxMembers)) {
+      alert(`This event requires ${minMembers}–${maxMembers} members total. Please adjust the teammate list.`);
+      return;
+    }
+
     try {
       setRegistering(true);
 
-      await api.registrations.register({
+      const payload: any = {
         event_id: event.id,
         team_name: event.team_type === 'TEAM' ? teamNameInput : undefined,
-      });
+      };
+
+      if (event.team_type === 'TEAM') {
+        payload.team_members = enteredTeammates;
+      }
+
+      await api.registrations.register(payload);
 
       setUserRegistrations([...userRegistrations, event.id]);
       setSelectedEvent(null);
       setTeamNameInput('');
+      setTeamMemberEmails(['']);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to register for event.');
     } finally {
@@ -555,15 +579,38 @@ export const EventsPage: React.FC = () => {
 
                   {/* Team Registration Input if applicable */}
                   {selectedEvent.team_type === 'TEAM' && !isRegistered && paymentVerified && user?.role !== 'admin' && user?.role !== 'event_coordinator' && user?.role !== 'super_admin' && user?.role !== 'admin_power' && (
-                    <div className="space-y-2 pt-2 border-t border-[#2A1A1D]">
-                      <label className="mono-label text-[#F7F2F2] block">ENTER YOUR SQUAD / TEAM NAME:</label>
-                      <input
-                        type="text"
-                        value={teamNameInput}
-                        onChange={(e) => setTeamNameInput(e.target.value)}
-                        placeholder="e.g. CyberVipers"
-                        className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] px-4 py-2 text-xs font-mono text-[#F7F2F2] rounded-[2px] outline-none"
-                      />
+                    <div className="space-y-3 pt-2 border-t border-[#2A1A1D]">
+                      <div className="space-y-2">
+                        <label className="mono-label text-[#F7F2F2] block">ENTER YOUR SQUAD / TEAM NAME:</label>
+                        <input
+                          type="text"
+                          value={teamNameInput}
+                          onChange={(e) => setTeamNameInput(e.target.value)}
+                          placeholder="e.g. CyberVipers"
+                          className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] px-4 py-2 text-xs font-mono text-[#F7F2F2] rounded-[2px] outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="mono-label text-[#F7F2F2] block">TEAM MEMBER EMAILS:</label>
+                        {teamMemberEmails.map((email, index) => (
+                          <input
+                            key={`teammate-${index}`}
+                            type="email"
+                            value={email}
+                            onChange={(e) => {
+                              const next = [...teamMemberEmails];
+                              next[index] = e.target.value;
+                              setTeamMemberEmails(next);
+                            }}
+                            placeholder={`Teammate ${index + 1} email`}
+                            className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] px-4 py-2 text-xs font-mono text-[#F7F2F2] rounded-[2px] outline-none"
+                          />
+                        ))}
+                        <p className="text-[10px] font-mono text-[#A79798]">
+                          Team size must be between {Math.max(1, selectedEvent.min_team_size || 1)} and {Math.max(Math.max(1, selectedEvent.min_team_size || 1), selectedEvent.max_team_size || Math.max(1, selectedEvent.min_team_size || 1))} members total.
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -594,7 +641,14 @@ export const EventsPage: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => handleRegisterEvent(selectedEvent)}
-                        disabled={registering || (selectedEvent.team_type === 'TEAM' && !teamNameInput.trim())}
+                        disabled={
+                          registering ||
+                          (selectedEvent.team_type === 'TEAM' && (
+                            !teamNameInput.trim() ||
+                            (1 + teamMemberEmails.filter((email) => email.trim()).length) < Math.max(1, selectedEvent.min_team_size || 1) ||
+                            (1 + teamMemberEmails.filter((email) => email.trim()).length) > Math.max(Math.max(1, selectedEvent.min_team_size || 1), selectedEvent.max_team_size || Math.max(1, selectedEvent.min_team_size || 1))
+                          ))
+                        }
                         className="px-6 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] disabled:opacity-50 text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors shadow-md"
                       >
                         {registering ? 'Transmitting...' : 'Confirm Registration'}

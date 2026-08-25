@@ -76,7 +76,7 @@ const AdminUsers = () => {
             User <span className="text-color-silver">Management</span> & Roster
           </GlitchText>
           <p className="text-text-secondary font-mono text-sm">
-            Manage system access for student participants and view visiting Alumni RSVP records.
+            Manage system access for student participants and view visiting Alumni records.
           </p>
         </div>
       </div>

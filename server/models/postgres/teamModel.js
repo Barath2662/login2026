@@ -25,6 +25,12 @@ const teamModel = sequelize.define(
       },
       onDelete: "CASCADE",
     },
+
+    member_emails: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: "[]",
+    },
   },
   {
     tableName: "teams",

@@ -11,7 +11,7 @@ const seedUsers = async () => {
     const usersToSeed = [
       {
         name: "Symposium Administrator",
-        email: process.env.ADMIN_EMAIL || "admin@psgtech.ac.in",
+        email: process.env.ADMIN_EMAIL || "login@psgtech.ac.in",
         phone: "9876543210",
         password: process.env.ADMIN_PASSWORD || "admin_secret_password_2026",
         college_name: "PSG College of Technology",

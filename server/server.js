@@ -19,8 +19,22 @@ const startServer = async () => {
   try {
     await connectPostgres();
 
-    // Ensure the schema exists before API traffic hits the app.
-    await sequelize.sync({ alter: true, logging: false });
+    await sequelize.sync({ logging: false });
+
+    try {
+      const queryInterface = sequelize.getQueryInterface();
+      const teamsTable = await queryInterface.describeTable('teams').catch(() => null);
+      if (teamsTable && !Object.prototype.hasOwnProperty.call(teamsTable, 'member_emails')) {
+        await queryInterface.addColumn('teams', 'member_emails', {
+          type: sequelize.Sequelize.DataTypes.TEXT,
+          allowNull: true,
+          defaultValue: '[]',
+        });
+      }
+    } catch (columnError) {
+      console.warn('Member email column bootstrap warning:', columnError.message);
+    }
+
     console.log("Database schema synchronized");
 
     app.listen(PORT, () => {

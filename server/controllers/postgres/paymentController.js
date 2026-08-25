@@ -46,6 +46,10 @@ const createPayment = async (req, res) => {
       return res.status(409).json({ message: "This transaction reference number has already been submitted by another account." });
     }
 
+    if (!existingRef && trimmedRef.length < 4) {
+      return res.status(400).json({ message: "Transaction reference looks incomplete. Please verify the UTR or reference number." });
+    }
+
     const existing = await paymentModel.findOne({
       where: { student_id: req.user.id },
     });

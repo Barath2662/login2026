@@ -7,6 +7,51 @@ const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
 const { sendEventRegistrationConfirmation } = require("../../services/emailService");
 
+const normalizeTeamEmails = (teamMembers) => {
+  if (!Array.isArray(teamMembers)) return [];
+
+  return teamMembers
+    .map((member) => {
+      if (typeof member === "string") return member.trim().toLowerCase();
+      if (member && typeof member.email === "string") return member.email.trim().toLowerCase();
+      return "";
+    })
+    .filter(Boolean);
+};
+
+const parseStoredTeamEmails = (value) => {
+  if (!value) return [];
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((email) => String(email).trim().toLowerCase()).filter(Boolean);
+  } catch (error) {
+    return [];
+  }
+};
+
+const ensureUniqueMemberEmailList = (values) => [...new Set(values.filter(Boolean))];
+
+const getStudentRegisteredEvents = async (studentId) => {
+  const registrations = await registrationModel.findAll({
+    where: { student_id: studentId, status: "registered" },
+  });
+
+  if (!registrations.length) return [];
+
+  const eventIds = [...new Set(registrations.map((registration) => registration.event_id).filter(Boolean))];
+  const events = await eventModel.findAll({
+    where: { id: eventIds },
+  });
+
+  const eventMap = new Map(events.map((event) => [event.id, event]));
+
+  return registrations.map((registration) => ({
+    ...registration.toJSON(),
+    event: eventMap.get(registration.event_id) || null,
+  }));
+};
+
 const createRegistration = async (req, res) => {
   try {
     const student_id = req.user.id;
@@ -57,13 +102,7 @@ const createRegistration = async (req, res) => {
     }
 
     // 6. Overlap Collision Guard
-    const currentRegistrations = await registrationModel.findAll({
-      where: {
-        student_id: student_id,
-        status: "registered",
-      },
-      include: [{ model: eventModel, as: "event" }],
-    });
+    const currentRegistrations = await getStudentRegisteredEvents(student_id);
 
     let clashingEvent = null;
     const hasOverlap = currentRegistrations.some((reg) => {
@@ -92,44 +131,43 @@ const createRegistration = async (req, res) => {
     const cleanTeamName = team_name ? team_name.trim() : null;
     const isTeamEvent = event.team_type === "TEAM" || (event.max_team_size && event.max_team_size > 1);
     const verifiedTeammates = [];
+    const pendingTeammates = [];
 
     if (isTeamEvent) {
       if (!cleanTeamName) {
         return res.status(400).json({ message: "Team name is required for team events." });
       }
 
-      const minMembers = event.min_team_size || 2;
-      const maxMembers = event.max_team_size || 4;
-      const mandatoryExtra = Math.max(1, minMembers - 1);
-      const maxExtra = maxMembers - 1;
+      const minMembers = Math.max(1, event.min_team_size || 1);
+      const maxMembers = Math.max(minMembers, event.max_team_size || minMembers);
+      const memberEmails = ensureUniqueMemberEmailList(normalizeTeamEmails(team_members));
+      const totalTeamSize = 1 + memberEmails.length;
 
-      const rawMembers = Array.isArray(team_members) ? team_members : [];
-      const memberEmails = rawMembers
-        .map((m) => (typeof m === "string" ? m.trim().toLowerCase() : m && m.email ? m.email.trim().toLowerCase() : ""))
-        .filter(Boolean);
-
-      // Unique emails check
-      const uniqueEmails = [...new Set(memberEmails)];
-      if (uniqueEmails.length < memberEmails.length) {
-        return res.status(400).json({ message: "Duplicate teammate emails are not allowed." });
-      }
-
-      if (uniqueEmails.length < mandatoryExtra) {
+      if (totalTeamSize < minMembers) {
+        const missingTeammates = minMembers - totalTeamSize;
         return res.status(400).json({
-          message: `This event requires a team of ${minMembers}–${maxMembers} members. You must provide at least ${mandatoryExtra} teammate email(s).`,
+          message: `This event requires a team of ${minMembers}–${maxMembers} members. Add ${missingTeammates} more teammate${missingTeammates === 1 ? "" : "s"}.`,
         });
       }
 
-      if (uniqueEmails.length > maxExtra) {
+      if (totalTeamSize > maxMembers) {
+        const extraTeammates = totalTeamSize - maxMembers;
         return res.status(400).json({
-          message: `Maximum allowed additional teammates for this event is ${maxExtra}.`,
+          message: `This event allows up to ${maxMembers} members total. Remove ${extraTeammates} teammate${extraTeammates === 1 ? "" : "s"}.`,
         });
       }
 
       const currentUser = await userModel.findByPk(student_id);
 
-      // Verify each teammate in Database
-      for (const teammateEmail of uniqueEmails) {
+      teamRecord = await teamModel.findOne({
+        where: { created_by: student_id, name: cleanTeamName },
+      }) || await teamModel.create({
+        name: cleanTeamName,
+        created_by: student_id,
+        member_emails: JSON.stringify([]),
+      });
+
+      for (const teammateEmail of memberEmails) {
         if (currentUser && teammateEmail === currentUser.email.toLowerCase()) {
           return res.status(400).json({
             message: "Do not enter your own email as a teammate. You are automatically registered as the Team Leader.",
@@ -138,12 +176,10 @@ const createRegistration = async (req, res) => {
 
         const teammateUser = await userModel.findOne({ where: { email: teammateEmail } });
         if (!teammateUser) {
-          return res.status(400).json({
-            message: `Teammate email '${teammateEmail}' is not registered in LOGIN 2026. All team members must create an account first.`,
-          });
+          pendingTeammates.push(teammateEmail);
+          continue;
         }
 
-        // Check if teammate is already registered
         const teammateExistingReg = await registrationModel.findOne({
           where: { student_id: teammateUser.id, event_id, status: "registered" },
         });
@@ -157,33 +193,42 @@ const createRegistration = async (req, res) => {
         verifiedTeammates.push(teammateUser);
       }
 
-      // Create Team record
-      teamRecord = await teamModel.create({
-        name: cleanTeamName,
-        created_by: student_id,
+      await teamMemberModel.findOrCreate({
+        where: { team_id: teamRecord.id, student_id: student_id },
+        defaults: { team_id: teamRecord.id, student_id: student_id, status: "active" },
       });
 
-      // Add leader to team
-      await teamMemberModel.create({
-        team_id: teamRecord.id,
-        student_id: student_id,
+      const storedPendingEmails = parseStoredTeamEmails(teamRecord.member_emails);
+      const mergedPendingEmails = ensureUniqueMemberEmailList([
+        ...storedPendingEmails,
+        ...pendingTeammates,
+      ]);
+
+      await teamRecord.update({
+        member_emails: JSON.stringify(mergedPendingEmails),
       });
 
-      // Add teammates to team and register them for event
       for (const teammate of verifiedTeammates) {
-        await teamMemberModel.create({
-          team_id: teamRecord.id,
-          student_id: teammate.id,
+        await teamMemberModel.findOrCreate({
+          where: { team_id: teamRecord.id, student_id: teammate.id },
+          defaults: { team_id: teamRecord.id, student_id: teammate.id, status: "active" },
         });
 
-        await registrationModel.create({
-          student_id: teammate.id,
-          event_id,
-          status: "registered",
-          team_name: cleanTeamName,
+        const teammateRegistration = await registrationModel.findOne({
+          where: { student_id: teammate.id, event_id },
         });
 
-        // Send confirmation email to teammate
+        if (teammateRegistration) {
+          await teammateRegistration.update({ status: "registered", team_name: cleanTeamName });
+        } else {
+          await registrationModel.create({
+            student_id: teammate.id,
+            event_id,
+            status: "registered",
+            team_name: cleanTeamName,
+          });
+        }
+
         sendEventRegistrationConfirmation(teammate, event, teamRecord);
       }
     }
@@ -197,6 +242,15 @@ const createRegistration = async (req, res) => {
           status: "registered",
           team_name: cleanTeamName,
         });
+
+    if (teamRecord) {
+      const pendingStored = parseStoredTeamEmails(teamRecord.member_emails);
+      const activeMembers = ensureUniqueMemberEmailList([
+        ...pendingStored,
+        ...(verifiedTeammates.map((member) => member.email.toLowerCase())),
+      ]);
+      await teamRecord.update({ member_emails: JSON.stringify(activeMembers) });
+    }
 
     // 9. Send Confirmation Email to Leader
     const leaderUser = await userModel.findByPk(student_id);
@@ -221,7 +275,66 @@ const getMyRegistrations = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    return res.json(registrations);
+    const enrichedRegistrations = await Promise.all(
+      registrations.map(async (registration) => {
+        const payload = registration.toJSON();
+
+        if (!payload.team_name) {
+          payload.team_members = [];
+          return payload;
+        }
+
+        let teamRecord = await teamModel.findOne({
+          where: { created_by: req.user.id, name: payload.team_name },
+        });
+
+        if (!teamRecord) {
+          const teamMembership = await teamMemberModel.findOne({
+            where: { student_id: req.user.id, status: "active" },
+          });
+          if (teamMembership) {
+            teamRecord = await teamModel.findByPk(teamMembership.team_id);
+          }
+        }
+
+        if (!teamRecord) {
+          payload.team_members = [{ email: "team member not registered", status: "pending" }];
+          return payload;
+        }
+
+        const teamMembers = await teamMemberModel.findAll({
+          where: { team_id: teamRecord.id, status: "active" },
+          include: [{ model: userModel, as: "student" }],
+        });
+
+        const registeredMembers = teamMembers
+          .filter((member) => member.student)
+          .map((member) => ({
+            id: member.student.id,
+            name: member.student.name,
+            email: member.student.email,
+            status: "registered",
+          }));
+
+        const pendingEmails = parseStoredTeamEmails(teamRecord.member_emails).filter((email) => {
+          const lowered = email.toLowerCase();
+          return !registeredMembers.some((member) => member.email && member.email.toLowerCase() === lowered);
+        });
+
+        payload.team_members = [
+          ...registeredMembers,
+          ...pendingEmails.map((email) => ({
+            name: null,
+            email,
+            status: "pending",
+          })),
+        ];
+
+        return payload;
+      })
+    );
+
+    return res.json(enrichedRegistrations);
   } catch (error) {
     return res.status(500).json({
       message: "Failed to fetch registrations",

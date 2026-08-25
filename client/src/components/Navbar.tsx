@@ -196,18 +196,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
             </Link>
 
             <Link
-              to="/legacy"
-              className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
-                location.pathname === '/legacy' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'
-              }`}
-            >
-              Legacy
-              <span className={`absolute bottom-0 left-0 right-0 h-[2px] bg-[#E01B22] transition-all duration-300 ${
-                location.pathname === '/legacy' ? 'w-full opacity-100' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-              }`} />
-            </Link>
-
-            <Link
               to="/alumni"
               className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
                 location.pathname === '/alumni' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'

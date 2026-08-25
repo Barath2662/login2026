@@ -126,7 +126,7 @@ export const RegisterPage: React.FC = () => {
         <div className="text-center space-y-2">
           <img src="/assets/login.png" alt="LOGIN 2026 Logo" className="h-14 w-auto mx-auto drop-shadow-[0_0_15px_rgba(224,27,34,0.4)]" />
           <h1 className="text-2xl font-display font-extrabold text-[#F2F2F4] tracking-wider">
-            {userType === 'ALUMNI' ? 'PSG MCA ALUMNI RSVP REGISTRATION' : 'REGISTER FOR LOGIN 2026'}
+            {userType === 'ALUMNI' ? 'PSG MCA ALUMNI REGISTRATION' : 'REGISTER FOR LOGIN 2026'}
           </h1>
           <p className="text-xs font-mono text-[#9A9AA2]">
             {userType === 'ALUMNI' ? 'Inform the organizing committee of your visit' : 'Student Operative / Participant Registration'}
@@ -135,14 +135,9 @@ export const RegisterPage: React.FC = () => {
 
         {/* Dedicated Type Badge Notice */}
         {userType === 'ALUMNI' ? (
-          <div className="bg-[#E8A317]/10 border border-[#E8A317]/40 p-4 rounded-xl flex items-start gap-3 text-xs text-[#E8A317]">
-            <Info className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <div className="font-bold uppercase tracking-wider text-[11px] mb-1">ALUMNI VISIT RSVP RECORD</div>
-              <p className="text-[11px] leading-relaxed opacity-90">
-                This registration is strictly an RSVP information form to inform the organizing committee of your visit to LOGIN 2026 (18–19 Sep). Alumni do not compete in student symposium events.
-              </p>
-            </div>
+          <div >
+           
+            
           </div>
         ) : (
           <div className="bg-[#E01B24]/10 border border-[#E01B24]/40 p-3.5 rounded-xl flex items-center gap-3 text-xs text-[#E01B24]">

@@ -27,7 +27,6 @@ export const GlitchNavbar = () => {
     { name: 'Home', path: '/home' },
     { name: 'Enter the Multiverse', path: '/events' },
     { name: 'About', path: '/about' },
-    { name: 'Legacy', path: '/legacy' },
     { name: 'Alumni', path: '/alumni' },
     { name: 'Contact', path: '/contact' },
   ];

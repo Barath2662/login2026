@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { api } from '../services/api';
-import { CreditCard, ShieldCheck, Clock, XCircle, AlertCircle, ExternalLink, QrCode, Trash2 } from 'lucide-react';
+import { CreditCard, ShieldCheck, Clock, XCircle, AlertCircle, ExternalLink, QrCode, Trash2, ArrowRight } from 'lucide-react';
 
 interface PaymentInfo {
   id: number;
@@ -13,6 +14,7 @@ interface PaymentInfo {
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
 
   const [payment, setPayment] = useState<PaymentInfo | null>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -312,10 +314,15 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* 4. Registered Events Data Table (§9.4) */}
         <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] space-y-6">
-          <div className="flex items-center justify-between border-b border-[#2A1A1D] pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#2A1A1D] pb-4">
             <h2 className="text-lg font-display font-bold text-[#F7F2F2]">MY REGISTERED EVENTS ({registrations.length})</h2>
+            <button
+              onClick={() => navigate('/events')}
+              className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-[10px] font-bold uppercase rounded-[2px] transition-colors"
+            >
+              Register Now <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           {registrations.length === 0 ? (
@@ -336,12 +343,31 @@ export const DashboardPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-[#2A1A1D]">
                   {registrations.map((reg) => (
-                    <tr key={reg.id} className="hover:bg-[#1A1114] transition-colors">
+                    <tr key={reg.id} className="hover:bg-[#1A1114] transition-colors align-top">
                       <td className="p-3 font-bold text-[#F7F2F2]">{reg.event?.name || `Event #${reg.event_id}`}</td>
                       <td className="p-3 font-mono text-[#A79798]">
                         Day {reg.event?.day || 18} Sep ({reg.event?.start_time?.slice(0, 5)} - {reg.event?.end_time?.slice(0, 5)})
                       </td>
-                      <td className="p-3 font-mono text-[#E08A17]">{reg.team_name || '-'}</td>
+                      <td className="p-3 font-mono text-[#E08A17]">
+                        <div className="space-y-1">
+                          <div>{reg.team_name || '-'}</div>
+                          {Array.isArray(reg.team_members) && reg.team_members.length > 0 && (
+                            <div className="space-y-1 text-[10px] text-[#A79798]">
+                              {reg.team_members.map((member, idx) => (
+                                <div key={`${member.email || member.name || 'member'}-${idx}`} className="flex items-center gap-2">
+                                  <span className={member.status === 'pending' ? 'text-[#E08A17]' : 'text-[#1FA971]'}>
+                                    {member.status === 'pending' ? '•' : '✓'}
+                                  </span>
+                                  <span>
+                                    {member.email || member.name || 'team member not registered'}
+                                    {member.status === 'pending' && ' (team member not registered)'}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-3 text-[#A79798]">{reg.event?.venue || 'TBA'}</td>
                       <td className="p-3">
                         <button

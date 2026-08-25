@@ -69,13 +69,13 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose }) => {
         await api.auth.register({ email, password, name });
         // Auto login after successful registration
         const res = await api.auth.login({ email, password });
-        setAuth(true, res.data.token);
+        setAuth(true, res.data.token, res.data.user);
         setSurvivor(res.data.user);
         onClose();
         window.location.href = '/home';
       } else {
         const res = await api.auth.login({ email, password });
-        setAuth(true, res.data.token);
+        setAuth(true, res.data.token, res.data.user);
         setSurvivor(res.data.user);
         onClose();
         
