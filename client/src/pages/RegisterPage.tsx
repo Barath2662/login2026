@@ -136,12 +136,7 @@ export const RegisterPage: React.FC = () => {
         </div>
 
         {/* Dedicated Type Badge Notice */}
-        {userType === 'ALUMNI' ? (
-          <div >
-           
-            
-          </div>
-        ) : (
+        {userType === 'PARTICIPANT' && (
           <div className="bg-[#E01B24]/10 border border-[#E01B24]/40 p-3.5 rounded-xl flex items-center gap-3 text-xs text-[#E01B24]">
             <UserCheck className="w-5 h-5 shrink-0" />
             <div>
@@ -151,9 +146,11 @@ export const RegisterPage: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-[#E08A17]/10 border border-[#E08A17]/40 p-3 text-xs text-[#E08A17] font-mono">
-          Bonafide certificate is mandatory to participate in LOGIN 2026.
-        </div>
+        {userType === 'PARTICIPANT' && (
+          <div className="bg-[#E08A17]/10 border border-[#E08A17]/40 p-3 text-xs text-[#E08A17] font-mono">
+            Bonafide certificate is mandatory to participate in LOGIN 2026.
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
