@@ -50,9 +50,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
           
           {/* Logo / Brand */}
           <Link to="/" className="flex items-center gap-3 group select-none">
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* LOGIN Logo (Circled & White themed) */}
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#2A1A1D]/60 bg-white flex items-center justify-center p-1 shadow-md transition-transform group-hover:scale-105 duration-300">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border border-[#2A1A1D]/60 bg-white flex items-center justify-center p-1 shadow-md transition-transform group-hover:scale-105 duration-300">
                 <img 
                   src="/assets/login.png" 
                   alt="LOGIN Logo" 
@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
                 />
               </div>
               {/* CAA Logo (Circled & White themed) */}
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#2A1A1D]/60 bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border border-[#2A1A1D]/60 bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
                 <img 
                   src="/assets/logos/caa.png" 
                   alt="CAA Logo" 
@@ -123,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
               <div className="flex items-center gap-2">
                 <Link
                   to="/alumni"
-                  className="px-3.5 py-2 border border-[#E01B22]/40 hover:border-[#E01B22] text-[#F7F2F2] hover:bg-[#E01B22]/5 font-bold text-[10px] sm:text-[11px] font-mono uppercase tracking-wider rounded-[2px] transition-all"
+                  className="hidden sm:inline-flex px-3.5 py-2 border border-[#E01B22]/40 hover:border-[#E01B22] text-[#F7F2F2] hover:bg-[#E01B22]/5 font-bold text-[10px] sm:text-[11px] font-mono uppercase tracking-wider rounded-[2px] transition-all"
                 >
                   ALUMNI SIGNUP
                 </Link>
