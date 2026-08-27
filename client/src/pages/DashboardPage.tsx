@@ -132,6 +132,9 @@ export const DashboardPage: React.FC = () => {
                 )}
               </div>
               <p className="text-xs text-[#A79798] font-mono mt-1.5">{user?.email} • {user?.college_name || 'PSG Tech'}</p>
+              {user?.user_type === 'PARTICIPANT' && (
+                <p className="text-[11px] text-[#E08A17] font-mono mt-2">Bonafide certificate is mandatory to participate.</p>
+              )}
             </div>
           </div>
 

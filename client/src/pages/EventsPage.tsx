@@ -397,7 +397,7 @@ export const EventsPage: React.FC = () => {
 
                       {/* Short Crisp Summary */}
                       <p className="text-xs text-[#A79798] leading-relaxed mt-3 line-clamp-3">
-                        {detail.shortDesc}
+                        {event.description || detail.shortDesc}
                       </p>
 
                       {/* Skills Tags */}
