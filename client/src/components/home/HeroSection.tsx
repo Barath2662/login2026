@@ -15,7 +15,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
     <section 
       className="relative min-h-screen flex flex-col justify-between items-center text-center overflow-hidden"
       style={{
-        backgroundImage: "url('/assets/hero.png')",
+        backgroundImage: "url('/assets/hero.webp')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
