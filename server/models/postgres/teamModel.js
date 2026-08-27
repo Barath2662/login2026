@@ -1,6 +1,7 @@
-﻿const { DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../config/db/postgres");
 const userModel = require("./userModel");
+const eventModel = require("./eventModel");
 
 const teamModel = sequelize.define(
   "teams",
@@ -16,6 +17,16 @@ const teamModel = sequelize.define(
       allowNull: false,
     },
 
+    event_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: eventModel,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -24,6 +35,12 @@ const teamModel = sequelize.define(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+
+    status: {
+      type: DataTypes.ENUM("forming", "registered", "disbanded"),
+      allowNull: false,
+      defaultValue: "forming",
     },
 
     member_emails: {

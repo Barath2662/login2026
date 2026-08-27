@@ -1,46 +1,71 @@
-﻿const { Op } = require("sequelize");
+const { Op } = require("sequelize");
 const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
+const teamInvitationModel = require("../../models/postgres/teamInvitationModel");
 const teamRequestModel = require("../../models/postgres/teamRequestModel");
+const eventModel = require("../../models/postgres/eventModel");
 const userModel = require("../../models/postgres/userModel");
+const notificationModel = require("../../models/postgres/notificationModel");
+const { sendEmail } = require("../../services/emailService");
 
-const listStudents = async (req, res) => {
+// ──────────────────────────────────────────────
+// Helper: create in-app notification
+// ──────────────────────────────────────────────
+const notify = async (userId, type, title, message) => {
   try {
-    const search = req.query.search || "";
-
-    const students = await userModel.findAll({
-      where: {
-        role: "student",
-        is_active: true,
-        [Op.or]: [
-          { name: { [Op.iLike]: `%${search}%` } },
-          { college_name: { [Op.iLike]: `%${search}%` } },
-          { department: { [Op.iLike]: `%${search}%` } },
-          { roll_no: { [Op.iLike]: `%${search}%` } },
-        ],
-      },
-      attributes: ["id", "name", "college_name", "department", "roll_no"],
-      order: [["name", "ASC"]],
-    });
-
-    return res.json(students);
-  } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch students", error: error.message });
+    await notificationModel.create({ user_id: userId, type, title, message });
+  } catch (err) {
+    console.warn("Notification creation failed:", err.message);
   }
 };
 
+// ──────────────────────────────────────────────
+// 1. Create Team
+// ──────────────────────────────────────────────
 const createTeam = async (req, res) => {
   try {
-    const { name, studentId } = req.body;
+    const userId = req.user.id;
+    const { name, event_id } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Team name is required" });
+    }
+
+    if (!event_id) {
+      return res.status(400).json({ message: "Event ID is required" });
+    }
+
+    const event = await eventModel.findByPk(event_id);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (event.team_type !== "TEAM" && event.max_team_size <= 1) {
+      return res.status(400).json({ message: "This is not a team event" });
+    }
+
+    // Check if user already has a team for this event
+    const existingMembership = await teamMemberModel.findOne({
+      where: { student_id: userId, status: "accepted" },
+      include: [{ model: teamModel, as: "team", where: { event_id } }],
+    });
+
+    if (existingMembership) {
+      return res.status(409).json({ message: "You already belong to a team for this event" });
+    }
 
     const team = await teamModel.create({
-      name: name || `Team-${studentId}`,
-      created_by: studentId,
+      name: name.trim(),
+      event_id,
+      created_by: userId,
+      status: "forming",
     });
 
     await teamMemberModel.create({
       team_id: team.id,
-      student_id: studentId,
+      student_id: userId,
+      role: "leader",
+      status: "accepted",
     });
 
     return res.status(201).json({ message: "Team created", team });
@@ -49,124 +74,659 @@ const createTeam = async (req, res) => {
   }
 };
 
-const sendRequest = async (req, res) => {
+// ──────────────────────────────────────────────
+// 2. Get My Teams
+// ──────────────────────────────────────────────
+const getMyTeams = async (req, res) => {
   try {
-    const senderId = req.user.id;
-    console.log(req.body);
-    const { receiver_id, team_id } = req.body;
-
-    if (senderId === Number(receiver_id)) {
-      return res.status(400).json({ message: "You cannot send a request to yourself" });
-    }
-
-    const receiver = await userModel.findOne({
-      where: { id: receiver_id, role: "student", is_active: true },
+    const memberships = await teamMemberModel.findAll({
+      where: { student_id: req.user.id, status: "accepted" },
+      include: [
+        {
+          model: teamModel,
+          as: "team",
+          include: [
+            { model: eventModel, as: "event", attributes: ["id", "name", "team_type", "min_team_size", "max_team_size", "category", "status"] },
+            {
+              model: teamMemberModel,
+              as: "members",
+              where: { status: "accepted" },
+              required: false,
+              include: [{ model: userModel, as: "student", attributes: ["id", "name", "login_id", "college_name", "department"] }],
+            },
+          ],
+        },
+      ],
     });
 
-    if (!receiver) {
-      return res.status(404).json({ message: "Registered student not found" });
-    }
-
-    const existing = await teamRequestModel.findOne({
-      where: {
-        sender_id: senderId,
-        receiver_id,
-        team_id,
-        status: "pending",
-      },
-    });
-
-    if (existing) {
-      return res.status(409).json({ message: "Request already pending" });
-    }
-
-    const request = await teamRequestModel.create({
-      sender_id: senderId,
-      receiver_id,
-      team_id
-    });
-
-    return res.status(201).json({ message: "Team request sent", request });
+    return res.json(memberships);
   } catch (error) {
-    return res.status(500).json({ message: "Failed to send team request", error: error.message });
+    return res.status(500).json({ message: "Failed to fetch teams", error: error.message });
   }
 };
 
-const getRequests = async (req, res) => {
+// ──────────────────────────────────────────────
+// 3. Get Team Details
+// ──────────────────────────────────────────────
+const getTeamDetails = async (req, res) => {
+  try {
+    const team = await teamModel.findByPk(req.params.teamId, {
+      include: [
+        { model: eventModel, as: "event" },
+        { model: userModel, as: "creator", attributes: ["id", "name", "login_id"] },
+        {
+          model: teamMemberModel,
+          as: "members",
+          include: [{ model: userModel, as: "student", attributes: ["id", "name", "login_id", "college_name", "department"] }],
+        },
+        {
+          model: teamInvitationModel,
+          as: "invitations",
+          where: { status: "pending" },
+          required: false,
+          include: [{ model: userModel, as: "receiver", attributes: ["id", "name", "login_id"] }],
+        },
+        {
+          model: teamRequestModel,
+          as: "joinRequests",
+          where: { status: "pending" },
+          required: false,
+          include: [{ model: userModel, as: "sender", attributes: ["id", "name", "login_id", "college_name"] }],
+        },
+      ],
+    });
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    return res.json(team);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch team", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 4. Get Available Teams for an Event
+// ──────────────────────────────────────────────
+const getEventTeams = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await eventModel.findByPk(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    const teams = await teamModel.findAll({
+      where: { event_id: eventId, status: "forming" },
+      include: [
+        { model: userModel, as: "creator", attributes: ["id", "name", "login_id", "college_name"] },
+        {
+          model: teamMemberModel,
+          as: "members",
+          where: { status: "accepted" },
+          required: false,
+          include: [{ model: userModel, as: "student", attributes: ["id", "name", "login_id"] }],
+        },
+      ],
+    });
+
+    // Filter teams that still have capacity
+    const availableTeams = teams.filter((team) => {
+      const memberCount = team.members ? team.members.length : 0;
+      return memberCount < event.max_team_size;
+    });
+
+    return res.json(availableTeams);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch teams", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 5. Invite Member by LOGIN ID
+// ──────────────────────────────────────────────
+const inviteMember = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { teamId } = req.params;
+    const { login_id } = req.body;
+
+    if (!login_id) {
+      return res.status(400).json({ message: "LOGIN ID is required" });
+    }
+
+    // Verify team exists and user is the leader
+    const team = await teamModel.findByPk(teamId, {
+      include: [
+        { model: eventModel, as: "event" },
+        { model: teamMemberModel, as: "members", where: { status: "accepted" }, required: false },
+      ],
+    });
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    const leaderMember = await teamMemberModel.findOne({
+      where: { team_id: teamId, student_id: userId, role: "leader", status: "accepted" },
+    });
+
+    if (!leaderMember) {
+      return res.status(403).json({ message: "Only the team leader can invite members" });
+    }
+
+    // Find the target user
+    const targetUser = await userModel.findOne({
+      where: { login_id: login_id.toUpperCase().trim(), is_active: true },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ message: `No participant found with LOGIN ID: ${login_id}` });
+    }
+
+    if (targetUser.id === userId) {
+      return res.status(400).json({ message: "You cannot invite yourself" });
+    }
+
+    // Check team capacity
+    const currentMemberCount = team.members ? team.members.length : 0;
+    if (currentMemberCount >= team.event.max_team_size) {
+      return res.status(400).json({ message: "Team is already at maximum capacity" });
+    }
+
+    // Check if target user already in a team for this event
+    const existingMembership = await teamMemberModel.findOne({
+      where: { student_id: targetUser.id, status: "accepted" },
+      include: [{ model: teamModel, as: "team", where: { event_id: team.event_id } }],
+    });
+
+    if (existingMembership) {
+      return res.status(409).json({ message: "This participant is already in a team for this event" });
+    }
+
+    // Check for existing pending invitation
+    const existingInvite = await teamInvitationModel.findOne({
+      where: { team_id: teamId, receiver_id: targetUser.id, status: "pending" },
+    });
+
+    if (existingInvite) {
+      return res.status(409).json({ message: "An invitation is already pending for this participant" });
+    }
+
+    const invitation = await teamInvitationModel.create({
+      team_id: teamId,
+      sender_id: userId,
+      receiver_id: targetUser.id,
+      status: "pending",
+    });
+
+    // In-app notification
+    const sender = await userModel.findByPk(userId, { attributes: ["name", "login_id"] });
+    await notify(
+      targetUser.id,
+      "team_invitation",
+      "Team Invitation",
+      `${sender.login_id} (${sender.name}) invited you to join team "${team.name}" for ${team.event.name}.`
+    );
+
+    // Email notification
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    sendEmail({
+      to: targetUser.email,
+      subject: `[LOGIN 2026] Team Invitation: ${team.name}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; max-width: 600px; margin: 0 auto; border: 1px solid #2A1A1D;">
+          <h1 style="color: #E01B22; font-size: 20px;">Team Invitation</h1>
+          <p>Hello <strong>${targetUser.name}</strong>,</p>
+          <p><strong>${sender.name}</strong> (${sender.login_id}) has invited you to join:</p>
+          <div style="background: #130C0E; border: 1px solid #E01B22; padding: 16px; margin: 16px 0;">
+            <p style="margin: 4px 0;"><strong>Team:</strong> ${team.name}</p>
+            <p style="margin: 4px 0;"><strong>Event:</strong> ${team.event.name}</p>
+          </div>
+          <p><a href="${frontendUrl}/dashboard/teams" style="display: inline-block; padding: 10px 24px; background: #E01B22; color: #F7F2F2; text-decoration: none; font-weight: bold;">Accept Invitation</a></p>
+        </div>
+      `,
+    });
+
+    return res.status(201).json({ message: "Invitation sent", invitation });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to send invitation", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 6. Respond to Invitation (Accept/Decline)
+// ──────────────────────────────────────────────
+const respondToInvitation = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["accepted", "declined"].includes(status)) {
+      return res.status(400).json({ message: "Status must be 'accepted' or 'declined'" });
+    }
+
+    const invitation = await teamInvitationModel.findOne({
+      where: { id, receiver_id: userId, status: "pending" },
+      include: [
+        { model: teamModel, as: "team", include: [{ model: eventModel, as: "event" }] },
+      ],
+    });
+
+    if (!invitation) {
+      return res.status(404).json({ message: "Pending invitation not found" });
+    }
+
+    if (status === "accepted") {
+      // Check if user already in a team for this event
+      const existingMembership = await teamMemberModel.findOne({
+        where: { student_id: userId, status: "accepted" },
+        include: [{ model: teamModel, as: "team", where: { event_id: invitation.team.event_id } }],
+      });
+
+      if (existingMembership) {
+        return res.status(409).json({ message: "You are already in a team for this event" });
+      }
+
+      // Check team capacity
+      const memberCount = await teamMemberModel.count({
+        where: { team_id: invitation.team_id, status: "accepted" },
+      });
+
+      if (memberCount >= invitation.team.event.max_team_size) {
+        return res.status(400).json({ message: "Team is already at maximum capacity" });
+      }
+
+      await teamMemberModel.create({
+        team_id: invitation.team_id,
+        student_id: userId,
+        role: "member",
+        status: "accepted",
+      });
+    }
+
+    await invitation.update({ status });
+
+    // Notify the sender
+    const receiver = await userModel.findByPk(userId, { attributes: ["name", "login_id"] });
+    await notify(
+      invitation.sender_id,
+      "invitation_response",
+      status === "accepted" ? "Invitation Accepted" : "Invitation Declined",
+      `${receiver.login_id} (${receiver.name}) ${status} your invitation to join "${invitation.team.name}".`
+    );
+
+    return res.json({ message: `Invitation ${status}`, invitation });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to respond to invitation", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 7. Get My Invitations
+// ──────────────────────────────────────────────
+const getMyInvitations = async (req, res) => {
+  try {
+    const invitations = await teamInvitationModel.findAll({
+      where: { receiver_id: req.user.id, status: "pending" },
+      include: [
+        {
+          model: teamModel,
+          as: "team",
+          include: [{ model: eventModel, as: "event", attributes: ["id", "name", "category"] }],
+        },
+        { model: userModel, as: "sender", attributes: ["id", "name", "login_id", "college_name"] },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.json(invitations);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch invitations", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 8. Send Join Request
+// ──────────────────────────────────────────────
+const sendJoinRequest = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { teamId } = req.params;
+
+    const team = await teamModel.findByPk(teamId, {
+      include: [
+        { model: eventModel, as: "event" },
+        { model: teamMemberModel, as: "members", where: { status: "accepted" }, required: false },
+      ],
+    });
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    if (team.status !== "forming") {
+      return res.status(400).json({ message: "This team is no longer accepting members" });
+    }
+
+    // Check capacity
+    const memberCount = team.members ? team.members.length : 0;
+    if (memberCount >= team.event.max_team_size) {
+      return res.status(400).json({ message: "Team is at maximum capacity" });
+    }
+
+    // Check if user already in a team for this event
+    const existingMembership = await teamMemberModel.findOne({
+      where: { student_id: userId, status: "accepted" },
+      include: [{ model: teamModel, as: "team", where: { event_id: team.event_id } }],
+    });
+
+    if (existingMembership) {
+      return res.status(409).json({ message: "You are already in a team for this event" });
+    }
+
+    // Check for existing pending request
+    const existingRequest = await teamRequestModel.findOne({
+      where: { sender_id: userId, team_id: teamId, status: "pending" },
+    });
+
+    if (existingRequest) {
+      return res.status(409).json({ message: "A join request is already pending" });
+    }
+
+    const request = await teamRequestModel.create({
+      sender_id: userId,
+      receiver_id: team.created_by,
+      team_id: teamId,
+      status: "pending",
+    });
+
+    // Notify the team leader
+    const sender = await userModel.findByPk(userId, { attributes: ["name", "login_id"] });
+    await notify(
+      team.created_by,
+      "join_request",
+      "Join Request",
+      `${sender.login_id} (${sender.name}) wants to join your team "${team.name}" for ${team.event.name}.`
+    );
+
+    return res.status(201).json({ message: "Join request sent", request });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to send join request", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 9. Respond to Join Request (Leader Only)
+// ──────────────────────────────────────────────
+const respondToJoinRequest = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["accepted", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Status must be 'accepted' or 'rejected'" });
+    }
+
+    const request = await teamRequestModel.findOne({
+      where: { id, receiver_id: userId, status: "pending" },
+      include: [
+        { model: teamModel, as: "team", include: [{ model: eventModel, as: "event" }] },
+      ],
+    });
+
+    if (!request) {
+      return res.status(404).json({ message: "Pending join request not found" });
+    }
+
+    if (status === "accepted") {
+      // Check if requester already in a team for this event
+      const existingMembership = await teamMemberModel.findOne({
+        where: { student_id: request.sender_id, status: "accepted" },
+        include: [{ model: teamModel, as: "team", where: { event_id: request.team.event_id } }],
+      });
+
+      if (existingMembership) {
+        await request.update({ status: "rejected" });
+        return res.status(409).json({ message: "This participant is already in a team for this event" });
+      }
+
+      // Check team capacity
+      const memberCount = await teamMemberModel.count({
+        where: { team_id: request.team_id, status: "accepted" },
+      });
+
+      if (memberCount >= request.team.event.max_team_size) {
+        return res.status(400).json({ message: "Team is already at maximum capacity" });
+      }
+
+      await teamMemberModel.create({
+        team_id: request.team_id,
+        student_id: request.sender_id,
+        role: "member",
+        status: "accepted",
+      });
+    }
+
+    await request.update({ status });
+
+    // Notify the requester
+    await notify(
+      request.sender_id,
+      "join_request_response",
+      status === "accepted" ? "Join Request Accepted" : "Join Request Rejected",
+      `Your request to join team "${request.team.name}" has been ${status}.`
+    );
+
+    return res.json({ message: `Join request ${status}`, request });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to respond to join request", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// 10. Get Join Requests for My Teams
+// ──────────────────────────────────────────────
+const getMyJoinRequests = async (req, res) => {
   try {
     const requests = await teamRequestModel.findAll({
-      where: {
-        [Op.or]: [
-          { sender_id: req.user.id },
-          { receiver_id: req.user.id },
-        ],
-      },
+      where: { receiver_id: req.user.id, status: "pending" },
       include: [
-        { model: userModel, as: "sender", attributes: ["id", "name", "college_name", "department"] },
-        { model: userModel, as: "receiver", attributes: ["id", "name", "college_name", "department"] },
+        {
+          model: teamModel,
+          as: "team",
+          include: [{ model: eventModel, as: "event", attributes: ["id", "name"] }],
+        },
+        { model: userModel, as: "sender", attributes: ["id", "name", "login_id", "college_name", "department"] },
       ],
       order: [["createdAt", "DESC"]],
     });
 
     return res.json(requests);
   } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch team requests", error: error.message });
+    return res.status(500).json({ message: "Failed to fetch join requests", error: error.message });
   }
 };
 
-const respondToRequest = async (req, res) => {
+// ──────────────────────────────────────────────
+// 11. Register Team for Event
+// ──────────────────────────────────────────────
+const registerTeamForEvent = async (req, res) => {
   try {
-    const request = await teamRequestModel.findOne({
-      where: {
-        id: req.params.id,
-        receiver_id: req.user.id,
-        status: "pending",
-      },
+    const userId = req.user.id;
+    const { teamId } = req.params;
+
+    const team = await teamModel.findByPk(teamId, {
+      include: [
+        { model: eventModel, as: "event" },
+        { model: teamMemberModel, as: "members", where: { status: "accepted" }, required: false },
+      ],
     });
 
-    if (!request) {
-      return res.status(404).json({ message: "Pending request not found" });
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
     }
 
-    const { status } = req.body;
-
-    if (!["accepted", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Status must be accepted or rejected" });
-    }
-
-    await request.update({ status });
-
-    if(status=="accepted"){
-      await teamMemberModel.create({
-      team_id: request.team_id,
-      student_id: req.user.id,
+    // Only leader can register
+    const leaderMember = await teamMemberModel.findOne({
+      where: { team_id: teamId, student_id: userId, role: "leader", status: "accepted" },
     });
+
+    if (!leaderMember) {
+      return res.status(403).json({ message: "Only the team leader can register the team" });
     }
 
-    return res.json({ message: `Request ${status}`, request });
+    const memberCount = team.members ? team.members.length : 0;
+    if (memberCount < team.event.min_team_size) {
+      return res.status(400).json({
+        message: `Team needs at least ${team.event.min_team_size} members. Currently has ${memberCount}.`,
+      });
+    }
+
+    // Register all team members for the event
+    const registrationModel = require("../../models/postgres/registrationModel");
+    const { sendEventRegistrationConfirmation } = require("../../services/emailService");
+
+    for (const member of team.members) {
+      const existingReg = await registrationModel.findOne({
+        where: { student_id: member.student_id, event_id: team.event_id },
+      });
+
+      if (existingReg) {
+        await existingReg.update({ status: "registered", team_name: team.name });
+      } else {
+        await registrationModel.create({
+          student_id: member.student_id,
+          event_id: team.event_id,
+          status: "registered",
+          team_name: team.name,
+        });
+      }
+
+      // Notification & email
+      const user = await userModel.findByPk(member.student_id);
+      if (user) {
+        await notify(
+          user.id,
+          "event_registration",
+          "Event Registration Confirmed",
+          `Your team "${team.name}" has been registered for ${team.event.name}.`
+        );
+        sendEventRegistrationConfirmation(user, team.event, team);
+      }
+    }
+
+    await team.update({ status: "registered" });
+
+    return res.json({ message: "Team registered for event", team });
   } catch (error) {
-    return res.status(500).json({ message: "Failed to respond to request", error: error.message });
+    return res.status(500).json({ message: "Failed to register team", error: error.message });
   }
 };
 
-const getMyTeam = async (req, res) => {
+// ──────────────────────────────────────────────
+// 12. Remove Member / Leave Team
+// ──────────────────────────────────────────────
+const removeMember = async (req, res) => {
   try {
-    const membership = await teamMemberModel.findOne({
-      where: { student_id: req.user.id, status: "active" },
-      include: [{ model: teamModel, as: "team" }],
+    const userId = req.user.id;
+    const { teamId, userId: targetUserId } = req.params;
+
+    const team = await teamModel.findByPk(teamId);
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    const isLeader = await teamMemberModel.findOne({
+      where: { team_id: teamId, student_id: userId, role: "leader", status: "accepted" },
     });
 
-    return res.json(membership || null);
+    const isSelf = Number(targetUserId) === userId;
+
+    if (!isSelf && !isLeader) {
+      return res.status(403).json({ message: "Only the team leader can remove members" });
+    }
+
+    if (isLeader && isSelf) {
+      return res.status(400).json({ message: "Team leader cannot leave. Transfer leadership or disband the team." });
+    }
+
+    const member = await teamMemberModel.findOne({
+      where: { team_id: teamId, student_id: targetUserId, status: "accepted" },
+    });
+
+    if (!member) {
+      return res.status(404).json({ message: "Member not found in this team" });
+    }
+
+    await member.update({ status: "left" });
+
+    // Notify the removed member
+    if (!isSelf) {
+      await notify(
+        Number(targetUserId),
+        "team_removal",
+        "Removed from Team",
+        `You have been removed from team "${team.name}".`
+      );
+    }
+
+    return res.json({ message: "Member removed from team" });
   } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch team", error: error.message });
+    return res.status(500).json({ message: "Failed to remove member", error: error.message });
+  }
+};
+
+// ──────────────────────────────────────────────
+// Legacy: Search students
+// ──────────────────────────────────────────────
+const listStudents = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+
+    const where = {
+      role: "student",
+      is_active: true,
+    };
+
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${search}%` } },
+        { login_id: { [Op.iLike]: `%${search}%` } },
+        { college_name: { [Op.iLike]: `%${search}%` } },
+        { department: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    const students = await userModel.findAll({
+      where,
+      attributes: ["id", "name", "login_id", "college_name", "department"],
+      order: [["name", "ASC"]],
+      limit: 20,
+    });
+
+    return res.json(students);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch students", error: error.message });
   }
 };
 
 module.exports = {
-  listStudents,
   createTeam,
-  sendRequest,
-  getRequests,
-  respondToRequest,
-  getMyTeam,
+  getMyTeams,
+  getTeamDetails,
+  getEventTeams,
+  inviteMember,
+  respondToInvitation,
+  getMyInvitations,
+  sendJoinRequest,
+  respondToJoinRequest,
+  getMyJoinRequests,
+  registerTeamForEvent,
+  removeMember,
+  listStudents,
 };

@@ -460,8 +460,9 @@ export const AdminPage: React.FC = () => {
                   <tr>
                     <th className="p-3.5">USER</th>
                     <th className="p-3.5">REFERENCE / UTR</th>
+                    <th className="p-3.5">DETAILS</th>
                     <th className="p-3.5">STATUS</th>
-                    <th className="p-3.5">STUDENT ID</th>
+                    <th className="p-3.5">RECEIPT</th>
                     <th className="p-3.5">ACTIONS</th>
                   </tr>
                 </thead>
@@ -471,16 +472,35 @@ export const AdminPage: React.FC = () => {
                       <td className="p-3.5">
                         <div className="font-bold text-[#F7F2F2]">{p.student?.name || p.user?.name || 'Participant'}</div>
                         <div className="text-[10px] text-[#A79798] font-mono">{p.student?.email || p.user?.email || '-'}</div>
+                        <div className="text-[10px] font-mono text-[#1FA971] font-bold mt-0.5">{p.student?.student_id_code || p.user?.student_id_code || '-'}</div>
                       </td>
                       <td className="p-3.5 font-mono text-[#E08A17] font-bold">{p.transaction_reference}</td>
+                      <td className="p-3.5 font-mono text-[10px]">
+                        <div className="text-[#F7F2F2]">₹{p.amount || '150'}</div>
+                        <div className="text-[#A79798]">{p.payment_date || '-'}</div>
+                        <div className="text-[#A79798]">{p.payment_method || 'UPI'}</div>
+                      </td>
                       <td className="p-3.5">
-                        <span className={`px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold ${
-                          p.status === 'VERIFIED' ? 'chip-verified' : p.status === 'REJECTED' ? 'chip-rejected' : 'chip-pending'
+                        <span className={`px-2.5 py-0.5 rounded-[2px] font-mono text-[10px] font-bold ${
+                          p.status === 'VERIFIED' ? 'bg-[#1FA971]/20 text-[#1FA971] border border-[#1FA971]' : p.status === 'REJECTED' ? 'bg-[#4A050A] text-[#FF2A2A] border border-[#E01B22]' : 'bg-[#E08A17]/20 text-[#E08A17] border border-[#E08A17]'
                         }`}>
                           {p.status}
                         </span>
+                        {p.status === 'REJECTED' && p.rejection_reason && (
+                          <div className="text-[9px] text-[#FF2A2A] mt-1 max-w-[120px] truncate" title={p.rejection_reason}>
+                            {p.rejection_reason}
+                          </div>
+                        )}
                       </td>
-                      <td className="p-3.5 font-mono text-[#1FA971] font-bold">{p.student?.student_id_code || p.user?.student_id_code || '-'}</td>
+                      <td className="p-3.5">
+                        {p.receipt_url ? (
+                          <a href={p.receipt_url.startsWith('http') ? p.receipt_url : `${api.defaults?.baseURL?.replace('/api', '') || 'http://localhost:5000'}${p.receipt_url}`} target="_blank" rel="noreferrer" className="text-[#6366F1] hover:text-[#818CF8] font-mono text-[10px] font-bold flex items-center gap-1 transition-colors">
+                            VIEW RECEIPT ↗
+                          </a>
+                        ) : (
+                          <span className="text-[#6B5A5C] text-[10px] font-mono">-</span>
+                        )}
+                      </td>
                       <td className="p-3.5">
                         <div className="flex items-center gap-2">
                           <button onClick={() => editManagedUser(p.student || p.user)} title="Edit participant details" className="p-1.5 text-[#E08A17] hover:text-[#F7F2F2]"><Pencil className="w-3.5 h-3.5" /></button>

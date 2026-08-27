@@ -54,14 +54,11 @@ export const MainLayout: React.FC = () => {
           {/* Header & Navigation */}
           <Navbar onOpenCommandSearch={() => setCommandSearchOpen(true)} />
 
-          {/* Instrument Rail (Fixed left on viewports >= 1280px) */}
-          <InstrumentRail />
-
           {/* Announcements Ticker (Renders ONLY if active announcements exist) */}
           <Ticker />
 
-          {/* Main Content Area (offset by 72px left on XL screens for instrument rail) */}
-          <main className="flex-grow xl:pl-[72px]">
+          {/* Main Content Area */}
+          <main className="flex-grow">
             <Outlet />
           </main>
 

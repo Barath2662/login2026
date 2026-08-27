@@ -21,14 +21,14 @@ export const InstrumentRail: React.FC = () => {
   // Determine section name from route path
   const getSectionName = () => {
     const path = location.pathname;
-    if (path === '/') return 'SYS // COMMAND HERO';
-    if (path === '/events') return 'SYS // ARENA MATRIX';
-    if (path === '/timeline') return 'SYS // SCHEDULE GRID';
-    if (path === '/about') return 'SYS // SYMPOSIUM INFO';
-    if (path === '/dashboard') return 'SYS // SURVIVOR DOSSIER';
-    if (path === '/coordinator') return 'SYS // EVENT CONTROL';
-    if (path === '/admin') return 'SYS // ADMIN PANEL';
-    return 'SYS // LOGIN 2026';
+    if (path === '/') return 'NODE // 01 • SECTOR // PSG • STATUS // ONLINE';
+    if (path === '/events') return 'NODE // 02 • SECTOR // EVENTS • STATUS // ONLINE';
+    if (path === '/timeline') return 'NODE // 03 • SECTOR // SCHEDULE • STATUS // ONLINE';
+    if (path === '/about') return 'NODE // 04 • SECTOR // ABOUT • STATUS // ONLINE';
+    if (path === '/dashboard') return 'NODE // 05 • SECTOR // PORTAL • STATUS // ACTIVE';
+    if (path === '/coordinator') return 'NODE // 06 • SECTOR // CONTROL • STATUS // ACTIVE';
+    if (path === '/admin') return 'NODE // 07 • SECTOR // ADMIN • STATUS // ACTIVE';
+    return 'SYSTEM // ONLINE • EDITION // 35 • STATUS // ACTIVE';
   };
 
   return (
@@ -43,7 +43,10 @@ export const InstrumentRail: React.FC = () => {
       </div>
 
       {/* Vertical Section Name */}
-      <div className="writing-mode-vertical rotate-180 font-mono text-[10px] tracking-[0.2em] text-[#6B5A5C] uppercase font-bold whitespace-nowrap">
+      <div 
+        className="font-mono text-[9px] sm:text-[10px] tracking-[0.25em] text-[#6B5A5C] uppercase font-bold whitespace-nowrap"
+        style={{ writingMode: 'vertical-rl' }}
+      >
         {getSectionName()}
       </div>
 

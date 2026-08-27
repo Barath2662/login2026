@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Search, Menu, X, LogOut, LayoutDashboard, Shield, Trophy } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, Shield, Trophy } from 'lucide-react';
 
 interface NavbarProps {
   onOpenCommandSearch?: () => void;
@@ -13,6 +13,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 48) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     resetAuth();
@@ -20,327 +33,237 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
     navigate('/login');
   };
 
+  const handleNavClick = (sectionId: string, path: string) => {
+    setMobileMenuOpen(false);
+    if (location.pathname === '/' || location.pathname === '/home') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`${path}#${sectionId}`);
+    }
+  };
+
+  const isHomepage = location.pathname === '/' || location.pathname === '/home';
+
   return (
-    <header className="sticky top-0 z-40 bg-[#0A0607]/95 backdrop-blur border-b border-[#2A1A1D] w-full shadow-2xl">
-      <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 py-3.5 flex flex-col items-center gap-3 overflow-x-hidden">
-        
-        {/* Top Centered Brand Header: [Logo 1][Logo 2] PSG COLLEGE OF TECHNOLOGY ... [Logo 3][Logo 4] */}
-        <div className="w-full flex items-center justify-between md:justify-center gap-0 sm:gap-8 relative min-h-[76px] md:pr-44">
+    <div className={`w-full z-40 ${isHomepage && !isSticky ? 'absolute top-0 left-0 right-0 bg-transparent' : 'relative bg-[#0A0607]'}`}>
+      
+      {/* ── NAVBAR: MAIN NAVIGATION BAR ── */}
+      <header className={`w-full transition-all duration-300 z-40 ${
+        isSticky 
+          ? 'fixed top-0 left-0 right-0 bg-[#130C0E]/95 backdrop-blur border-b border-[#2A1A1D] shadow-2xl' 
+          : isHomepage 
+          ? 'bg-transparent border-b border-transparent' 
+          : 'relative bg-[#130C0E] border-b border-[#2A1A1D]'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-5 sm:py-6 flex items-center justify-between">
           
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            className="md:hidden p-2 text-[#A79798] hover:text-white"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          {/* Central Logo & Brand Header Cluster */}
-          <div className="flex items-center justify-center gap-0.5 sm:gap-8 min-w-0 flex-1 mx-auto md:w-full md:max-w-4xl px-0 sm:px-2">
-            {/* Left 2 Logos */}
-            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
-              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
-                <img src="/assets/logos/psg-main.png" alt="PSG Main" className="max-w-full max-h-full object-contain" />
+          {/* Logo / Brand */}
+          <Link to="/" className="flex items-center gap-3 group select-none">
+            <div className="flex items-center gap-2 shrink-0">
+              {/* LOGIN Logo (Circled & White themed) */}
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#2A1A1D]/60 bg-white flex items-center justify-center p-1 shadow-md transition-transform group-hover:scale-105 duration-300">
+                <img 
+                  src="/assets/login.png" 
+                  alt="LOGIN Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
-                <img src="/assets/logos/psg-100.png" alt="PSG 100 Yrs" className="max-w-full max-h-full object-contain" />
+              {/* CAA Logo (Circled & White themed) */}
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-[#2A1A1D]/60 bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
+                <img 
+                  src="/assets/logos/caa.png" 
+                  alt="CAA Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
             </div>
+            <span className="font-mono font-black text-lg sm:text-2xl tracking-wider text-[#F7F2F2] group-hover:text-[#E01B22] transition-colors drop-shadow-[0_0_10px_rgba(224,27,34,0.3)]">
+              LOGIN<span className="text-[#E01B22]">2K26</span>
+            </span>
+          </Link>
 
-            {/* Center Brand Text — Wide, Prominent & Distinct */}
-            <Link to="/" className="flex flex-col items-center text-center px-0 sm:px-6 group min-w-0 flex-1">
-              <span className="text-[8px] sm:text-sm md:text-base font-mono font-extrabold tracking-[0.04em] sm:tracking-[0.22em] text-[#E8DCDC] uppercase leading-tight drop-shadow whitespace-nowrap">
-                PSG COLLEGE OF TECHNOLOGY
-              </span>
-              <span className="hidden sm:block text-[10px] sm:text-xs md:text-sm font-mono font-bold tracking-[0.18em] text-[#FF2A2A] uppercase leading-tight mt-1">
-                COMPUTER APPLICATIONS ASSOCIATION PRESENTS
-              </span>
-              <span className="font-mono font-black text-base sm:text-3xl md:text-4xl tracking-wider text-white group-hover:text-[#FF2A2A] transition-colors leading-tight mt-1 drop-shadow-[0_0_18px_rgba(224,27,34,0.5)]">
-                LOGIN<span className="text-[#FF2A2A]">2K26</span>
-              </span>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8 font-mono text-xs tracking-wider">
+            <Link
+              to="/home"
+              className={`relative py-1 px-2.5 transition-colors uppercase font-bold ${
+                location.pathname === '/home' || location.pathname === '/' ? 'text-[#E01B22]' : 'text-[#A79798] hover:text-white'
+              }`}
+            >
+              Home
             </Link>
+            <Link
+              to="/events"
+              className={`relative py-1 px-2.5 transition-colors uppercase font-bold ${
+                location.pathname === '/events' ? 'text-[#E01B22]' : 'text-[#A79798] hover:text-white'
+              }`}
+            >
+              Events
+            </Link>
+            <Link
+              to="/gallery"
+              className={`relative py-1 px-2.5 transition-colors uppercase font-bold ${
+                location.pathname === '/gallery' ? 'text-[#E01B22]' : 'text-[#A79798] hover:text-white'
+              }`}
+            >
+              Gallery
+            </Link>
+            <Link
+              to="/coordinators"
+              className={`relative py-1 px-2.5 transition-colors uppercase font-bold ${
+                location.pathname === '/coordinators' ? 'text-[#E01B22]' : 'text-[#A79798] hover:text-white'
+              }`}
+            >
+              Coordinators
+            </Link>
+            <Link
+              to="/contact"
+              className={`relative py-1 px-2.5 transition-colors uppercase font-bold ${
+                location.pathname === '/contact' ? 'text-[#E01B22]' : 'text-[#A79798] hover:text-white'
+              }`}
+            >
+              Contact
+            </Link>
+          </nav>
 
-            {/* Right 2 Logos */}
-            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
-              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
-                <img src="/assets/logos/psg-75.png" alt="PSG 75 Yrs" className="max-w-full max-h-full object-contain" />
-              </div>
-              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
-                <img src="/assets/logos/caa.png" alt="CAA Logo" className="max-w-full max-h-full object-contain" />
-              </div>
-            </div>
-          </div>
-
-          {/* Top Right Corner Profile Button / Sign In */}
-          <div className="hidden md:flex items-center absolute right-0 top-1/2 -translate-y-1/2">
+          {/* Right Action Button */}
+          <div className="flex items-center gap-3">
             {!isAuthenticated ? (
-              <Link
-                to="/login"
-                className="px-4 py-1.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-black font-bold text-xs font-mono uppercase tracking-wider rounded-[2px] transition-all shadow-[0_0_15px_rgba(224,27,34,0.4)] hover:shadow-[0_0_25px_rgba(224,27,34,0.7)] hover:scale-105"
-              >
-                SURVIVOR LOGIN
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/alumni"
+                  className="px-3.5 py-2 border border-[#E01B22]/40 hover:border-[#E01B22] text-[#F7F2F2] hover:bg-[#E01B22]/5 font-bold text-[10px] sm:text-[11px] font-mono uppercase tracking-wider rounded-[2px] transition-all"
+                >
+                  ALUMNI SIGNUP
+                </Link>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-bold text-[11px] font-mono uppercase tracking-wider rounded-[2px] transition-all shadow-[0_0_15px_rgba(224,27,34,0.3)] hover:shadow-[0_0_25px_rgba(224,27,34,0.6)]"
+                >
+                  LOGIN
+                </Link>
+              </div>
             ) : (
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 bg-[#130C0E] hover:bg-[#1A1114] border border-[#2A1A1D] px-3 py-1.5 rounded-[2px] transition-colors shadow-md"
+                  className="flex items-center gap-2 bg-[#0A0607] hover:bg-[#130C0E] border border-[#2A1A1D] px-3 py-1.5 rounded-[2px] transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-full bg-[#7E0910] border border-[#FF2A2A] flex items-center justify-center font-bold text-xs text-[#F7F2F2]">
+                  <div className="w-6 h-6 rounded-full bg-[#7E0910] border border-[#E01B22] flex items-center justify-center font-bold text-[10px] text-[#F7F2F2]">
                     {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </div>
-                  <span className="text-xs font-semibold text-[#F7F2F2]">{user?.name || 'User'}</span>
+                  <span className="text-xs font-semibold text-[#F7F2F2] hidden sm:inline">{user?.name?.split(' ')[0] || 'User'}</span>
                 </button>
 
-                {/* User Dropdown Menu */}
+                {/* User Dropdown */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-[#130C0E] border border-[#2A1A1D] rounded-[2px] shadow-2xl py-2 z-50 animate-in fade-in">
+                  <div className="absolute right-0 mt-2 w-52 bg-[#130C0E] border border-[#2A1A1D] rounded-[2px] shadow-2xl py-2 z-50 animate-fade-in text-xs">
                     <div className="px-4 py-2 border-b border-[#2A1A1D]">
-                      <p className="text-xs font-bold text-[#F7F2F2]">{user?.name}</p>
+                      <p className="font-bold text-[#F7F2F2] truncate">{user?.name}</p>
                       <p className="text-[10px] text-[#A79798] truncate">{user?.email}</p>
-                      {user?.student_id_code && (
-                        <p className="text-[10px] font-mono text-[#1FA971] font-bold mt-1">ID: {user.student_id_code}</p>
-                      )}
                     </div>
-
-                    {/* Role-Specific Primary Dashboard Link */}
+                    
                     {user?.role === 'admin' || user?.role === 'super_admin' ? (
-                      <Link
-                        to="/admin"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-mono font-bold text-[#FF2A2A] hover:bg-[#1A1114] transition-colors"
-                      >
-                        <Shield className="w-4 h-4 text-[#FF2A2A]" />
-                        COMMAND CENTER
+                      <Link to="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2.5 font-mono text-[#E01B22] hover:bg-[#0A0607]">
+                        <Shield className="w-4 h-4" /> COMMAND CENTER
                       </Link>
                     ) : user?.role === 'admin_power' ? (
-                      <Link
-                        to="/admin/access-control"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-mono font-bold text-[#FF2A2A] hover:bg-[#1A1114] transition-colors"
-                      >
-                        <Shield className="w-4 h-4 text-[#FF2A2A]" />
-                        SUPER ADMIN CONTROL
+                      <Link to="/admin/access-control" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2.5 font-mono text-[#E01B22] hover:bg-[#0A0607]">
+                        <Shield className="w-4 h-4" /> SUPER ADMIN
                       </Link>
                     ) : user?.role === 'event_coordinator' ? (
-                      <Link
-                        to="/coordinator"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-mono font-bold text-[#E08A17] hover:bg-[#1A1114] transition-colors"
-                      >
-                        <Trophy className="w-4 h-4 text-[#E08A17]" />
-                        COORDINATOR HUB
+                      <Link to="/coordinator" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2.5 font-mono text-[#E08A17] hover:bg-[#0A0607]">
+                        <Trophy className="w-4 h-4" /> COORDINATOR HUB
                       </Link>
                     ) : (
-                      <Link
-                        to="/dashboard"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-mono font-bold text-[#F7F2F2] hover:bg-[#1A1114] transition-colors"
-                      >
-                        <LayoutDashboard className="w-4 h-4 text-[#E01B22]" />
-                        SURVIVOR DOSSIER
+                      <Link to="/dashboard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2.5 font-mono text-[#F7F2F2] hover:bg-[#0A0607]">
+                        <LayoutDashboard className="w-4 h-4 text-[#E01B22]" /> MY DASHBOARD
                       </Link>
                     )}
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-xs text-[#FF2A2A] hover:bg-[#1A1114] transition-colors text-left border-t border-[#2A1A1D] mt-1"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
+                    <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-[#FF2A2A] hover:bg-[#0A0607] text-left border-t border-[#2A1A1D] mt-1">
+                      <LogOut className="w-4 h-4" /> Sign Out
                     </button>
                   </div>
                 )}
               </div>
             )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-[#A79798] hover:text-white"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
+
         </div>
 
-        {/* Bottom Horizontal Centered Navigation Bar */}
-        <div className="w-full hidden md:flex items-center justify-center border-t border-[#2A1A1D]/60 pt-2 pb-0.5">
-          <nav className="flex items-center space-x-5 lg:space-x-8 font-mono text-xs tracking-wider">
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[#130C0E] border-t border-[#2A1A1D] px-4 py-4 space-y-3">
             <Link
               to="/home"
-              className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
-                location.pathname === '/home' || location.pathname === '/' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'
-              }`}
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-xs font-mono font-bold text-[#F7F2F2] hover:text-[#E01B22]"
             >
-              Home
-              <span className={`absolute bottom-0 left-0 right-0 h-[2px] bg-[#E01B22] transition-all duration-300 ${
-                location.pathname === '/home' || location.pathname === '/' ? 'w-full opacity-100' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-              }`} />
+              HOME
             </Link>
-
             <Link
               to="/events"
-              className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
-                location.pathname === '/events' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'
-              }`}
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-xs font-mono font-bold text-[#F7F2F2] hover:text-[#E01B22]"
             >
-              Events
-              <span className={`absolute bottom-0 left-0 right-0 h-[2px] bg-[#E01B22] transition-all duration-300 ${
-                location.pathname === '/events' ? 'w-full opacity-100' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-              }`} />
+              EVENTS
             </Link>
-
             <Link
-              to="/timeline"
-              className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
-                location.pathname === '/timeline' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'
-              }`}
+              to="/gallery"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-xs font-mono font-bold text-[#F7F2F2] hover:text-[#E01B22]"
             >
-              Timeline
-              <span className={`absolute bottom-0 left-0 right-0 h-[2px] bg-[#E01B22] transition-all duration-300 ${
-                location.pathname === '/timeline' ? 'w-full opacity-100' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-              }`} />
+              GALLERY
             </Link>
-
             <Link
-              to="/alumni"
-              className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
-                location.pathname === '/alumni' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'
-              }`}
+              to="/coordinators"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-xs font-mono font-bold text-[#F7F2F2] hover:text-[#E01B22]"
             >
-              Alumni
-              <span className={`absolute bottom-0 left-0 right-0 h-[2px] bg-[#E01B22] transition-all duration-300 ${
-                location.pathname === '/alumni' ? 'w-full opacity-100' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-              }`} />
+              COORDINATORS
             </Link>
-
             <Link
-              to="/about"
-              className={`relative py-1 px-3 rounded-sm transition-all duration-200 uppercase font-bold group ${
-                location.pathname === '/about' ? 'text-[#E01B22] bg-[#E01B22]/10' : 'text-[#A79798] hover:text-white hover:bg-white/5'
-              }`}
+              to="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-xs font-mono font-bold text-[#F7F2F2] hover:text-[#E01B22]"
             >
-              About
-              <span className={`absolute bottom-0 left-0 right-0 h-[2px] bg-[#E01B22] transition-all duration-300 ${
-                location.pathname === '/about' ? 'w-full opacity-100' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-              }`} />
+              CONTACT
             </Link>
 
-            {/* Command Search Trigger */}
-            {onOpenCommandSearch && (
-              <button
-                onClick={onOpenCommandSearch}
-                className="flex items-center gap-2 bg-[#130C0E] hover:bg-[#1A1114] border border-[#2A1A1D] text-[#A79798] px-3 py-1 rounded-[2px] text-xs font-mono transition-colors"
-                title="Search events and routes"
+            {!isAuthenticated && (
+              <Link
+                to="/alumni"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-xs font-mono font-bold text-[#E01B22] pt-2 border-t border-[#2A1A1D]"
               >
-                <Search className="w-3.5 h-3.5" />
-                <span>Search</span>
-                <kbd className="bg-[#0A0607] px-1 py-0.2 rounded-[2px] text-[10px] text-[#F7F2F2] border border-[#2A1A1D]">Ctrl+K</kbd>
-              </button>
+                ALUMNI SIGNUP
+              </Link>
             )}
-          </nav>
-        </div>
-      </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0A0607] border-b border-[#2A1A1D] px-4 pt-4 pb-6 space-y-4">
-          <Link
-            to="/home"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
-          >
-            Home
-          </Link>
-          <Link
-            to="/events"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
-          >
-            Events (11)
-          </Link>
-          <Link
-            to="/timeline"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
-          >
-            Timeline (18-19 Sep)
-          </Link>
-          <Link
-            to="/about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
-          >
-            About Fest
-          </Link>
-          <Link
-            to="/alumni"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
-          >
-            Alumni
-          </Link>
-
-          {isAuthenticated ? (
-            <div className="pt-4 border-t border-[#2A1A1D] space-y-2">
-              {user?.role === 'admin' && (
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center py-2.5 bg-[#FF2A2A]/10 text-[#FF2A2A] rounded-[2px] font-mono text-xs font-bold border border-[#FF2A2A]/20"
-                >
-                  ADMIN CONTROL PANEL
-                </Link>
-              )}
-              {user?.role === 'admin_power' && (
-                <Link
-                  to="/admin/access-control"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center py-2.5 bg-[#FF2A2A]/10 text-[#FF2A2A] rounded-[2px] font-mono text-xs font-bold border border-[#FF2A2A]/20"
-                >
-                  SUPER ADMIN DASHBOARD
-                </Link>
-              )}
-              {user?.role === 'event_coordinator' && (
-                <Link
-                  to="/coordinator"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center py-2.5 bg-[#E08A17]/10 text-[#E08A17] rounded-[2px] font-mono text-xs font-bold border border-[#E08A17]/20"
-                >
-                  COORDINATOR PORTAL
-                </Link>
-              )}
+            {isAuthenticated && (
               <Link
                 to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block w-full text-center py-2.5 bg-[#130C0E] text-[#F7F2F2] rounded-[2px] font-mono text-xs font-bold"
+                className="block text-xs font-mono font-bold text-[#E01B22] pt-2 border-t border-[#2A1A1D]"
               >
                 GO TO DASHBOARD
               </Link>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="block w-full text-center py-2.5 bg-[#2A1A1D] text-[#FF2A2A] rounded-[2px] font-mono text-xs font-bold"
-              >
-                SIGN OUT
-              </button>
-            </div>
-          ) : (
-            <div className="pt-4 border-t border-[#2A1A1D] flex gap-3">
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 text-center py-2.5 bg-[#130C0E] text-[#F7F2F2] rounded-[2px] font-mono text-xs font-bold"
-              >
-                SIGN IN
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 text-center py-2.5 bg-[#E01B22] text-[#F7F2F2] rounded-[2px] font-mono text-xs font-bold"
-              >
-                REGISTER
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
-    </header>
+            )}
+          </div>
+        )}
+      </header>
+    </div>
   );
 };

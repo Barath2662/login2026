@@ -74,6 +74,12 @@ const userModel = sequelize.define(
       allowNull: true,
     },
 
+    login_id: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      unique: true,
+    },
+
     student_id_code: {
       type: DataTypes.STRING,
       allowNull: true,

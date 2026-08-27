@@ -1,4 +1,4 @@
-﻿const { DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../config/db/postgres");
 const teamModel = require("./teamModel");
 const userModel = require("./userModel");
@@ -32,10 +32,16 @@ const teamMemberModel = sequelize.define(
       onDelete: "CASCADE",
     },
 
-    status: {
-      type: DataTypes.ENUM("active", "left"),
+    role: {
+      type: DataTypes.ENUM("leader", "member"),
       allowNull: false,
-      defaultValue: "active",
+      defaultValue: "member",
+    },
+
+    status: {
+      type: DataTypes.ENUM("pending", "accepted", "rejected", "left"),
+      allowNull: false,
+      defaultValue: "accepted",
     },
   },
   {

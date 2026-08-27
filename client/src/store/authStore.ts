@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 export interface UserProfile {
   id: number;
+  login_id: string | null;
   name: string;
   fullName?: string;
   email: string;
@@ -10,12 +11,13 @@ export interface UserProfile {
   department: string | null;
   roll_no: string | null;
   role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin' | 'super_admin' | 'admin_power';
-  user_type: 'PARTICIPANT' | 'ALUMNI';
+  user_type: 'PARTICIPANT' | 'ALUMNI' | 'STAFF';
   student_id_code?: string | null;
   must_change_password?: boolean;
   is_active: boolean;
   hasPaidFee?: boolean;
   registrations?: any[];
+  accommodation_required?: boolean;
 }
 
 interface AuthState {

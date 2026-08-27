@@ -2,30 +2,35 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
 
-  const [email, setEmail] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [useEmail, setUseEmail] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!email.trim() || !password) {
-      setError('Email and password are required.');
+    if (!loginId.trim() || !password) {
+      setError(useEmail ? 'Email and password are required.' : 'LOGIN ID and password are required.');
       return;
     }
 
     try {
       setLoading(true);
-      const res = await api.auth.login({ email, password });
+      const payload = useEmail
+        ? { email: loginId.trim(), password }
+        : { loginId: loginId.trim().toUpperCase(), password };
+
+      const res = await api.auth.login(payload);
       const { token, user } = res.data;
 
       setAuth(true, token, user);
@@ -42,7 +47,7 @@ export const LoginPage: React.FC = () => {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password.');
+      setError(err.response?.data?.message || 'Invalid credentials.');
     } finally {
       setLoading(false);
     }
@@ -62,7 +67,7 @@ export const LoginPage: React.FC = () => {
             <ShieldCheck className="w-7 h-7 text-[#E01B22]" />
           </div>
           <h1 className="text-xl sm:text-2xl font-display font-extrabold text-[#F7F2F2] tracking-wider">PORTAL AUTHENTICATION</h1>
-          <p className="text-xs font-mono text-[#6B5A5C]">Sign in to access your LOGIN 2026 account</p>
+          <p className="text-xs font-mono text-[#6B5A5C]">Sign in with your LOGIN ID to access the platform</p>
         </div>
 
         {error && (
@@ -74,15 +79,20 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body">
           <div>
-            <label className="block text-[#A79798] mb-1.5 font-semibold text-xs">Registered Email *</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@domain.com"
-              required
-              className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-3 text-[#F7F2F2] outline-none input-glow text-sm"
-            />
+            <label className="block text-[#A79798] mb-1.5 font-semibold text-xs">
+              {useEmail ? 'Email Address *' : 'LOGIN ID *'}
+            </label>
+            <div className="relative">
+              <input
+                type={useEmail ? 'email' : 'text'}
+                value={loginId}
+                onChange={(e) => setLoginId(useEmail ? e.target.value : e.target.value.toUpperCase())}
+                placeholder={useEmail ? 'user@domain.com' : 'LOGIN101'}
+                required
+                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-3 pl-11 text-[#F7F2F2] outline-none input-glow text-sm font-mono tracking-wider"
+              />
+              <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B5A5C]" />
+            </div>
           </div>
 
           <div>
@@ -116,6 +126,17 @@ export const LoginPage: React.FC = () => {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        {/* Toggle between LOGIN ID and Email */}
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => { setUseEmail(!useEmail); setLoginId(''); setError(null); }}
+            className="text-[11px] text-[#6B5A5C] hover:text-[#A79798] transition-colors font-mono"
+          >
+            {useEmail ? '← Sign in with LOGIN ID' : 'Admin/Coordinator? Sign in with email →'}
+          </button>
+        </div>
 
         <div className="text-center text-xs text-[#6B5A5C] border-t border-[#2A1A1D] pt-5">
           Don't have an account yet?{' '}

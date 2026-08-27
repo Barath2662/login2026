@@ -1,3 +1,5 @@
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 require("dotenv").config();
 const { connectPostgres, sequelize } = require("./config/db/postgres");
 const eventModel = require("./models/postgres/eventModel");
@@ -6,13 +8,14 @@ const { Op } = require("sequelize");
 const seedEvents = async () => {
   try {
     await connectPostgres();
+    console.log("Connected to database for event seeding...");
+
+    // Synchronize model schema changes first so tables exist
+    await sequelize.sync();
+
     await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "is_online" BOOLEAN NOT NULL DEFAULT FALSE;');
     await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "coordinator_name" VARCHAR(255);');
     await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "coordinator_phone" VARCHAR(255);');
-    console.log("Connected to database for event seeding...");
-
-    // Synchronize model schema changes
-    await sequelize.sync();
 
     const eventsData = [
       {

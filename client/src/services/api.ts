@@ -15,7 +15,7 @@ export const api = {
   // Auth Module
   auth: {
     register: async (data: any) => await axiosInstance.post('/auth/register', data),
-    login: async (data: any) => await axiosInstance.post('/auth/login', data),
+    login: async (data: { loginId?: string; email?: string; password: string }) => await axiosInstance.post('/auth/login', data),
     logout: async () => await axiosInstance.post('/auth/logout'),
     forgotPassword: async (email: string) => await axiosInstance.post('/auth/forgot-password', { email }),
     resetPassword: async (data: { token: string; newPassword: string }) => await axiosInstance.post('/auth/reset-password', data),
@@ -58,16 +58,38 @@ export const api = {
   // Payment Module
   payments: {
     getMyStatus: async () => await axiosInstance.get('/payments/my'),
-    initiate: async (data: { transaction_reference: string; receipt_url?: string }) => await axiosInstance.post('/payments/', data),
+    initiate: async (data: { transaction_reference: string; receipt_url?: string; amount?: number; payment_date?: string; payment_method?: string }) => await axiosInstance.post('/payments/', data),
     getAll: async () => await axiosInstance.get('/payments/'),
     verify: async (id: number | string, data?: { status?: string; rejection_reason?: string }) => await axiosInstance.put(`/payments/${id}/verify`, data || { status: 'VERIFIED' }),
     refund: async (id: number | string) => await axiosInstance.put(`/payments/${id}/refund`),
   },
 
+  // Uploads Module
+  uploads: {
+    uploadReceipt: async (data: FormData) => await axiosInstance.post('/upload/receipt', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  },
+
   // Team Formation Module
   teams: {
-    create: async (data: any) => await axiosInstance.post('/teams/', data),
-    getMyTeam: async () => await axiosInstance.get('/teams/my'),
+    create: async (data: { name: string; event_id: number }) => await axiosInstance.post('/teams/', data),
+    getMyTeams: async () => await axiosInstance.get('/teams/my'),
+    getTeamDetails: async (teamId: number | string) => await axiosInstance.get(`/teams/${teamId}`),
+    getEventTeams: async (eventId: number | string) => await axiosInstance.get(`/teams/event/${eventId}`),
+    searchStudents: async (search: string) => await axiosInstance.get('/teams/students', { params: { search } }),
+
+    // Invitations (Leader → Participant)
+    inviteMember: async (teamId: number | string, login_id: string) => await axiosInstance.post(`/teams/${teamId}/invite`, { login_id }),
+    getMyInvitations: async () => await axiosInstance.get('/teams/invitations/my'),
+    respondToInvitation: async (id: number | string, status: 'accepted' | 'declined') => await axiosInstance.put(`/teams/invitations/${id}`, { status }),
+
+    // Join Requests (Participant → Team)
+    sendJoinRequest: async (teamId: number | string) => await axiosInstance.post(`/teams/${teamId}/join-request`),
+    getMyJoinRequests: async () => await axiosInstance.get('/teams/join-requests/my'),
+    respondToJoinRequest: async (id: number | string, status: 'accepted' | 'rejected') => await axiosInstance.put(`/teams/join-requests/${id}`, { status }),
+
+    // Team Management
+    registerTeam: async (teamId: number | string) => await axiosInstance.post(`/teams/${teamId}/register`),
+    removeMember: async (teamId: number | string, userId: number | string) => await axiosInstance.delete(`/teams/${teamId}/members/${userId}`),
   },
 
   // Attendance Module
@@ -79,6 +101,9 @@ export const api = {
   // Notifications Module
   notifications: {
     getMy: async () => await axiosInstance.get('/notifications/'),
+    getUnreadCount: async () => await axiosInstance.get('/notifications/unread-count'),
+    markAsRead: async (id: number | string) => await axiosInstance.put(`/notifications/${id}/read`),
+    markAllAsRead: async () => await axiosInstance.put('/notifications/read-all'),
   },
 
   // Competition Results Module

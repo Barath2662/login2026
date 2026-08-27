@@ -6,6 +6,7 @@ const Payment = require("./paymentModel");
 const Team = require("./teamModel");
 const TeamMember = require("./teamMemberModel");
 const TeamRequest = require("./teamRequestModel");
+const TeamInvitation = require("./teamInvitationModel");
 const Bonafide = require("./bonafideModel");
 const Attendance = require("./attendanceModel");
 const Result = require("./resultModel");
@@ -39,11 +40,34 @@ Payment.belongsTo(User, { foreignKey: "verified_by", as: "verifier" });
 User.hasMany(Team, { foreignKey: "created_by", as: "createdTeams" });
 Team.belongsTo(User, { foreignKey: "created_by", as: "creator" });
 
+Event.hasMany(Team, { foreignKey: "event_id", as: "teams" });
+Team.belongsTo(Event, { foreignKey: "event_id", as: "event" });
+
 Team.hasMany(TeamMember, { foreignKey: "team_id", as: "members" });
 TeamMember.belongsTo(Team, { foreignKey: "team_id", as: "team" });
 
 User.hasMany(TeamMember, { foreignKey: "student_id", as: "teamMemberships" });
 TeamMember.belongsTo(User, { foreignKey: "student_id", as: "student" });
+
+// Team Invitations (Leader invites participant)
+Team.hasMany(TeamInvitation, { foreignKey: "team_id", as: "invitations" });
+TeamInvitation.belongsTo(Team, { foreignKey: "team_id", as: "team" });
+
+User.hasMany(TeamInvitation, { foreignKey: "sender_id", as: "sentInvitations" });
+TeamInvitation.belongsTo(User, { foreignKey: "sender_id", as: "sender" });
+
+User.hasMany(TeamInvitation, { foreignKey: "receiver_id", as: "receivedInvitations" });
+TeamInvitation.belongsTo(User, { foreignKey: "receiver_id", as: "receiver" });
+
+// Team Requests (Participant requests to join team)
+Team.hasMany(TeamRequest, { foreignKey: "team_id", as: "joinRequests" });
+TeamRequest.belongsTo(Team, { foreignKey: "team_id", as: "team" });
+
+User.hasMany(TeamRequest, { foreignKey: "sender_id", as: "sentRequests" });
+TeamRequest.belongsTo(User, { foreignKey: "sender_id", as: "sender" });
+
+User.hasMany(TeamRequest, { foreignKey: "receiver_id", as: "receivedRequests" });
+TeamRequest.belongsTo(User, { foreignKey: "receiver_id", as: "receiver" });
 
 // Attendance
 User.hasMany(Attendance, { foreignKey: "student_id", as: "attendance" });
@@ -72,6 +96,7 @@ module.exports = {
   Team,
   TeamMember,
   TeamRequest,
+  TeamInvitation,
   Bonafide,
   Attendance,
   Result,

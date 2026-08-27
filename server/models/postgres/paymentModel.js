@@ -56,6 +56,17 @@ const paymentModel = sequelize.define(
       allowNull: true,
     },
 
+    payment_date: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    payment_method: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "UPI",
+    },
+
     receipt_url: {
       type: DataTypes.STRING,
       allowNull: true,
