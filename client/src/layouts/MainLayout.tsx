@@ -12,7 +12,7 @@ import { api } from '../services/api';
 export const MainLayout: React.FC = () => {
   const location = useLocation();
   const { token, user, setUser, resetAuth, setInitialized } = useAuthStore();
-  const [showIntro, setShowIntro] = useState<boolean>(() => sessionStorage.getItem('hasPlayedIntro') !== 'true');
+  const [showIntro, setShowIntro] = useState<boolean>(() => localStorage.getItem('hasPlayedIntro') !== 'true');
   const [commandSearchOpen, setCommandSearchOpen] = useState(false);
 
   useEffect(() => {
