@@ -146,10 +146,14 @@ export const RegisterPage: React.FC = () => {
             <UserCheck className="w-5 h-5 shrink-0" />
             <div>
               <div className="font-bold uppercase tracking-wider text-[11px]">STUDENT SYMPOSIUM PARTICIPANT</div>
-              <p className="text-[11px] text-[#9A9AA2]">Compete across 11 technical & non-technical symposium events.</p>
+              <p className="text-[11px] text-[#9A9AA2]">Compete across 11 technical & non-technical symposium events. Bonafide certificate is mandatory to participate.</p>
             </div>
           </div>
         )}
+
+        <div className="bg-[#E08A17]/10 border border-[#E08A17]/40 p-3 text-xs text-[#E08A17] font-mono">
+          Bonafide certificate is mandatory to participate in LOGIN 2026.
+        </div>
 
         {/* Error Alert */}
         {error && (
@@ -181,7 +185,7 @@ export const RegisterPage: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="student@college.edu"
+                placeholder="example@mail.com"
                 required
                 className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
               />
@@ -283,15 +287,19 @@ export const RegisterPage: React.FC = () => {
           {userType === 'ALUMNI' && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[#9A9AA2] mb-1 font-semibold">Graduating Batch/Year</label>
+                <label className="block text-[#9A9AA2] mb-1 font-semibold">Alumni Batch Code *</label>
                 <input
                   type="text"
                   name="batch_year"
                   value={formData.batch_year}
-                  onChange={handleChange}
-                  placeholder="e.g. 2018"
+                  onChange={(e) => setFormData({ ...formData, batch_year: e.target.value.toUpperCase().replace(/[^0-9MX]/g, '').slice(0, 4) })}
+                  placeholder="e.g. 25MX"
+                  pattern="[0-9]{2}MX"
+                  title="Enter your batch code e.g. 25MX."
+                  required
                   className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-2.5 text-[#F7F2F2] outline-none input-glow"
                 />
+                
               </div>
 
               <div>

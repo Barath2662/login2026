@@ -72,6 +72,12 @@ const registerUser = async (req, res) => {
       });
     }
 
+    if (isAlumni && !/^\d{2}MX$/i.test(String(batch_year || ""))) {
+      return res.status(400).json({
+        message: "Alumni batch code must use YYMX format, such as 25MX or 95MX",
+      });
+    }
+
     const existingUser = await userModel.findOne({
       where: { email },
     });

@@ -22,50 +22,51 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
 
   return (
     <header className="sticky top-0 z-40 bg-[#0A0607]/95 backdrop-blur border-b border-[#2A1A1D] w-full shadow-2xl">
-      <div className="max-w-screen-2xl mx-auto px-4 py-3.5 flex flex-col items-center gap-3">
+      <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 py-3.5 flex flex-col items-center gap-3 overflow-x-hidden">
         
         {/* Top Centered Brand Header: [Logo 1][Logo 2] PSG COLLEGE OF TECHNOLOGY ... [Logo 3][Logo 4] */}
-        <div className="w-full flex items-center justify-between md:justify-center gap-4 sm:gap-8 relative min-h-[76px]">
+        <div className="w-full flex items-center justify-between md:justify-center gap-0 sm:gap-8 relative min-h-[76px] md:pr-44">
           
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             className="md:hidden p-2 text-[#A79798] hover:text-white"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
           {/* Central Logo & Brand Header Cluster */}
-          <div className="flex items-center justify-center gap-3 sm:gap-8 shrink-0 mx-auto w-full max-w-4xl px-2">
-            {/* Left 2 Logos — auto-floating */}
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <div className="w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0 animate-float">
+          <div className="flex items-center justify-center gap-0.5 sm:gap-8 min-w-0 flex-1 mx-auto md:w-full md:max-w-4xl px-0 sm:px-2">
+            {/* Left 2 Logos */}
+            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
+              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
                 <img src="/assets/logos/psg-main.png" alt="PSG Main" className="max-w-full max-h-full object-contain" />
               </div>
-              <div className="w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0 animate-float-delayed">
+              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
                 <img src="/assets/logos/psg-100.png" alt="PSG 100 Yrs" className="max-w-full max-h-full object-contain" />
               </div>
             </div>
 
             {/* Center Brand Text — Wide, Prominent & Distinct */}
-            <Link to="/" className="flex flex-col items-center text-center px-2 sm:px-6 group shrink-0 flex-1">
-              <span className="text-xs sm:text-sm md:text-base font-mono font-extrabold tracking-[0.22em] text-[#E8DCDC] uppercase leading-tight drop-shadow">
+            <Link to="/" className="flex flex-col items-center text-center px-0 sm:px-6 group min-w-0 flex-1">
+              <span className="text-[8px] sm:text-sm md:text-base font-mono font-extrabold tracking-[0.04em] sm:tracking-[0.22em] text-[#E8DCDC] uppercase leading-tight drop-shadow whitespace-nowrap">
                 PSG COLLEGE OF TECHNOLOGY
               </span>
-              <span className="text-[10px] sm:text-xs md:text-sm font-mono font-bold tracking-[0.18em] text-[#FF2A2A] uppercase leading-tight mt-1">
+              <span className="hidden sm:block text-[10px] sm:text-xs md:text-sm font-mono font-bold tracking-[0.18em] text-[#FF2A2A] uppercase leading-tight mt-1">
                 COMPUTER APPLICATIONS ASSOCIATION PRESENTS
               </span>
-              <span className="font-mono font-black text-2xl sm:text-3xl md:text-4xl tracking-wider text-white group-hover:text-[#FF2A2A] transition-colors leading-tight mt-1 drop-shadow-[0_0_18px_rgba(224,27,34,0.5)]">
+              <span className="font-mono font-black text-base sm:text-3xl md:text-4xl tracking-wider text-white group-hover:text-[#FF2A2A] transition-colors leading-tight mt-1 drop-shadow-[0_0_18px_rgba(224,27,34,0.5)]">
                 LOGIN<span className="text-[#FF2A2A]">2K26</span>
               </span>
             </Link>
 
-            {/* Right 2 Logos — auto-floating */}
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <div className="w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0 animate-float-delayed">
+            {/* Right 2 Logos */}
+            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
+              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
                 <img src="/assets/logos/psg-75.png" alt="PSG 75 Yrs" className="max-w-full max-h-full object-contain" />
               </div>
-              <div className="w-10 h-10 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0 animate-float">
+              <div className="w-6 h-6 sm:w-13 sm:h-13 md:w-14 md:h-14 rounded-full border-2 border-[#E01B22]/70 bg-white p-0.5 sm:p-1.5 flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.4)] shrink-0">
                 <img src="/assets/logos/caa.png" alt="CAA Logo" className="max-w-full max-h-full object-contain" />
               </div>
             </div>
@@ -239,6 +240,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#0A0607] border-b border-[#2A1A1D] px-4 pt-4 pb-6 space-y-4">
           <Link
+            to="/home"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
+          >
+            Home
+          </Link>
+          <Link
             to="/events"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
@@ -258,6 +266,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
             className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
           >
             About Fest
+          </Link>
+          <Link
+            to="/alumni"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-sm font-medium text-[#F7F2F2] hover:text-[#E01B22]"
+          >
+            Alumni
           </Link>
 
           {isAuthenticated ? (
