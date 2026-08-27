@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ShieldAlert } from 'lucide-react';
 
 export const ContactPage: React.FC = () => {
   const [name, setName] = useState('');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -102,7 +102,6 @@ const RegistrationSuccess: React.FC<{ loginId: string; name: string }> = ({ logi
 // Main Register Page
 // ──────────────────────────────────────────────
 export const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [userType, setUserType] = useState<'PARTICIPANT' | 'ALUMNI'>('PARTICIPANT');

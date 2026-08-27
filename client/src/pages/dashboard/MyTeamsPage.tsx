@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { Users, Plus, Send, UserPlus, Check, X, Crown, Search, ArrowRight, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Users, Plus, Send, UserPlus, Check, X, Crown, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 // ──────────────────────────────────────────────
 // Create Team Modal

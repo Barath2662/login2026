@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
+import { Clock, MapPin, ChevronRight } from 'lucide-react';
 
 const SCHEDULE_DATA: Record<'DAY_01' | 'DAY_02', Array<{ time: string; title: string; type: string; venue: string }>> = {
   DAY_01: [

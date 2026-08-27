@@ -7,7 +7,7 @@ interface NavbarProps {
   onOpenCommandSearch?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
+export const Navbar: React.FC<NavbarProps> = () => {
   const { isAuthenticated, user, resetAuth } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,18 +31,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCommandSearch }) => {
     resetAuth();
     setUserMenuOpen(false);
     navigate('/login');
-  };
-
-  const handleNavClick = (sectionId: string, path: string) => {
-    setMobileMenuOpen(false);
-    if (location.pathname === '/' || location.pathname === '/home') {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      navigate(`${path}#${sectionId}`);
-    }
   };
 
   const isHomepage = location.pathname === '/' || location.pathname === '/home';

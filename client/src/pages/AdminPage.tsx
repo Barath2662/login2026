@@ -494,7 +494,7 @@ export const AdminPage: React.FC = () => {
                       </td>
                       <td className="p-3.5">
                         {p.receipt_url ? (
-                          <a href={p.receipt_url.startsWith('http') ? p.receipt_url : `${api.defaults?.baseURL?.replace('/api', '') || 'http://localhost:5000'}${p.receipt_url}`} target="_blank" rel="noreferrer" className="text-[#6366F1] hover:text-[#818CF8] font-mono text-[10px] font-bold flex items-center gap-1 transition-colors">
+                          <a href={p.receipt_url.startsWith('http') ? p.receipt_url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${p.receipt_url}`} target="_blank" rel="noreferrer" className="text-[#6366F1] hover:text-[#818CF8] font-mono text-[10px] font-bold flex items-center gap-1 transition-colors">
                             VIEW RECEIPT ↗
                           </a>
                         ) : (

@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } else {
       localStorage.removeItem('token');
     }
-    set({ isAuthenticated, token, user: safeUser, survivor: safeUser });
+    set({ isAuthenticated, token, user: safeUser as UserProfile, survivor: safeUser as UserProfile });
   },
   setUser: (user) => set({ user, survivor: user }),
   setSurvivor: (survivor) => set({ user: survivor, survivor }),

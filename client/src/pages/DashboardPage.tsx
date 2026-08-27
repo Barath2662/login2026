@@ -356,7 +356,7 @@ export const DashboardPage: React.FC = () => {
                           <div>{reg.team_name || '-'}</div>
                           {Array.isArray(reg.team_members) && reg.team_members.length > 0 && (
                             <div className="space-y-1 text-[10px] text-[#A79798]">
-                              {reg.team_members.map((member, idx) => (
+                              {reg.team_members.map((member: any, idx: number) => (
                                 <div key={`${member.email || member.name || 'member'}-${idx}`} className="flex items-center gap-2">
                                   <span className={member.status === 'pending' ? 'text-[#E08A17]' : 'text-[#1FA971]'}>
                                     {member.status === 'pending' ? '•' : '✓'}

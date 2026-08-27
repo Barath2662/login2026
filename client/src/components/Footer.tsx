@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Play, Mail, Phone, MapPin } from 'lucide-react';
 
 interface FooterProps {
   onReplayIntro?: () => void;

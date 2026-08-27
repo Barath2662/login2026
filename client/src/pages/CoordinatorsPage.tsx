@@ -1,6 +1,6 @@
 import React from 'react';
 import { CoordinatorsSection } from '../components/home/CoordinatorsSection';
-import { GraduationCap, Award, ShieldAlert } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 
 interface AdvisorCardProps {
   name: string;

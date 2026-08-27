@@ -1,4 +1,4 @@
-import React from 'react';
+// Removed unused React import
 
 export const Logo3D = ({ className = "" }: { className?: string }) => {
   return (

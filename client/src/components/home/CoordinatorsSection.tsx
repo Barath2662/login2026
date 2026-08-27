@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, ShieldCheck } from 'lucide-react';
-import { DecryptedText } from '../../animations/DecryptedText';
+// Removed unused DecryptedText import
 
 interface CoordCardProps {
   name: string;

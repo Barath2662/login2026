@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, ZoomIn, X, Calendar, MapPin, Grid } from 'lucide-react';
+import { ZoomIn, X, Calendar, MapPin } from 'lucide-react';
 
 interface GalleryItem {
   id: string;

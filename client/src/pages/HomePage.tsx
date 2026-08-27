@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { HeroSection } from '../components/home/HeroSection';
 import { NewsSection } from '../components/home/NewsSection';
 import { AboutSection } from '../components/home/AboutSection';

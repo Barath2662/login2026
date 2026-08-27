@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
-import { InstrumentRail } from '../components/InstrumentRail';
 import { Ticker } from '../components/Ticker';
 import { UnpaidBanner } from '../components/UnpaidBanner';
 import { Footer } from '../components/Footer';

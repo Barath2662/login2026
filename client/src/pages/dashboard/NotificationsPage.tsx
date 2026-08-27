@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { Bell, Check, Trash2, CheckCircle2 } from 'lucide-react';
+import { Bell, Check } from 'lucide-react';
 
 export const NotificationsPage: React.FC = () => {
   const queryClient = useQueryClient();
