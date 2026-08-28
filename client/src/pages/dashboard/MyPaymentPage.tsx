@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { QrCode, UploadCloud, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { UploadCloud, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 
 export const MyPaymentPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -127,16 +127,22 @@ export const MyPaymentPage: React.FC = () => {
                   <span className="text-lg font-bold text-[#F7F2F2]">₹150</span>
                 </div>
                 
-                <div>
-                  <p className="text-[#F7F2F2] font-bold mb-2">Scan QR Code to Pay (UPI)</p>
-                  <div className="bg-[#F7F2F2] p-4 rounded-[2px] inline-block mb-3 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                    <QrCode className="w-32 h-32 text-[#0A0607]" />
-                  </div>
-                  <p>UPI ID: <span className="text-[#F7F2F2] font-bold select-all">login2k26@psg</span></p>
+                <div className="pt-2">
+                  <p className="text-[#F7F2F2] font-bold mb-3">Pay via PSG Institutions Portal</p>
+                  <p className="mb-4">Click the button below to open the official PSG payment gateway in a new tab. Complete your payment there.</p>
+                  <a
+                    href="https://events.psginstitutions.in/EMS/register/E5294158179"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-6 py-3 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] shadow-[0_0_15px_rgba(224,27,34,0.2)] transition-all"
+                  >
+                    OPEN PAYMENT PORTAL ↗
+                  </a>
                 </div>
                 
-                <div className="pt-4 border-t border-[#2A1A1D]">
-                  <p className="text-[10px]">After completing the payment, capture a screenshot of the successful transaction containing the UTR/Reference number and upload it here.</p>
+                <div className="pt-5 border-t border-[#2A1A1D]">
+                  <p className="text-[10px] text-[#E08A17] font-bold">IMPORTANT STEP</p>
+                  <p className="text-[10px] mt-1">After completing the payment on the external portal, you MUST return here and submit your Transaction Reference Number and payment screenshot to get verified.</p>
                 </div>
               </div>
             </div>

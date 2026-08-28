@@ -1,62 +1,49 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { LogIn, FileText, Users, Trophy } from 'lucide-react';
 
 const MILESTONES = [
   {
-    code: "SYSTEM ONLINE",
+    icon: LogIn,
     title: "Registration Opens",
-    date: "AUG 20",
-    desc: "Create your LOGIN identity and secure your place in the arena.",
-    status: "COMPLETED"
+    date: "07",
+    monthYear: "JUN 2026",
+    desc: "Portal goes live. Assemble your team and lock in your spot before it fills up.",
+    status: "COMPLETED",
+    isGrandFinal: false
   },
   {
-    code: "ASSEMBLE THE SQUAD",
-    title: "Team Formation",
-    date: "SEP 01 — SEP 18",
-    desc: "Build your crew and synchronize team coordinates.",
-    status: "ACTIVE"
+    icon: FileText,
+    title: "Idea (PPT) Submission",
+    date: "25",
+    monthYear: "JUL 2026",
+    desc: "Final date to submit your initial idea and presentation deck.",
+    status: "ACTIVE",
+    isGrandFinal: false
   },
   {
-    code: "FINAL LOCKDOWN",
-    title: "Registration Closes",
-    date: "SEP 20",
-    desc: "All roster changes and entries are permanently locked.",
-    status: "LOCKING"
+    icon: Users,
+    title: "Shortlisted Teams Announced",
+    date: "07",
+    monthYear: "AUG 2026",
+    desc: "Selected teams notified and briefed on problem statement and next round.",
+    status: "STANDBY",
+    isGrandFinal: false
   },
   {
-    code: "ARENAS REVEALED",
-    title: "Event Schedules",
-    date: "SEP 25",
-    desc: "Unlock detailed timings, rules, and event briefings.",
-    status: "STANDBY"
-  },
-  {
-    code: "IGNITION",
-    title: "DAY 01 // Competitions",
-    date: "OCT 01",
-    desc: "The system activates. First wave of contests commences.",
-    status: "STANDBY"
-  },
-  {
-    code: "SURVIVAL",
-    title: "DAY 02 // Final Rounds",
-    date: "OCT 02",
-    desc: "Elimination brackets tighten. Only the absolute strongest survive.",
-    status: "STANDBY"
-  },
-  {
-    code: "THE LAST HUMAN",
-    title: "Grand Finale",
-    date: "OCT 02",
-    desc: "The final logic showdown. The champion is crowned.",
-    status: "STANDBY"
+    icon: Trophy,
+    title: "Grand Final",
+    date: "14",
+    monthYear: "AUG 2026",
+    desc: "24 hours of intense hacking, live judging by industry experts, and the grand award ceremony.",
+    status: "STANDBY",
+    isGrandFinal: true
   }
 ];
 
 export const TimelineSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Track scroll progress of the container relative to the viewport center
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start center", "end center"]
@@ -73,45 +60,30 @@ export const TimelineSection: React.FC = () => {
         
         {/* Section Header */}
         <div className="text-center space-y-3 select-none">
-          <span className="font-mono text-[11px] text-[#E01B22] font-black tracking-[0.25em] block">
-            [ DIRECTIVE // 03 ]
+          <span className="font-mono text-[11px] text-[#E01B22] font-black tracking-[0.25em] block uppercase">
+            Mark your Calendar.
           </span>
           <h2 className="text-3xl sm:text-4xl font-display font-black text-[#F7F2F2] tracking-wider uppercase">
-            SYMPOSIUM TIMELINE
+            EVENT TIMELINE
           </h2>
-          <p className="text-xs text-[#A79798] font-mono uppercase tracking-[0.15em] max-w-sm mx-auto">
-            Follow the path to LOGIN 2K26.
-          </p>
         </div>
 
         {/* Scrollable Timeline Path */}
-        <div ref={containerRef} className="relative mt-20">
+        <div ref={containerRef} className="relative mt-20 pb-10">
           
-          {/* Central Vertical Tracking Line (Desktop: centered; Mobile: shifted to 24px) */}
-          <div className="absolute left-[24px] md:left-1/2 top-0 bottom-0 w-[2px] bg-[#2A1A1D] -translate-x-1/2 z-10">
+          {/* Central Vertical Tracking Line (Desktop: centered; Mobile: shifted to left) */}
+          <div className="absolute left-[24px] md:left-1/2 top-0 bottom-0 w-[2px] bg-[#2A1A1D] -translate-x-1/2 z-0">
             <motion.div 
-              className="absolute top-0 left-0 w-full bg-[#E01B22] origin-top shadow-[0_0_10px_rgba(224,27,34,0.6)]"
+              className="absolute top-0 left-0 w-full bg-[#E01B22] origin-top shadow-[0_0_15px_rgba(224,27,34,0.8)]"
               style={{ scaleY, height: '100%' }}
             />
           </div>
 
           {/* Timeline Milestones */}
-          <div className="space-y-4">
+          <div className="space-y-12 md:space-y-24">
             {MILESTONES.map((milestone, idx) => (
               <TimelineItem key={idx} item={milestone} index={idx} />
             ))}
-          </div>
-
-          {/* System Complete Bottom Node */}
-          <div className="relative flex justify-start md:justify-center pl-[24px] md:pl-0 pt-16 z-20">
-            <div className="absolute left-[24px] md:left-1/2 -translate-x-1/2 flex items-center justify-center">
-              <div className="w-5 h-5 rounded-full border-2 border-[#E01B22] bg-[#0A0607] flex items-center justify-center shadow-[0_0_15px_rgba(224,27,34,0.5)]">
-                <div className="w-2 h-2 rounded-full bg-[#E01B22]" />
-              </div>
-              <span className="font-mono text-[9px] font-bold text-[#E01B22] uppercase tracking-[0.25em] ml-8 md:ml-0 md:absolute md:top-8 md:whitespace-nowrap">
-                ◉ SYSTEM COMPLETE
-              </span>
-            </div>
           </div>
 
         </div>
@@ -128,43 +100,71 @@ interface TimelineItemProps {
 
 const TimelineItem: React.FC<TimelineItemProps> = ({ item, index }) => {
   const ref = useRef<HTMLDivElement>(null);
-  // Detect if item is around viewport center
   const isInView = useInView(ref, { once: false, amount: 0.35 });
   const isEven = index % 2 === 0;
 
   return (
-    <div ref={ref} className="relative min-h-[45vh] md:min-h-[60vh] flex flex-col justify-center py-6">
+    <div ref={ref} className="relative w-full">
       
-      {/* ── Desktop & Tablet alternating grid ── */}
-      <div className="hidden md:grid grid-cols-9 items-center w-full">
-        {/* Left column (milestones on even index) */}
-        <div className="col-span-4 pr-16">
-          {isEven && <TimelineContent item={item} index={index} isInView={isInView} />}
-        </div>
-
-        {/* Center dot column */}
-        <div className="col-span-1 flex justify-center items-center z-20">
-          <div
-            className={`w-4.5 h-4.5 rounded-full border-2 transition-all duration-500 flex items-center justify-center ${
-              isInView
-                ? 'bg-[#E01B22] border-[#E01B22] shadow-[0_0_15px_rgba(224,27,34,0.9)] scale-125'
-                : 'bg-[#0A0607] border-[#2A1A1D]'
-            }`}
-          >
-            {isInView && <div className="w-1.5 h-1.5 rounded-full bg-[#F7F2F2]" />}
+      {/* ── Desktop Alternating Layout ── */}
+      <div className="hidden md:block">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center w-full min-h-[160px]">
+          
+          {/* LEFT SIDE */}
+          <div className="flex justify-end pr-12 relative w-full h-full items-center">
+            {isEven && (
+              <>
+                <TimelineCard item={item} isInView={isInView} align="right" />
+                {/* Horizontal branch connecting to center node */}
+                <div className={`absolute top-1/2 -translate-y-1/2 right-0 h-[2px] w-12 transition-colors duration-500 z-0 ${isInView ? 'bg-[#E01B22]' : 'bg-[#2A1A1D]'}`} />
+                {/* Vertical branch corner if we want it to look like a tree (optional, we use simple horizontal line here to keep it clean) */}
+              </>
+            )}
+            {!isEven && (
+              <div className="text-right">
+                <span className={`block font-display text-4xl font-black transition-colors duration-500 ${isInView ? 'text-[#E01B22]' : 'text-[#6B5A5C]'}`}>{item.date}</span>
+                <span className={`block font-mono text-sm tracking-widest font-bold transition-colors duration-500 ${isInView ? 'text-[#F7F2F2]' : 'text-[#6B5A5C]'}`}>{item.monthYear}</span>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Right column (milestones on odd index) */}
-        <div className="col-span-4 pl-16">
-          {!isEven && <TimelineContent item={item} index={index} isInView={isInView} alignLeftOnDesktop />}
+          {/* CENTER NODE */}
+          <div className="flex justify-center items-center z-20 w-8">
+            <div
+              className={`w-4 h-4 rounded-full border-2 transition-all duration-500 flex items-center justify-center ${
+                isInView
+                  ? 'bg-[#E01B22] border-[#E01B22] shadow-[0_0_15px_rgba(224,27,34,0.9)] scale-125'
+                  : 'bg-[#0A0607] border-[#2A1A1D]'
+              }`}
+            >
+              {isInView && <div className="w-1.5 h-1.5 rounded-full bg-[#F7F2F2]" />}
+            </div>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="flex justify-start pl-12 relative w-full h-full items-center">
+            {!isEven && (
+              <>
+                <TimelineCard item={item} isInView={isInView} align="left" />
+                {/* Horizontal branch connecting to center node */}
+                <div className={`absolute top-1/2 -translate-y-1/2 left-0 h-[2px] w-12 transition-colors duration-500 z-0 ${isInView ? 'bg-[#E01B22]' : 'bg-[#2A1A1D]'}`} />
+              </>
+            )}
+            {isEven && (
+              <div className="text-left">
+                <span className={`block font-display text-4xl font-black transition-colors duration-500 ${isInView ? 'text-[#E01B22]' : 'text-[#6B5A5C]'}`}>{item.date}</span>
+                <span className={`block font-mono text-sm tracking-widest font-bold transition-colors duration-500 ${isInView ? 'text-[#F7F2F2]' : 'text-[#6B5A5C]'}`}>{item.monthYear}</span>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
-      {/* ── Mobile simple left-aligned vertical layout ── */}
-      <div className="md:hidden pl-14 pr-4 text-left relative">
-        {/* Dot aligned at absolute left 24px */}
-        <div className="absolute left-[24px] top-[6px] -translate-x-1/2 z-20">
+      {/* ── Mobile Layout (Left aligned timeline) ── */}
+      <div className="md:hidden flex relative min-h-[120px] items-start">
+        {/* Center Node (shifted to left) */}
+        <div className="absolute left-[24px] top-6 -translate-x-1/2 z-20">
           <div
             className={`w-4 h-4 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
               isInView
@@ -176,62 +176,74 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ item, index }) => {
           </div>
         </div>
 
-        <TimelineContent item={item} index={index} isInView={isInView} alignLeftOnDesktop />
+        {/* Horizontal branch */}
+        <div className={`absolute top-8 left-[24px] w-8 h-[2px] transition-colors duration-500 z-0 ${isInView ? 'bg-[#E01B22]' : 'bg-[#2A1A1D]'}`} />
+
+        {/* Content Side */}
+        <div className="pl-14 pr-4 w-full pt-1">
+          <div className="flex items-center gap-3 mb-3">
+             <span className={`font-display text-3xl font-black transition-colors duration-500 ${isInView ? 'text-[#E01B22]' : 'text-[#6B5A5C]'}`}>{item.date}</span>
+             <span className={`font-mono text-xs tracking-widest font-bold transition-colors duration-500 ${isInView ? 'text-[#F7F2F2]' : 'text-[#6B5A5C]'}`}>{item.monthYear}</span>
+          </div>
+          <TimelineCard item={item} isInView={isInView} align="left" />
+        </div>
       </div>
+
     </div>
   );
 };
 
-interface TimelineContentProps {
+interface TimelineCardProps {
   item: typeof MILESTONES[0];
-  index: number;
   isInView: boolean;
-  alignLeftOnDesktop?: boolean;
+  align: 'left' | 'right';
 }
 
-const TimelineContent: React.FC<TimelineContentProps> = ({ item, index, isInView, alignLeftOnDesktop }) => {
-  const alignClass = alignLeftOnDesktop 
-    ? 'text-left items-start' 
-    : 'text-left md:text-right items-start md:items-end';
-
-  const justifyClass = alignLeftOnDesktop
-    ? 'justify-start'
-    : 'justify-start md:justify-end';
+const TimelineCard: React.FC<TimelineCardProps> = ({ item, isInView, align }) => {
+  const Icon = item.icon;
+  const isSpecial = item.isGrandFinal;
 
   return (
-    <div className={`flex flex-col ${alignClass} space-y-2 transition-all duration-750 transform ${
-      isInView ? 'opacity-100 translate-y-0 scale-100' : 'opacity-30 translate-y-6 scale-95'
+    <div className={`w-full max-w-sm transition-all duration-700 transform ${
+      isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
     }`}>
-      {/* Code index and Status indicator */}
-      <div className={`flex items-center gap-2 text-[10px] font-mono font-bold tracking-wider text-[#E01B22] ${justifyClass}`}>
-        <span>0{index + 1} // {item.code}</span>
-        <span className={`px-1.5 py-0.5 text-[8px] uppercase tracking-wider font-bold rounded-[1px] border ${
-          item.status === 'ACTIVE' 
-            ? 'bg-[#E01B22]/10 border-[#E01B22]/40 text-[#E01B22]' 
-            : item.status === 'COMPLETED'
-            ? 'bg-green-500/10 border-green-500/30 text-green-400'
-            : item.status === 'LOCKING'
-            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-            : 'bg-[#2A1A1D]/40 border-[#2A1A1D]/60 text-[#A79798]'
-        }`}>
-          {item.status}
-        </span>
+      <div className={`relative border rounded-[2px] p-6 shadow-xl transition-colors duration-500 ${
+        isSpecial 
+          ? `bg-[#0A0607] border-[#E01B22] ${isInView ? 'shadow-[0_0_20px_rgba(224,27,34,0.15)]' : ''}`
+          : `bg-[#130C0E]/80 backdrop-blur-sm border-[#2A1A1D] ${isInView ? 'hover:border-[#E01B22]/50' : ''}`
+      }`}>
+        
+        {/* Status Badge */}
+        <div className={`absolute -top-3 ${align === 'right' ? 'right-6' : 'left-6'}`}>
+          <span className={`px-2 py-1 text-[9px] uppercase tracking-widest font-bold rounded-[1px] border shadow-sm ${
+            item.status === 'ACTIVE' 
+              ? 'bg-[#1C0D10] border-[#E01B22]/60 text-[#E01B22]' 
+              : item.status === 'COMPLETED'
+              ? 'bg-[#0F291E] border-green-500/40 text-green-400'
+              : 'bg-[#0A0607] border-[#2A1A1D] text-[#A79798]'
+          }`}>
+            {item.status}
+          </span>
+        </div>
+
+        <div className="flex flex-col space-y-4 pt-1">
+          {/* Header row: Icon & Title */}
+          <div className="flex items-start gap-3">
+            <div className={`p-2 rounded-[2px] border ${isSpecial ? 'bg-[#E01B22]/10 border-[#E01B22]/30 text-[#E01B22]' : 'bg-[#0A0607] border-[#2A1A1D] text-[#E01B22]'}`}>
+              <Icon className="w-5 h-5" />
+            </div>
+            <h3 className={`text-lg sm:text-xl font-display font-black tracking-wider uppercase leading-tight mt-1 ${isSpecial ? 'text-[#E01B22] drop-shadow-[0_0_8px_rgba(224,27,34,0.3)]' : 'text-[#F7F2F2]'}`}>
+              {item.title}
+            </h3>
+          </div>
+
+          {/* Description */}
+          <p className="text-xs sm:text-sm text-[#A79798] leading-relaxed font-body font-medium">
+            {item.desc}
+          </p>
+        </div>
+
       </div>
-
-      {/* Main Title */}
-      <h3 className="text-xl sm:text-2xl font-display font-black text-[#F7F2F2] tracking-wider uppercase leading-none">
-        {item.title}
-      </h3>
-
-      {/* Date */}
-      <p className="text-xs font-mono font-bold tracking-[0.15em] text-[#B8B2B2] uppercase">
-        {item.date}
-      </p>
-
-      {/* Description */}
-      <p className="text-xs sm:text-sm text-[#A79798] leading-relaxed font-body font-medium max-w-[38ch]">
-        {item.desc}
-      </p>
     </div>
   );
 };

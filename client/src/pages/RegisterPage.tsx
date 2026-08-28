@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '../services/api';
-import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff, CheckCircle2, Copy, Check } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
+import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff, CheckCircle2, Copy, Check, FileWarning } from 'lucide-react';
 
 // ──────────────────────────────────────────────
 // Zod Validation Schema
 // ──────────────────────────────────────────────
 const participantSchema = z.object({
   name: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Enter a valid email address'),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian mobile number'),
   college_name: z.string().min(2, 'College name is required'),
   department: z.string().optional(),
   roll_no: z.string().optional(),
@@ -28,8 +27,6 @@ const participantSchema = z.object({
 
 const alumniSchema = z.object({
   name: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Enter a valid email address'),
-  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number').optional().or(z.literal('')),
   gender: z.string().optional(),
   batch_year: z.string().regex(/^\d{2}MX$/i, 'Batch code must be in YYMX format (e.g. 25MX)'),
   place: z.string().optional(),
@@ -103,6 +100,8 @@ const RegistrationSuccess: React.FC<{ loginId: string; name: string }> = ({ logi
 // ──────────────────────────────────────────────
 export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
 
   const [userType, setUserType] = useState<'PARTICIPANT' | 'ALUMNI'>('PARTICIPANT');
   const [loading, setLoading] = useState(false);
@@ -111,7 +110,6 @@ export const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Success state
-  const [successData, setSuccessData] = useState<{ loginId: string; name: string } | null>(null);
   const [alumniSuccess, setAlumniSuccess] = useState(false);
 
   useEffect(() => {
@@ -124,7 +122,7 @@ export const RegisterPage: React.FC = () => {
   const participantForm = useForm<ParticipantForm>({
     resolver: zodResolver(participantSchema),
     defaultValues: {
-      name: '', email: '', phone: '', college_name: '', department: '', roll_no: '',
+      name: '', college_name: '', department: '', roll_no: '',
       gender: 'Male', year_of_study: '1st Year', accommodation_required: false, password: '', confirmPassword: '',
     },
   });
@@ -132,7 +130,7 @@ export const RegisterPage: React.FC = () => {
   const alumniForm = useForm<AlumniForm>({
     resolver: zodResolver(alumniSchema),
     defaultValues: {
-      name: '', email: '', phone: '', gender: 'Male', batch_year: '', place: '', current_organization: '',
+      name: '', gender: 'Male', batch_year: '', place: '', current_organization: '',
       accommodation_required: false,
     },
   });
@@ -152,11 +150,10 @@ export const RegisterPage: React.FC = () => {
       if (userType === 'ALUMNI') {
         setAlumniSuccess(true);
       } else {
-        // Show success screen with LOGIN ID
-        setSuccessData({
-          loginId: res.data.loginId,
-          name: data.name,
-        });
+        // Auto-login and pass LOGIN ID to dashboard
+        setAuth(res.data.token, res.data.user);
+        localStorage.setItem('newLoginId', res.data.loginId);
+        navigate('/dashboard');
       }
     } catch (err: any) {
       setServerError(err.response?.data?.message || 'Registration failed. Please check your inputs and try again.');
@@ -166,9 +163,6 @@ export const RegisterPage: React.FC = () => {
   };
 
   // ── Render: Success States ──
-  if (successData) {
-    return <RegistrationSuccess loginId={successData.loginId} name={successData.name} />;
-  }
 
   if (alumniSuccess) {
     return (
@@ -177,9 +171,9 @@ export const RegisterPage: React.FC = () => {
           <div className="w-16 h-16 bg-[#1FA971]/20 border border-[#1FA971] text-[#1FA971] rounded-full flex items-center justify-center mx-auto">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-display font-bold text-[#F2F2F4]">Alumni Registration Confirmed!</h2>
+          <h2 className="text-2xl font-display font-bold text-[#F2F2F4]">Welcome Back Home!</h2>
           <p className="text-xs text-[#9A9AA2] leading-relaxed">
-            Thank you for registering for LOGIN 2026. Your record has been saved, and our organizing committee looks forward to welcoming you back to PSG Tech on 18 & 19 September 2026!
+            Your alumni registration for LOGIN 2026 has been confirmed. Our organizing committee looks forward to welcoming you back to PSG Tech on 18 & 19 September 2026!
           </p>
           <Link
             to="/"
@@ -238,19 +232,6 @@ export const RegisterPage: React.FC = () => {
               <label className={labelClass}>Full Name *</label>
               <input type="text" {...register('name')} placeholder="e.g. Arun" className={inputClass} />
               {errors.name && <p className={errorClass}>{(errors.name as any).message}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Email Address *</label>
-              <input type="email" {...register('email')} placeholder="example@mail.com" className={inputClass} />
-              {errors.email && <p className={errorClass}>{(errors.email as any).message}</p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Phone (10-Digit Mobile) *</label>
-              <input type="tel" {...register('phone')} placeholder="9876543210" className={inputClass} />
-              {errors.phone && <p className={errorClass}>{(errors.phone as any).message}</p>}
             </div>
             <div>
               <label className={labelClass}>Gender</label>
@@ -354,6 +335,15 @@ export const RegisterPage: React.FC = () => {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        {userType === 'PARTICIPANT' && (
+          <div className="bg-[#E08A17]/10 border border-[#E08A17]/40 p-3.5 rounded-[2px] flex items-start gap-3 text-[11px] text-[#E08A17] font-mono leading-relaxed mt-2">
+            <FileWarning className="w-5 h-5 shrink-0" />
+            <p>
+              <strong className="font-bold">IMPORTANT:</strong> A valid Bonafide Certificate from your college is strictly required for participation verification at the venue.
+            </p>
+          </div>
+        )}
 
         {userType !== 'ALUMNI' && (
           <div className="text-center text-xs text-[#9A9AA2]">

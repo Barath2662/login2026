@@ -4,6 +4,7 @@ import { MainLayout } from '../layouts/MainLayout';
 import { HomePage } from '../pages/HomePage';
 import { AboutPage } from '../pages/AboutPage';
 import { EventsPage } from '../pages/EventsPage';
+import { EventDetailsPage } from '../pages/EventDetailsPage';
 import { TimelinePage } from '../pages/TimelinePage';
 import { GalleryPage } from '../pages/GalleryPage';
 import { ContactPage } from '../pages/ContactPage';
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: 'home', element: <HomePage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'events', element: <EventsPage /> },
+      { path: 'events/:id', element: <EventDetailsPage /> },
       { path: 'timeline', element: <TimelinePage /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'contact', element: <ContactPage /> },

@@ -1,101 +1,16 @@
 import React from 'react';
-import { User, ShieldCheck } from 'lucide-react';
-// Removed unused DecryptedText import
-
-interface CoordCardProps {
-  name: string;
-  role: string;
-  isSecretary?: boolean;
-  imageSrc?: string;
-  status?: string;
-}
-
-const CoordCard: React.FC<CoordCardProps> = ({ name, role, isSecretary = false, imageSrc, status = "ONLINE" }) => {
-  return (
-    <div className={`relative border border-[#2A1A1D] bg-[#0A0607]/80 backdrop-blur-sm rounded-[2px] transition-all duration-500 group overflow-hidden ${
-      isSecretary 
-        ? 'p-6 border-[#E01B22]/40 shadow-[0_0_30px_rgba(224,27,34,0.05)] hover:border-[#E01B22]' 
-        : 'p-4 hover:border-[#E01B22]/50 hover:bg-[#130C0E]/50'
-    }`}>
-      {/* Laser Scanning line for Secretary */}
-      {isSecretary && (
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#E01B22] to-transparent animate-[scan_3s_ease-in-out_infinite] z-20 pointer-events-none" />
-      )}
-
-      {/* Futuristic Background Accents */}
-      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#E01B22]/30 group-hover:border-[#E01B22] transition-colors" />
-      <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#E01B22]/30 group-hover:border-[#E01B22] transition-colors" />
-      <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#E01B22]/30 group-hover:border-[#E01B22] transition-colors" />
-      <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#E01B22]/30 group-hover:border-[#E01B22] transition-colors" />
-
-      {/* Hologram Image Container for Secretary */}
-      {isSecretary && imageSrc ? (
-        <div className="relative w-full aspect-square mb-5 overflow-hidden border border-[#2A1A1D] bg-black/60 group-hover:border-[#E01B22]/40 transition-colors">
-          {/* Tech ticks */}
-          <div className="absolute top-2 left-2 text-[8px] font-mono text-[#E01B22]/50">SYS // DETECTED</div>
-          <div className="absolute bottom-2 right-2 text-[8px] font-mono text-[#E01B22]/50">LATENCY // 4MS</div>
-          
-          {/* Dynamic glitch scan line */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(224,27,34,0.15)_50%)] bg-[size:100%_4px] pointer-events-none z-10 opacity-70" />
-          
-          <img 
-            src={imageSrc} 
-            alt={name} 
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale contrast-125 group-hover:grayscale-0"
-          />
-          {/* Red color overlay blend */}
-          <div className="absolute inset-0 bg-[#E01B22]/10 mix-blend-color pointer-events-none" />
-        </div>
-      ) : null}
-
-      {/* Avatar Placeholder for Coordinators */}
-      {!isSecretary && (
-        <div className="flex items-center gap-3.5 mb-3">
-          <div className="w-10 h-10 rounded-full border border-[#2A1A1D] flex items-center justify-center bg-[#130C0E] group-hover:border-[#E01B22]/40 transition-colors">
-            <User className="w-4 h-4 text-[#A79798] group-hover:text-[#E01B22] transition-colors" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] font-mono text-[#A79798] tracking-widest uppercase">NODE // COORD</span>
-            <span className="text-[10px] font-mono text-[#E01B22] font-black tracking-wider flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E01B22] animate-pulse" />
-              {status}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Core metadata info */}
-      <div className="space-y-1 select-none">
-        <span className="text-[10px] font-mono font-bold text-[#E01B22]/80 uppercase tracking-widest block">
-          {role}
-        </span>
-        <h4 className="text-sm sm:text-base font-display font-black text-[#F7F2F2] tracking-wider uppercase group-hover:text-[#E01B22] transition-colors">
-          {name}
-        </h4>
-        
-        {isSecretary && (
-          <div className="flex items-center gap-2 pt-2.5 border-t border-[#2A1A1D] mt-3">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#E01B22]" />
-            <span className="text-[9px] font-mono text-[#A79798] tracking-widest uppercase">
-              SYMPOSIUM CHAIRPERSON
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import { ShieldCheck, Crosshair } from 'lucide-react';
 
 export const CoordinatorsSection: React.FC = () => {
   return (
-    <section id="coordinators-section" className="py-24 px-4 bg-[#130C0E] border-b border-[#2A1A1D] relative overflow-hidden">
+    <section id="coordinators-section" className="py-20 px-4 bg-[#130C0E] border-b border-[#2A1A1D] relative overflow-hidden">
       {/* Grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#0a0607_1px,transparent_1px),linear-gradient(to_bottom,#0a0607_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-25 pointer-events-none" />
 
-      {/* Red ambient glow behind Secretary */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[radial-gradient(circle,_rgba(224,27,34,0.05)_0%,_transparent_75%)] pointer-events-none filter blur-3xl z-0" />
+      {/* Red ambient glow behind Group */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,_rgba(224,27,34,0.08)_0%,_transparent_75%)] pointer-events-none filter blur-3xl z-0" />
 
-      <div className="max-w-6xl mx-auto space-y-16 relative z-10">
+      <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         
         {/* Section Header */}
         <div className="text-center space-y-2 select-none">
@@ -110,56 +25,120 @@ export const CoordinatorsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* Dynamic 3-Column Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        {/* Unified Group Photo Layout */}
+        <div className="flex flex-col items-center justify-center space-y-10">
           
-          {/* LEFT: Treasurer & Coordinator (md:col-span-4) */}
-          <div className="md:col-span-4 space-y-6">
-            <div className="text-left md:text-right pb-2 border-b border-[#2A1A1D] hidden md:block">
-              <span className="text-[9px] font-mono text-[#6B5A5C] tracking-widest block uppercase">
-                // EXECUTIVE MATRIX LEFT
-              </span>
+          {/* Group Photo Container */}
+          <div className="relative w-full max-w-5xl h-[450px] sm:h-[500px] md:h-[550px] overflow-hidden bg-transparent group flex items-end justify-center">
+            
+            {/* Background Container for frame (to not bound the image if it overflows, but here we contain it) */}
+            <div className="absolute inset-0 bg-[#0A0607]/60" />
+
+            {/* Corner Brackets (no full border) */}
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#E01B22]/50 z-20 transition-all duration-500 group-hover:border-[#E01B22]" />
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#E01B22]/50 z-20 transition-all duration-500 group-hover:border-[#E01B22]" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#E01B22]/50 z-20 transition-all duration-500 group-hover:border-[#E01B22]" />
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#E01B22]/50 z-20 transition-all duration-500 group-hover:border-[#E01B22]" />
+            
+            {/* Crosshair accents */}
+            <Crosshair className="absolute top-6 left-1/2 -translate-x-1/2 w-4 h-4 text-[#E01B22]/30 z-20 pointer-events-none" />
+            <Crosshair className="absolute bottom-6 left-1/2 -translate-x-1/2 w-4 h-4 text-[#E01B22]/30 z-20 pointer-events-none" />
+
+            {/* Tech labels / HUD */}
+            <div className="absolute top-4 left-4 text-[9px] font-mono text-[#E01B22]/70 z-20 flex flex-col space-y-1">
+              <span>SYS // TEAM_UNIT_05</span>
+              <span>DEPT: MCA</span>
             </div>
-            <CoordCard 
-              name="Hari Prasath S" 
-              role="Treasurer" 
-              status="SECURE"
+            <div className="absolute bottom-4 right-4 text-[9px] font-mono text-[#E01B22]/70 z-20 text-right">
+              <span>STATUS: ACTIVE</span>
+            </div>
+            
+            {/* Hologram / Glow Effects inside frame */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(224,27,34,0.15)_0%,_transparent_60%)] pointer-events-none z-0" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(224,27,34,0.1)_50%)] bg-[size:100%_4px] pointer-events-none z-10 opacity-30" />
+            
+            {/* The Group Image - Object Contain to show full faces & bodies */}
+            <img 
+              src="/coord_dummy.png" 
+              alt="Department Coordinators" 
+              className="relative w-full h-[95%] object-contain object-bottom transition-transform duration-1000 group-hover:scale-[1.03] z-10 drop-shadow-[0_0_25px_rgba(224,27,34,0.25)] filter contrast-110 saturate-[1.1]"
             />
-            <CoordCard 
-              name="Kavya R" 
-              role="Joint Secretary / Coordinator" 
-              status="ONLINE"
-            />
+
+            {/* Laser Scanning line */}
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#E01B22] to-transparent animate-[scan_3s_ease-in-out_infinite] z-20 pointer-events-none" />
           </div>
 
-          {/* CENTER: Secretary (md:col-span-4) */}
-          <div className="md:col-span-4">
-            <CoordCard 
-              name="Nitheesh M K" 
-              role="Student Secretary" 
-              isSecretary={true}
-              imageSrc="/assets/secretary.png"
-              status="ACTIVE"
-            />
-          </div>
-
-          {/* RIGHT: Two Coordinators (md:col-span-4) */}
-          <div className="md:col-span-4 space-y-6">
-            <div className="text-left pb-2 border-b border-[#2A1A1D] hidden md:block">
-              <span className="text-[9px] font-mono text-[#6B5A5C] tracking-widest block uppercase">
-                // EXECUTIVE MATRIX RIGHT
-              </span>
+          {/* Clean Information Panel */}
+          <div className="w-full max-w-4xl flex flex-col items-center space-y-8">
+            
+            {/* Leadership Block */}
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+                <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase">
+                  ◈ TEAM LEADERSHIP
+                </span>
+              </div>
+              
+              <div className="text-center space-y-1">
+                <p className="font-mono text-[10px] sm:text-xs text-[#E01B22] tracking-widest uppercase">
+                  STUDENT SECRETARY
+                </p>
+                <h3 className="font-display font-black text-2xl sm:text-3xl text-[#F7F2F2] tracking-wider uppercase drop-shadow-[0_0_10px_rgba(247,242,242,0.2)]">
+                  NITHEESH M K
+                </h3>
+              </div>
             </div>
-            <CoordCard 
-              name="Sanjay Kumar A" 
-              role="Event Coordinator" 
-              status="ONLINE"
-            />
-            <CoordCard 
-              name="Abishek S" 
-              role="Technical Coordinator" 
-              status="ACTIVE"
-            />
+
+            {/* Other Roles 2x2 Grid */}
+            <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Box 1 */}
+              <div className="border border-[#2A1A1D] bg-[#0A0607]/80 p-4 rounded-[2px] text-center hover:border-[#E01B22]/50 transition-colors group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E01B22]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="font-mono text-[9px] text-[#A79798] tracking-widest uppercase mb-1">
+                  TREASURER
+                </p>
+                <p className="font-display font-bold text-sm text-[#F7F2F2] tracking-wider uppercase group-hover:text-[#E01B22] transition-colors">
+                  HARI PRASATH S
+                </p>
+              </div>
+
+              {/* Box 2 */}
+              <div className="border border-[#2A1A1D] bg-[#0A0607]/80 p-4 rounded-[2px] text-center hover:border-[#E01B22]/50 transition-colors group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E01B22]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="font-mono text-[9px] text-[#A79798] tracking-widest uppercase mb-1">
+                  JOINT SECRETARY / COORD
+                </p>
+                <p className="font-display font-bold text-sm text-[#F7F2F2] tracking-wider uppercase group-hover:text-[#E01B22] transition-colors">
+                  KAVYA R
+                </p>
+              </div>
+
+              {/* Box 3 */}
+              <div className="border border-[#2A1A1D] bg-[#0A0607]/80 p-4 rounded-[2px] text-center hover:border-[#E01B22]/50 transition-colors group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E01B22]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="font-mono text-[9px] text-[#A79798] tracking-widest uppercase mb-1">
+                  EVENT COORD
+                </p>
+                <p className="font-display font-bold text-sm text-[#F7F2F2] tracking-wider uppercase group-hover:text-[#E01B22] transition-colors">
+                  SANJAY KUMAR A
+                </p>
+              </div>
+
+              {/* Box 4 */}
+              <div className="border border-[#2A1A1D] bg-[#0A0607]/80 p-4 rounded-[2px] text-center hover:border-[#E01B22]/50 transition-colors group relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E01B22]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="font-mono text-[9px] text-[#A79798] tracking-widest uppercase mb-1">
+                  TECHNICAL COORD
+                </p>
+                <p className="font-display font-bold text-sm text-[#F7F2F2] tracking-wider uppercase group-hover:text-[#E01B22] transition-colors">
+                  ABISHEK S
+                </p>
+              </div>
+
+            </div>
+
           </div>
 
         </div>

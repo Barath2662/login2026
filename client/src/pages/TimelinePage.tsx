@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import eventsData from '../data/events.json';
 import { useAuthStore } from '../store/authStore';
-import { UnifiedDossierModal } from '../components/ui/UnifiedDossierModal';
+import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, MapPin, Calendar, LayoutGrid, BarChart3, ChevronRight, Trophy } from 'lucide-react';
 
 interface Event {
@@ -40,32 +42,15 @@ const HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
 export const TimelinePage: React.FC = () => {
   const { isAuthenticated, user } = useAuthStore();
+  const navigate = useNavigate();
 
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events] = useState<Event[]>(eventsData as any);
   const [selectedDay, setSelectedDay] = useState<number>(18);
   const [viewMode, setViewMode] = useState<'GANTT' | 'CARDS'>('GANTT');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'TECHNICAL' | 'NON_TECHNICAL'>('ALL');
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
-  useEffect(() => {
-    const fetchTimeline = async () => {
-      try {
-        setLoading(true);
-        const res = await api.events.getAll();
-        if (Array.isArray(res.data)) {
-          setEvents(res.data);
-        }
-      } catch (err) {
-        console.error('Failed to load timeline:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTimeline();
-  }, []);
+  // Removed fetchTimeline useEffect since eventsData is statically loaded
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'student') {
@@ -173,15 +158,8 @@ export const TimelinePage: React.FC = () => {
 
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="p-16 text-center bg-[#130C0E] border border-[#2A1A1D] rounded-[2px] font-mono text-[#A79798]">
-            Loading Event Schedule &amp; Timetable...
-          </div>
-        )}
-
         {/* VIEW MODE 1: VISUAL HORIZONTAL GANTT TIMELINE GRAPH */}
-        {!loading && viewMode === 'GANTT' && (
+        {viewMode === 'GANTT' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] rounded-[2px] p-6 space-y-6 shadow-2xl overflow-hidden">
             
             {/* Timeline Guide Legend */}
@@ -222,7 +200,7 @@ export const TimelinePage: React.FC = () => {
 
                 {/* 2. Visual Schedule Bars Container */}
                 <div className="space-y-3 pt-3 relative z-10">
-                  {dayEvents.map((evt) => {
+                  {dayEvents.map((evt, idx) => {
                     const startMin = timeToMinutes(evt.start_time);
                     const endMin = timeToMinutes(evt.end_time);
                     
@@ -237,10 +215,16 @@ export const TimelinePage: React.FC = () => {
                     const isTech = evt.category === 'TECHNICAL';
 
                     return (
-                      <div key={evt.id} className="relative h-20 group">
+                      <motion.div 
+                        key={evt.id} 
+                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{ duration: 0.5, delay: idx * 0.1, type: 'spring', stiffness: 100 }}
+                        className="relative h-20 group"
+                      >
                         {/* Event Positioning Box on Time Axis */}
                         <div
-                          onClick={() => setSelectedEvent(evt)}
+                          onClick={() => navigate(`/events/${(evt as any).slug}`)}
                           style={{
                             left: `${leftPercent}%`,
                             width: `${widthPercent}%`,
@@ -295,7 +279,7 @@ export const TimelinePage: React.FC = () => {
                             </span>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -307,16 +291,19 @@ export const TimelinePage: React.FC = () => {
         )}
 
         {/* VIEW MODE 2: CHRONOLOGICAL CARDS LIST */}
-        {!loading && viewMode === 'CARDS' && (
+        {viewMode === 'CARDS' && (
           <div className="space-y-4">
-            {dayEvents.map((evt) => {
+            {dayEvents.map((evt, idx) => {
               const isRegistered = userRegistrations.includes(evt.id);
               const isTech = evt.category === 'TECHNICAL';
 
               return (
-                <div
+                <motion.div
                   key={evt.id}
-                  onClick={() => setSelectedEvent(evt)}
+                  onClick={() => navigate(`/events/${(evt as any).slug}`)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: idx * 0.05 }}
                   className="bg-[#130C0E] border border-[#2A1A1D] hover:border-[#FF2A2A] p-5 rounded-[2px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer transition-all hover:bg-[#1A1114] group"
                 >
                   <div className="flex items-center gap-4">
@@ -366,7 +353,7 @@ export const TimelinePage: React.FC = () => {
                     </span>
                     <ChevronRight className="w-4 h-4 text-[#E01B22] group-hover:translate-x-1 transition-transform" />
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -407,13 +394,7 @@ export const TimelinePage: React.FC = () => {
           </div>
         )}
 
-        {selectedEvent && (
-          <UnifiedDossierModal
-            event={selectedEvent}
-            isOpen={true}
-            onClose={() => setSelectedEvent(null)}
-          />
-        )}
+        {/* UnifiedDossierModal removed in favor of /events/:slug route */}
       </div>
     </div>
   );

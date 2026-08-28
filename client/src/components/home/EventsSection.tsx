@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../../services/api';
 import { ArrowRight } from 'lucide-react';
 import { EventOrbit } from '../events/EventOrbit';
+import eventsData from '../../data/events.json';
 
 // Static event metadata representing the 11 arenas
 const STATIC_EVENTS = [
@@ -23,22 +23,19 @@ export const EventsSection: React.FC = () => {
   const [events, setEvents] = useState(STATIC_EVENTS);
 
   useEffect(() => {
-    api.events.getAll().then((res) => {
-      if (Array.isArray(res.data) && res.data.length > 0) {
-        // Map dynamic database IDs to our static event list
-        const updated = STATIC_EVENTS.map(item => {
-          const matched = res.data.find((e: any) => {
-            const nameDb = e.name.toLowerCase();
-            const nameStatic = item.name.toLowerCase();
-            return nameDb.includes(nameStatic) || nameStatic.includes(nameDb) || 
-                   (nameStatic.includes('qr') && nameDb.includes('treasure')) ||
-                   (nameStatic.includes('phoenix') && nameDb.includes('phoenix'));
-          });
-          return matched ? { ...item, id: matched.id, category: matched.category } : item;
+    if (eventsData && eventsData.length > 0) {
+      const updated = STATIC_EVENTS.map(item => {
+        const matched = eventsData.find((e: any) => {
+          const nameDb = e.name.toLowerCase();
+          const nameStatic = item.name.toLowerCase();
+          return nameDb.includes(nameStatic) || nameStatic.includes(nameDb) || 
+                 (nameStatic.includes('qr') && nameDb.includes('treasure')) ||
+                 (nameStatic.includes('phoenix') && nameDb.includes('phoenix'));
         });
-        setEvents(updated);
-      }
-    }).catch(() => {});
+        return matched ? { ...item, id: matched.id, category: matched.category, slug: matched.slug } : item;
+      });
+      setEvents(updated);
+    }
   }, []);
 
   return (

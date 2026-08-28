@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { DecryptedText } from '../../animations/DecryptedText';
+import GradientWaves from '../../animations/GradientWaves';
 
 interface HeroSectionProps {
   onExploreEvents: () => void;
@@ -15,7 +16,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
     <section 
       className="relative min-h-[100dvh] flex flex-col justify-center items-center text-center overflow-hidden pt-20"
       style={{
-        backgroundImage: "url('/assets/hero.webp')",
+        backgroundImage: "url('/final_hero_doom.webp')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -26,6 +27,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
       {/* Layer 1: Dark Base Vignette Overlay */}
       <div className="absolute inset-0 bg-black/25 pointer-events-none z-0" />
       
+      {/* Light Red Theme Gradient Waves from ReactBits */}
+      <div className="absolute inset-0 z-0 opacity-50 mix-blend-screen select-none">
+         <GradientWaves 
+            horizonColor="#4A0404" 
+            waveColor="#E01B22" 
+            crestColor="#FF2A2A"
+            speed={0.3} 
+            amplitude={1.8} 
+            waveScale={0.8}
+            opacity={0.6}
+            mouseInteraction={true}
+            className="w-full h-full"
+         />
+      </div>
+
       {/* Layer 2: Deep Red Thematic Vignette Aura */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(126,9,16,0.18)_0%,_transparent_75%)] pointer-events-none z-0" />
       
@@ -52,7 +68,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
       <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-4xl mx-auto px-4 flex-grow py-12">
         
         {/* ── Top Header Spacer & Institutional Label ── */}
-        <div className="flex flex-col items-center select-none space-y-1.5 mb-10 sm:mb-14">
+        <div className="flex flex-col items-center select-none space-y-1.5 mb-4 sm:mb-6">
           <div className="flex flex-col items-center justify-center gap-3">
             <div className="flex items-center gap-3 justify-center select-none">
               {/* PSG Main Logo */}

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import type { Event } from '../../types/event';
 import { Calendar, Users, User, Clock, MapPin, ArrowRight, Search, Filter, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const DashboardEventsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -15,6 +16,14 @@ export const DashboardEventsPage: React.FC = () => {
     queryKey: ['events'],
     queryFn: async () => { const res = await api.events.getAll(); return res.data || []; },
   });
+
+  const { data: paymentData } = useQuery({
+    queryKey: ['payment-status'],
+    queryFn: async () => { const res = await api.payments.getMyStatus(); return res.data; },
+  });
+
+  const pStatus = paymentData?.status || 'NOT_SUBMITTED';
+  const canRegister = pStatus === 'PENDING' || pStatus === 'VERIFIED';
 
   const registerMutation = useMutation({
     mutationFn: async (eventId: number) => {
@@ -38,6 +47,16 @@ export const DashboardEventsPage: React.FC = () => {
     const matchesFilter = filter === 'ALL' || event.team_type === filter;
     return matchesSearch && matchesFilter && event.status === 'open';
   });
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 10 },
+    show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
 
   return (
     <div className="space-y-6">
@@ -94,10 +113,16 @@ export const DashboardEventsPage: React.FC = () => {
       ) : filteredEvents.length === 0 ? (
         <div className="text-center py-12 text-xs font-mono text-[#6B5A5C]">No events found</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
           {filteredEvents.map((event) => (
-            <div key={event.id} className="bg-[#130C0E] border border-[#2A1A1D] rounded-[2px] p-5 space-y-4 hover:border-[#3E2529] transition-colors">
-              <div className="flex items-start justify-between gap-3">
+            <motion.div variants={itemVariants} key={event.id} className="bg-[#130C0E] border border-[#2A1A1D] rounded-[2px] p-5 space-y-4 hover:border-[#3E2529] transition-colors flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-display font-bold text-[#F7F2F2]">{event.name}</h3>
                   <span className={`inline-block mt-1 px-2 py-0.5 text-[9px] font-mono font-bold rounded-[2px] ${
@@ -124,7 +149,15 @@ export const DashboardEventsPage: React.FC = () => {
                 {event.venue && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.venue}</span>}
               </div>
 
-              {event.team_type === 'INDIVIDUAL' ? (
+              <div className="pt-2">
+                {!canRegister ? (
+                  <button
+                    disabled
+                    className="w-full py-2.5 bg-[#4A050A] text-[#FF2A2A] border border-[#E01B22] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 opacity-70 cursor-not-allowed"
+                  >
+                    PAYMENT REQUIRED TO REGISTER
+                  </button>
+                ) : event.team_type === 'INDIVIDUAL' ? (
                 <button
                   onClick={() => registerMutation.mutate(event.id)}
                   disabled={registerMutation.isPending}
@@ -139,10 +172,11 @@ export const DashboardEventsPage: React.FC = () => {
                 >
                   CREATE / JOIN TEAM <ArrowRight className="w-3 h-3 inline ml-1" />
                 </a>
-              )}
-            </div>
+                )}
+              </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

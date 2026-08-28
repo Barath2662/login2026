@@ -19,6 +19,23 @@ interface EventOrbitProps {
 export const EventOrbit: React.FC<EventOrbitProps> = ({ events }) => {
   const navigate = useNavigate();
   const [activeEvent, setActiveEvent] = useState<OrbitEvent | null>(null);
+  
+  // Animation state
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const requestRef = React.useRef<number>(0);
+
+  const animate = () => {
+    if (!isHovered) {
+      setRotationAngle(prev => (prev + 0.002) % (2 * Math.PI));
+    }
+    requestRef.current = requestAnimationFrame(animate);
+  };
+
+  React.useEffect(() => {
+    requestRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(requestRef.current!);
+  }, [isHovered]);
 
   // Layout parameters for Desktop
   const center = 250; // Center X and Y of the 500x500 container
@@ -26,11 +43,15 @@ export const EventOrbit: React.FC<EventOrbitProps> = ({ events }) => {
   const totalEvents = events.length;
 
   const handleNodeClick = (evt: OrbitEvent) => {
-    navigate(`/events?id=${evt.id}`);
+    navigate(`/events/${(evt as any).slug}`);
   };
 
   return (
-    <div className="w-full flex items-center justify-center py-6 select-none">
+    <div 
+      className="w-full flex items-center justify-center py-6 select-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* ── Desktop & Tablet Orbital view (hidden on small mobile screens) ── */}
       <div className="hidden md:block relative w-[500px] h-[500px] shrink-0">
         
@@ -44,22 +65,22 @@ export const EventOrbit: React.FC<EventOrbitProps> = ({ events }) => {
         <div className="absolute w-[380px] h-[380px] top-[60px] left-[60px] rounded-full border border-dashed border-[#E01B22]/15 pointer-events-none" />
 
         {/* Orbit Indicator Dots */}
-        <div className="absolute top-[60px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none" />
-        <div className="absolute bottom-[60px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none" />
-        <div className="absolute left-[60px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none" />
-        <div className="absolute right-[60px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none" />
+        <div className="absolute top-[60px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none animate-pulse" />
+        <div className="absolute bottom-[60px] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none animate-pulse" />
+        <div className="absolute left-[60px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none animate-pulse" />
+        <div className="absolute right-[60px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#E01B22]/55 pointer-events-none animate-pulse" />
 
         {/* Central Hub centerpiece */}
         <EventHub
           activeEventName={activeEvent?.name}
-          activeEventCategory={activeEvent?.category}
+          activeEventCategory={activeEvent ? ((activeEvent as any).detail?.quote || activeEvent.category) : undefined}
         />
 
         {/* 11 Evenly Spaced Event Nodes */}
         {events.map((evt, index) => {
           // Calculate positions dynamically using trigonometry
-          // Offset by -Math.PI / 2 to position the first node at the top center
-          const angle = (index / totalEvents) * 2 * Math.PI - Math.PI / 2;
+          // Add rotationAngle to make them orbit over time
+          const angle = (index / totalEvents) * 2 * Math.PI - Math.PI / 2 + rotationAngle;
           const x = center + radius * Math.cos(angle);
           const y = center + radius * Math.sin(angle);
 

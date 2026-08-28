@@ -114,10 +114,16 @@ const registerUser = async (req, res) => {
 
     const isAlumni = String(user_type).toUpperCase() === "ALUMNI";
 
-    if (!name || !email || (!isAlumni && !password)) {
+    // Generate unique LOGIN ID first so we can use it for the dummy email
+    const loginId = await generateLoginId(transaction);
+
+    const finalEmail = email ? email.toLowerCase() : `${loginId.toLowerCase()}@login2k26.psgtech.ac.in`;
+    const finalPhone = phone || null;
+
+    if (!name || (!isAlumni && !password)) {
       await transaction.rollback();
       return res.status(400).json({
-        message: isAlumni ? "Name and email are required" : "Name, email and password are required",
+        message: isAlumni ? "Name is required" : "Name and password are required",
       });
     }
 
@@ -128,30 +134,30 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const existingUser = await userModel.findOne({
-      where: { email },
-      transaction,
-    });
-
-    if (existingUser) {
-      await transaction.rollback();
-      return res.status(409).json({
-        message: "Email already registered",
+    // Only check for existing user if a real email was provided
+    if (email) {
+      const existingUser = await userModel.findOne({
+        where: { email: finalEmail },
+        transaction,
       });
+
+      if (existingUser) {
+        await transaction.rollback();
+        return res.status(409).json({
+          message: "Email already registered",
+        });
+      }
     }
 
     const rawPassword = password || `AlumniRSVP_${Math.random().toString(36).slice(-8)}`;
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-    // Generate unique LOGIN ID
-    const loginId = await generateLoginId(transaction);
-
     const normalizedRole = "student";
     const user = await userModel.create(
       {
         name,
-        email,
-        phone,
+        email: finalEmail,
+        phone: finalPhone,
         password: hashedPassword,
         college_name,
         department,
@@ -173,31 +179,33 @@ const registerUser = async (req, res) => {
 
     await pairPendingTeamInvite(user.id, user.email);
 
-    // Send welcome email with LOGIN ID
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    sendEmail({
-      to: user.email,
-      subject: `[LOGIN 2026] Welcome! Your Participant ID: ${loginId}`,
-      html: `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; border-radius: 6px; max-width: 600px; margin: 0 auto; border: 1px solid #2A1A1D;">
-          <div style="border-bottom: 2px solid #E01B22; padding-bottom: 16px; margin-bottom: 24px;">
-            <h1 style="color: #E01B22; margin: 0; font-size: 24px; letter-spacing: 2px;">LOGIN 2026</h1>
-            <p style="color: #A79798; margin: 6px 0 0 0; font-size: 12px; font-family: monospace;">Department of Computer Applications • PSG College of Technology</p>
+    // Send welcome email with LOGIN ID only if a real email was provided
+    if (email) {
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      sendEmail({
+        to: finalEmail,
+        subject: `[LOGIN 2026] Welcome! Your Participant ID: ${loginId}`,
+        html: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; border-radius: 6px; max-width: 600px; margin: 0 auto; border: 1px solid #2A1A1D;">
+            <div style="border-bottom: 2px solid #E01B22; padding-bottom: 16px; margin-bottom: 24px;">
+              <h1 style="color: #E01B22; margin: 0; font-size: 24px; letter-spacing: 2px;">LOGIN 2026</h1>
+              <p style="color: #A79798; margin: 6px 0 0 0; font-size: 12px; font-family: monospace;">Department of Computer Applications • PSG College of Technology</p>
+            </div>
+            <h2 style="color: #F7F2F2; font-size: 20px; margin-top: 0;">Welcome to LOGIN 2026!</h2>
+            <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Hello <strong style="color: #F7F2F2;">${user.name}</strong>,</p>
+            <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Your participant account has been created successfully.</p>
+            <div style="background: #130C0E; border: 2px solid #E01B22; padding: 24px; margin: 24px 0; border-radius: 4px; text-align: center;">
+              <p style="color: #A79798; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 2px;">Your Participant ID</p>
+              <h2 style="color: #E01B22; font-size: 36px; margin: 0; letter-spacing: 4px; font-family: monospace;">${loginId}</h2>
+            </div>
+            <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Use this ID along with your password to log in at <a href="${frontendUrl}/login" style="color: #E01B22;">${frontendUrl}/login</a>.</p>
+            <p style="color: #6B5A5C; font-size: 12px; margin-top: 24px; border-top: 1px solid #2A1A1D; padding-top: 16px;">
+              For assistance, contact the organizing team at <a href="mailto:login@psgtech.ac.in" style="color: #E01B22;">login@psgtech.ac.in</a>.
+            </p>
           </div>
-          <h2 style="color: #F7F2F2; font-size: 20px; margin-top: 0;">Welcome to LOGIN 2026!</h2>
-          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Hello <strong style="color: #F7F2F2;">${user.name}</strong>,</p>
-          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Your participant account has been created successfully.</p>
-          <div style="background: #130C0E; border: 2px solid #E01B22; padding: 24px; margin: 24px 0; border-radius: 4px; text-align: center;">
-            <p style="color: #A79798; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 2px;">Your Participant ID</p>
-            <h2 style="color: #E01B22; font-size: 36px; margin: 0; letter-spacing: 4px; font-family: monospace;">${loginId}</h2>
-          </div>
-          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Use this ID along with your password to log in at <a href="${frontendUrl}/login" style="color: #E01B22;">${frontendUrl}/login</a>.</p>
-          <p style="color: #6B5A5C; font-size: 12px; margin-top: 24px; border-top: 1px solid #2A1A1D; padding-top: 16px;">
-            For assistance, contact the organizing team at <a href="mailto:login@psgtech.ac.in" style="color: #E01B22;">login@psgtech.ac.in</a>.
-          </p>
-        </div>
-      `,
-    });
+        `,
+      });
+    }
 
     const token = jwt.sign(
       {

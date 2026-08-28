@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DecryptedText } from '../animations/DecryptedText';
 
 interface IntroVideoProps {
   onComplete: () => void;
@@ -42,9 +43,9 @@ export const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete }) => {
     if (phase === 2) {
       interval = setInterval(() => {
         setCountdown((prev) => {
-          if (prev <= 1) {
+          if (prev <= 0) {
             clearInterval(interval);
-            return 1;
+            return 0;
           }
           return prev - 1;
         });
@@ -70,7 +71,9 @@ export const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete }) => {
         <AnimatePresence mode="wait">
           {phase === 0 && (
             <motion.div key="phase0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-              <div className="text-[#E01B22] text-sm tracking-widest uppercase">INITIALIZING SYSTEM...</div>
+              <div className="text-[#E01B22] text-sm tracking-widest uppercase">
+                <DecryptedText text="INITIALIZING SYSTEM..." speed={40} maxIterations={10} animateOn="view" />
+              </div>
               <div className="text-xs text-[#6B5A5C] tracking-widest flex items-center gap-2 justify-center">
                 <span>[</span>
                 <span className="text-[#F7F2F2]">████████░░</span>
@@ -81,7 +84,9 @@ export const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete }) => {
 
           {phase === 1 && (
             <motion.div key="phase1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="text-[#F7F2F2] text-sm tracking-widest uppercase animate-pulse">SCANNING LIFE FORMS...</div>
+              <div className="text-[#F7F2F2] text-sm tracking-widest uppercase animate-pulse">
+                <DecryptedText text="SCANNING LIFE FORMS..." speed={40} maxIterations={10} animateOn="view" />
+              </div>
             </motion.div>
           )}
 
@@ -98,7 +103,7 @@ export const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete }) => {
             <motion.div key="phase3" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-6">
               <div className="text-[#E01B22] text-sm tracking-widest uppercase">FINAL SUBJECT DETECTED.</div>
               <div className="text-4xl sm:text-6xl font-black font-display tracking-widest text-[#F7F2F2]">
-                THE LAST HUMAN.
+                <DecryptedText text="THE LAST HUMAN." speed={50} maxIterations={12} animateOn="view" />
               </div>
             </motion.div>
           )}

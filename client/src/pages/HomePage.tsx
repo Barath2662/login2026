@@ -7,6 +7,7 @@ import { TimelineSection } from '../components/home/TimelineSection';
 import { ScheduleSection } from '../components/home/ScheduleSection';
 import { CommunitySection } from '../components/home/CommunitySection';
 import { CoordinatorsSection } from '../components/home/CoordinatorsSection';
+import { ScrollReveal } from '../animations/ScrollReveal';
 
 export const HomePage: React.FC = () => {
   const handleScrollToEvents = () => {
@@ -20,28 +21,44 @@ export const HomePage: React.FC = () => {
     <div className="min-h-screen bg-[#0A0607] text-[#F7F2F2] overflow-x-hidden">
       
       {/* 01. NAVIGATION + HERO */}
-      <HeroSection onExploreEvents={handleScrollToEvents} />
+      <ScrollReveal direction="none" duration={1.2}>
+        <HeroSection onExploreEvents={handleScrollToEvents} />
+      </ScrollReveal>
 
       {/* 02. LATEST NEWS & METRICS */}
-      <NewsSection />
+      <ScrollReveal direction="up" delay={0.2}>
+        <NewsSection />
+      </ScrollReveal>
 
       {/* 03. ABOUT LOGIN */}
-      <AboutSection />
+      <ScrollReveal direction="up" amount={0.3}>
+        <AboutSection />
+      </ScrollReveal>
 
       {/* 05. EVENTS */}
-      <EventsSection />
+      <ScrollReveal direction="up" amount={0.1}>
+        <EventsSection />
+      </ScrollReveal>
 
       {/* 06. TIMELINE */}
-      <TimelineSection />
+      <ScrollReveal direction="up" amount={0.2}>
+        <TimelineSection />
+      </ScrollReveal>
 
       {/* 07. DAY SPOTLIGHT / SCHEDULE */}
-      <ScheduleSection />
+      <ScrollReveal direction="up" amount={0.2}>
+        <ScheduleSection />
+      </ScrollReveal>
 
       {/* 08. COMMUNITY / ALUMNI */}
-      <CommunitySection />
+      <ScrollReveal direction="up" amount={0.2}>
+        <CommunitySection />
+      </ScrollReveal>
 
       {/* 08b. LEADERSHIP / COORDINATORS */}
-      <CoordinatorsSection />
+      <ScrollReveal direction="up" amount={0.2}>
+        <CoordinatorsSection />
+      </ScrollReveal>
 
     </div>
   );

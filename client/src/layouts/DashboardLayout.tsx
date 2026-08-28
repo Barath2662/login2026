@@ -52,15 +52,16 @@ export const DashboardLayout: React.FC = () => {
     <div className="flex flex-col h-full">
       {/* Profile Header */}
       <div className="p-5 border-b border-[#2A1A1D]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#7E0910] border border-[#E01B22] flex items-center justify-center font-display font-bold text-sm text-[#F7F2F2]">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#7E0910] border border-[#E01B22] flex items-center justify-center font-display font-bold text-sm text-[#F7F2F2] shrink-0 mt-0.5">
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-display font-bold text-[#F7F2F2] truncate">{user?.name}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <KeyRound className="w-3 h-3 text-[#E01B22]" />
-              <span className="text-[11px] font-mono text-[#E01B22] font-bold">{user?.login_id || '—'}</span>
+            <p className="text-sm font-display font-bold text-[#F7F2F2] truncate leading-tight">{user?.name}</p>
+            <p className="text-[10px] font-mono text-[#A79798] uppercase tracking-wider mt-1">{user?.user_type || 'PARTICIPANT'}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-[10px] font-mono text-[#E01B22]">ID:</span>
+              <span className="text-[11px] font-mono text-[#F7F2F2] font-bold">{user?.login_id || '—'}</span>
             </div>
           </div>
         </div>
