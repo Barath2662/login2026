@@ -55,7 +55,7 @@ export const DashboardEventsPage: React.FC = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 10 },
-    show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+    show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } as const }
   };
 
   return (
@@ -147,6 +147,7 @@ export const DashboardEventsPage: React.FC = () => {
                 <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Day {event.day}</span>
                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{event.start_time?.slice(0, 5)} - {event.end_time?.slice(0, 5)}</span>
                 {event.venue && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.venue}</span>}
+              </div>
               </div>
 
               <div className="pt-2">

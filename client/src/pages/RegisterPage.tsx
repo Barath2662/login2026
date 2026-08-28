@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff, CheckCircle2, Copy, Check, FileWarning } from 'lucide-react';
+import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff, FileWarning } from 'lucide-react';
 
 // ──────────────────────────────────────────────
 // Zod Validation Schema
@@ -36,64 +36,6 @@ const alumniSchema = z.object({
 
 type ParticipantForm = z.infer<typeof participantSchema>;
 type AlumniForm = z.infer<typeof alumniSchema>;
-
-// ──────────────────────────────────────────────
-// Success Screen Component
-// ──────────────────────────────────────────────
-const RegistrationSuccess: React.FC<{ loginId: string; name: string }> = ({ loginId, name }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(loginId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-[#0A0607]">
-      <div className="max-w-md w-full bg-[#130C0E] border border-[#1FA971] p-8 rounded-[2px] text-center space-y-6 animate-scale-in corner-bracket-container">
-        <div className="corner-bracket-tl" />
-        <div className="corner-bracket-br" />
-
-        <div className="w-20 h-20 bg-[#1FA971]/15 border-2 border-[#1FA971] rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle2 className="w-10 h-10 text-[#1FA971]" />
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-2xl font-display font-extrabold text-[#F7F2F2] tracking-wider">REGISTRATION SUCCESSFUL</h2>
-          <p className="text-sm text-[#A79798]">Welcome to LOGIN 2K26, <strong className="text-[#F7F2F2]">{name}</strong>.</p>
-        </div>
-
-        {/* LOGIN ID Display */}
-        <div className="bg-[#0A0607] border-2 border-[#E01B22] p-6 rounded-[2px] space-y-3">
-          <p className="text-[10px] font-mono text-[#A79798] uppercase tracking-[3px]">Your Participant ID</p>
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-4xl font-mono font-extrabold text-[#E01B22] tracking-[4px] select-all">{loginId}</span>
-            <button
-              onClick={handleCopy}
-              className="p-2 rounded-[2px] bg-[#2A1A1D] hover:bg-[#3E2529] transition-colors"
-              title="Copy LOGIN ID"
-            >
-              {copied ? <Check className="w-4 h-4 text-[#1FA971]" /> : <Copy className="w-4 h-4 text-[#A79798]" />}
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-[#E08A17]/10 border border-[#E08A17]/40 p-3 rounded-[2px] text-xs text-[#E08A17] font-mono">
-          Please save this ID. You will use it to log in.
-        </div>
-
-        <Link
-          to="/login"
-          className="shimmer-btn inline-flex items-center gap-2 px-8 py-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-bold font-mono text-sm rounded-[2px] transition-all hover:shadow-[0_0_25px_rgba(224,27,34,0.4)]"
-        >
-          PROCEED TO LOGIN
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-    </div>
-  );
-};
 
 // ──────────────────────────────────────────────
 // Main Register Page
@@ -197,7 +139,7 @@ export const RegisterPage: React.FC = () => {
       <div className="max-w-xl w-full bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] shadow-2xl space-y-7 animate-scale-in relative corner-bracket-container">
         <div className="corner-bracket-tl" />
         <div className="corner-bracket-br" />
-        
+
         {/* Header */}
         <div className="text-center space-y-2">
           <img src="/assets/login.png" alt="LOGIN 2026 Logo" className="h-14 w-auto mx-auto drop-shadow-[0_0_15px_rgba(224,27,34,0.4)]" />
