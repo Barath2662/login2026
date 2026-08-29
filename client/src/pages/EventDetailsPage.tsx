@@ -261,6 +261,12 @@ export const EventDetailsPage: React.FC = () => {
                       Invite-Only (Competition Winners)
                     </span>
                   </div>
+                ) : selectedEvent.status !== 'open' ? (
+                  <div className="w-full bg-[#130C0E] border border-[#2A1A1D] p-4 text-center rounded-[2px]">
+                    <span className="text-[#A79798] font-mono text-sm font-bold uppercase tracking-widest cursor-not-allowed">
+                      Registration Filled
+                    </span>
+                  </div>
                 ) : isRegistered ? (
                   <div className="w-full bg-[#0F291E] border border-[#1FA971] p-4 text-center rounded-[2px] shadow-[0_0_20px_rgba(31,169,113,0.1)]">
                     <span className="text-[#1FA971] font-mono text-sm font-bold flex items-center justify-center gap-2 uppercase tracking-widest">

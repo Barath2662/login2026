@@ -165,14 +165,14 @@ export const DashboardLayout: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#0A0607] flex">
+    <div className="min-h-screen bg-[#0A0607] flex relative">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-[#130C0E] border-r border-[#2A1A1D] flex-col fixed top-0 left-0 h-screen z-30 xl:left-[72px]">
+      <aside className="hidden lg:flex w-64 bg-[#130C0E] border-r border-[#2A1A1D] flex-col fixed top-0 lg:top-[80px] left-0 h-screen lg:h-[calc(100vh-80px)] z-30">
         {sidebar}
       </aside>
 
       {/* Mobile Header Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#130C0E] border-b border-[#2A1A1D] px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-30 bg-[#130C0E] border-b border-[#2A1A1D] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <KeyRound className="w-4 h-4 text-[#E01B22]" />
           <span className="text-sm font-mono font-bold text-[#E01B22]">
@@ -201,9 +201,9 @@ export const DashboardLayout: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 xl:ml-64 min-h-screen">
-        <div className="pt-16 lg:pt-0">
-          <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+      <main className="flex-1 lg:ml-64 min-h-screen w-full">
+        <div className="pt-4 lg:pt-0">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full overflow-x-hidden">
             <Outlet />
           </div>
         </div>

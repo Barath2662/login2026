@@ -67,7 +67,10 @@ const createRegistration = async (req, res) => {
       });
     }
 
-    // 3. Deadline Check
+    // 3. Deadline and Status Check
+    if (event.status !== "open") {
+      return res.status(400).json({ message: "Registrations for this event are currently closed." });
+    }
     if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
       return res.status(400).json({ message: "Registrations for this event are closed." });
     }

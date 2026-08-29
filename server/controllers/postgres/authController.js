@@ -7,6 +7,7 @@ const paymentModel = require("../../models/postgres/paymentModel");
 const registrationModel = require("../../models/postgres/registrationModel");
 const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
+const otpModel = require("../../models/postgres/otpModel");
 const { sendEmail } = require("../../services/emailService");
 
 const jwtSecret = process.env.JWT_SECRET || "super_secret_jwt_key_login_2026";
@@ -73,6 +74,44 @@ const generateLoginId = async (transaction) => {
   return `${LOGIN_ID_PREFIX}${maxNum + 1}`;
 };
 
+const sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    const existingOtp = await otpModel.findOne({ where: { email: email.toLowerCase() } });
+    if (existingOtp) {
+      await existingOtp.update({ otp, expires_at: expiresAt });
+    } else {
+      await otpModel.create({ email: email.toLowerCase(), otp, expires_at: expiresAt });
+    }
+
+    await sendEmail({
+      to: email,
+      subject: "[LOGIN 2026] Your Verification OTP",
+      html: `
+        <div style="font-family: Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 24px; border-radius: 6px; border: 1px solid #2A1A1D; text-align: center;">
+          <h2 style="color: #E01B22; margin-top: 0;">LOGIN 2026 Verification</h2>
+          <p>Your OTP code is:</p>
+          <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #F7F2F2; background: #130C0E; padding: 16px; display: inline-block; border: 1px solid #E01B22; border-radius: 4px; margin: 16px 0;">
+            ${otp}
+          </div>
+          <p style="color: #A79798; font-size: 14px;">This code expires in 10 minutes. Do not share it with anyone.</p>
+        </div>
+      `,
+    });
+
+    return res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to send OTP", error: error.message });
+  }
+};
+
 const buildUserResponse = (user, hasPaidFee, registrations = []) => ({
   id: user.id,
   login_id: user.login_id,
@@ -110,6 +149,7 @@ const registerUser = async (req, res) => {
       place,
       current_organization,
       accommodation_required = false,
+      otp,
     } = req.body;
 
     const isAlumni = String(user_type).toUpperCase() === "ALUMNI";
@@ -132,6 +172,28 @@ const registerUser = async (req, res) => {
       return res.status(400).json({
         message: "Alumni batch code must use YYMX format, such as 25MX or 95MX",
       });
+    }
+
+    if (!isAlumni) {
+      if (!email || !otp) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "Email and OTP are required for participant registration." });
+      }
+
+      const validOtp = await otpModel.findOne({
+        where: { email: email.toLowerCase(), otp },
+        transaction,
+      });
+
+      if (!validOtp) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "Invalid or expired OTP." });
+      }
+
+      if (new Date() > validOtp.expires_at) {
+        await transaction.rollback();
+        return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+      }
     }
 
     // Only check for existing user if a real email was provided
@@ -178,6 +240,10 @@ const registerUser = async (req, res) => {
     await transaction.commit();
 
     await pairPendingTeamInvite(user.id, user.email);
+
+    if (!isAlumni && email) {
+      await otpModel.destroy({ where: { email: email.toLowerCase() }, transaction });
+    }
 
     // Send welcome email with LOGIN ID only if a real email was provided
     if (email) {
@@ -362,23 +428,39 @@ const forgotPassword = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    const user = await userModel.findOne({ where: { email } });
+    const user = await userModel.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
-      return res.status(200).json({ message: "If account exists, password reset token has been sent to email." });
+      // Return success anyway for security reasons
+      return res.status(200).json({ message: "If account exists, an OTP has been sent." });
     }
 
-    const resetToken = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: "1h" });
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    const existingOtp = await otpModel.findOne({ where: { email: email.toLowerCase() } });
+    if (existingOtp) {
+      await existingOtp.update({ otp, expires_at: expiresAt });
+    } else {
+      await otpModel.create({ email: email.toLowerCase(), otp, expires_at: expiresAt });
+    }
 
     await sendEmail({
       to: user.email,
-      subject: "[LOGIN 2026] Password Reset Token",
-      html: `<p>Hello ${user.name},</p><p>You requested a password reset. Click below to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
+      subject: "[LOGIN 2026] Password Reset OTP",
+      html: `
+        <div style="font-family: Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 24px; border-radius: 6px; border: 1px solid #2A1A1D; text-align: center;">
+          <h2 style="color: #E01B22; margin-top: 0;">Password Reset</h2>
+          <p>Your OTP code to reset your password is:</p>
+          <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #F7F2F2; background: #130C0E; padding: 16px; display: inline-block; border: 1px solid #E01B22; border-radius: 4px; margin: 16px 0;">
+            ${otp}
+          </div>
+          <p style="color: #A79798; font-size: 14px;">This code expires in 10 minutes. If you did not request this, please ignore this email.</p>
+        </div>
+      `,
     });
 
     return res.status(200).json({
-      message: "Password reset instructions sent to your email",
-      token: resetToken, // Returned for dev testing convenience
+      message: "OTP sent to your email",
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to request password reset", error: error.message });
@@ -387,14 +469,21 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
-    if (!token || !newPassword) {
-      return res.status(400).json({ message: "Token and new password are required" });
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: "Email, OTP, and new password are required" });
     }
 
-    const decoded = jwt.verify(token, jwtSecret);
-    const user = await userModel.findByPk(decoded.id);
+    const validOtp = await otpModel.findOne({ where: { email: email.toLowerCase(), otp } });
+    if (!validOtp) {
+      return res.status(400).json({ message: "Invalid or expired OTP." });
+    }
 
+    if (new Date() > validOtp.expires_at) {
+      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+    }
+
+    const user = await userModel.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -404,9 +493,11 @@ const resetPassword = async (req, res) => {
     user.must_change_password = false;
     await user.save();
 
+    await validOtp.destroy();
+
     return res.status(200).json({ message: "Password reset successfully. You can now log in." });
   } catch (error) {
-    return res.status(400).json({ message: "Invalid or expired token", error: error.message });
+    return res.status(400).json({ message: "Failed to reset password", error: error.message });
   }
 };
 
@@ -434,6 +525,7 @@ const changePassword = async (req, res) => {
 };
 
 module.exports = {
+  sendOtp,
   registerUser,
   loginUser,
   logoutUser,

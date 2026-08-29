@@ -147,10 +147,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
 
         {/* Short Powerful Description */}
         <p 
-          className="text-xs sm:text-sm md:text-base text-[#F7F2F2]/95 max-w-[46ch] leading-relaxed font-body font-medium mb-8"
+          className="text-xs sm:text-sm md:text-base text-[#F7F2F2]/95 max-w-[46ch] leading-relaxed font-body font-medium mb-2"
           style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 0, 0, 0.6)' }}
         >
-          Where innovation, competition, and the next generation of technologists converge.
+          The Perfect Fusion of Masterminds!
+        </p>
+        
+        <p 
+          className="text-base sm:text-lg md:text-xl text-[#F7F2F2] font-mono font-bold tracking-widest mb-8"
+          style={{ textShadow: '0 2px 15px rgba(209, 80, 80, 0.5)' }}
+        >
+          September 18 & 19, 2026
         </p>
 
         {/* Actions - Primary (Red Filled) vs Secondary (Subtle Link) */}

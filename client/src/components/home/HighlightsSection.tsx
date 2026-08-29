@@ -5,8 +5,8 @@ export const HighlightsSection: React.FC = () => {
   const stats = [
     { icon: Trophy, label: 'TOTAL PRIZE POOL', value: '₹ 1,00,000+', color: '#E08A17' },
     { icon: Calendar, label: 'COMPETITION ARENAS', value: '11 EVENTS', color: '#E01B22' },
-    { icon: Building2, label: 'PARTICIPATING INSTITUTIONS', value: '30+ COLLEGES', color: '#6366F1' },
-    { icon: Users, label: 'EXPECTED ENROLLMENT', value: '500+ LOGINS', color: '#1FA971' },
+    { icon: Building2, label: 'PARTICIPATING INSTITUTIONS', value: '100+ COLLEGES', color: '#6366F1' },
+    { icon: Users, label: 'EXPECTED ENROLLMENT', value: '1000+ LOGINS', color: '#1FA971' },
   ];
 
   return (

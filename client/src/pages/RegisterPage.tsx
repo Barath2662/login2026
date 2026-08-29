@@ -5,13 +5,15 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff, FileWarning } from 'lucide-react';
+import { UserCheck, ArrowRight, ShieldCheck, AlertCircle, Eye, EyeOff, FileWarning, Copy, Check } from 'lucide-react';
 
 // ──────────────────────────────────────────────
 // Zod Validation Schema
 // ──────────────────────────────────────────────
 const participantSchema = z.object({
   name: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
   college_name: z.string().min(2, 'College name is required'),
   department: z.string().optional(),
   roll_no: z.string().optional(),
@@ -53,6 +55,13 @@ export const RegisterPage: React.FC = () => {
 
   // Success state
   const [alumniSuccess, setAlumniSuccess] = useState(false);
+  const [participantSuccess, setParticipantSuccess] = useState(false);
+  const [generatedLoginId, setGeneratedLoginId] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  // OTP state
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
 
   useEffect(() => {
     const typeParam = searchParams.get('type');
@@ -64,7 +73,7 @@ export const RegisterPage: React.FC = () => {
   const participantForm = useForm<ParticipantForm>({
     resolver: zodResolver(participantSchema),
     defaultValues: {
-      name: '', college_name: '', department: '', roll_no: '',
+      name: '', email: '', otp: '', college_name: '', department: '', roll_no: '',
       gender: 'Male', year_of_study: '1st Year', accommodation_required: false, password: '', confirmPassword: '',
     },
   });
@@ -78,7 +87,24 @@ export const RegisterPage: React.FC = () => {
   });
 
   const activeForm = userType === 'PARTICIPANT' ? participantForm : alumniForm;
-  const { register, handleSubmit, formState: { errors } } = activeForm as any;
+  const { register, handleSubmit, watch, formState: { errors }, trigger } = activeForm as any;
+
+  const handleSendOtp = async () => {
+    const isValidEmail = await trigger('email');
+    if (!isValidEmail) return;
+
+    const email = watch('email');
+    setServerError(null);
+    setOtpSending(true);
+    try {
+      await api.auth.sendOtp(email);
+      setOtpSent(true);
+    } catch (err: any) {
+      setServerError(err.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setOtpSending(false);
+    }
+  };
 
   const onSubmit = async (data: any) => {
     setServerError(null);
@@ -92,10 +118,11 @@ export const RegisterPage: React.FC = () => {
       if (userType === 'ALUMNI') {
         setAlumniSuccess(true);
       } else {
-        // Auto-login and pass LOGIN ID to dashboard
+        // Auto-login but show success screen first
         setAuth(res.data.token, res.data.user);
         localStorage.setItem('newLoginId', res.data.loginId);
-        navigate('/dashboard');
+        setGeneratedLoginId(res.data.loginId);
+        setParticipantSuccess(true);
       }
     } catch (err: any) {
       setServerError(err.response?.data?.message || 'Registration failed. Please check your inputs and try again.');
@@ -123,6 +150,45 @@ export const RegisterPage: React.FC = () => {
           >
             RETURN TO HOMEPAGE
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (participantSuccess) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full bg-[#130C0E] border border-[#1FA971] p-8 rounded-[2px] text-center space-y-6">
+          <div className="w-16 h-16 bg-[#1FA971]/20 border border-[#1FA971] text-[#1FA971] rounded-full flex items-center justify-center mx-auto">
+            <ShieldCheck className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-display font-bold text-[#F2F2F4]">Registration Successful!</h2>
+          <p className="text-xs text-[#9A9AA2] leading-relaxed">
+            Your participant account has been created. Here is your unique LOGIN ID. You can use this for logging in and team mapping.
+          </p>
+          <div className="bg-[#0A0607] border border-[#2A1A1D] rounded p-4 flex flex-col items-center gap-3">
+            <span className="text-xs text-[#A79798] uppercase tracking-widest font-semibold">Your Login ID</span>
+            <div className="flex items-center gap-4">
+              <span className="text-3xl font-mono font-bold text-[#E01B22] tracking-wider">{generatedLoginId}</span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedLoginId);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="p-2 bg-[#2A1A1D] hover:bg-[#E01B22] text-[#F7F2F2] rounded transition-colors"
+                title="Copy Login ID"
+              >
+                {copied ? <Check className="w-4 h-4 text-[#1FA971]" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="inline-block w-full px-6 py-3 bg-[#E01B24] hover:bg-[#FF3B30] text-[#F2F2F4] font-bold text-sm font-mono rounded-[2px] transition-transform hover:scale-[1.02]"
+          >
+            PROCEED TO DASHBOARD
+          </button>
         </div>
       </div>
     );
@@ -188,6 +254,30 @@ export const RegisterPage: React.FC = () => {
           {/* Participant-only fields */}
           {userType === 'PARTICIPANT' && (
             <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Email Address *</label>
+                  <div className="flex gap-2">
+                    <input type="email" {...register('email')} placeholder="you@example.com" className={inputClass} disabled={otpSent} />
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={otpSending || otpSent}
+                      className="px-3 bg-[#2A1A1D] hover:bg-[#E01B22] text-[#F7F2F2] rounded-[2px] text-xs font-mono font-bold transition-colors disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {otpSending ? 'SENDING...' : otpSent ? 'SENT' : 'SEND OTP'}
+                    </button>
+                  </div>
+                  {errors.email && <p className={errorClass}>{(errors.email as any).message}</p>}
+                </div>
+                {otpSent && (
+                  <div>
+                    <label className={labelClass}>OTP Verification *</label>
+                    <input type="text" {...register('otp')} placeholder="Enter 6-digit OTP" className={inputClass} maxLength={6} />
+                    {errors.otp && <p className={errorClass}>{(errors.otp as any).message}</p>}
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>College / Institution *</label>

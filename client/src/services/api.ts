@@ -15,10 +15,11 @@ export const api = {
   // Auth Module
   auth: {
     register: async (data: any) => await axiosInstance.post('/auth/register', data),
+    sendOtp: async (email: string) => await axiosInstance.post('/auth/send-otp', { email }),
     login: async (data: { loginId?: string; email?: string; password: string }) => await axiosInstance.post('/auth/login', data),
     logout: async () => await axiosInstance.post('/auth/logout'),
     forgotPassword: async (email: string) => await axiosInstance.post('/auth/forgot-password', { email }),
-    resetPassword: async (data: { token: string; newPassword: string }) => await axiosInstance.post('/auth/reset-password', data),
+    resetPassword: async (data: { email: string; otp: string; newPassword: string }) => await axiosInstance.post('/auth/reset-password', data),
     changePassword: async (data: { currentPassword?: string; newPassword: string }) => await axiosInstance.post('/auth/change-password', data),
   },
 

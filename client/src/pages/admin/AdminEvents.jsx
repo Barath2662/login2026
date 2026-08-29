@@ -47,6 +47,22 @@ const AdminEvents = () => {
     }
   };
 
+  const handleToggleRegistration = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'open' ? 'closed' : 'open';
+    const confirmMessage = newStatus === 'closed' 
+      ? 'Are you sure you want to CLOSE registration for this event?' 
+      : 'Are you sure you want to OPEN registration for this event?';
+      
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      await api.put(`/events/${id}`, { status: newStatus });
+      fetchEvents();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to toggle event registration status.');
+    }
+  };
+
   const filteredEvents = events.filter(e => 
     (e.name?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
     (e.id?.toString().includes(searchQuery))
@@ -120,13 +136,20 @@ const AdminEvents = () => {
                       {(event.status || 'draft').toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center flex items-center justify-center gap-2">
                     <Button 
                       variant="outline" 
                       className="px-3 py-1 h-auto text-xs font-mono"
                       onClick={() => handleUpdateEvent(event.id, event.venue, event.start_time)}
                     >
                       EDIT
+                    </Button>
+                    <Button 
+                      variant={event.status === 'closed' ? "outline" : "default"}
+                      className={`px-3 py-1 h-auto text-xs font-mono ${event.status === 'closed' ? 'text-[#1FA971] border-[#1FA971] hover:bg-[#1FA971]/10' : 'bg-[#E01B22] text-white hover:bg-[#FF3B30]'}`}
+                      onClick={() => handleToggleRegistration(event.id, event.status || 'draft')}
+                    >
+                      {event.status === 'closed' ? 'OPEN REG' : 'CLOSE REG'}
                     </Button>
                   </td>
                 </tr>

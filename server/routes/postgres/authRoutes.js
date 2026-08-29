@@ -5,6 +5,7 @@ const authController = require("../../controllers/postgres/authController");
 const router = express.Router();
 
 router.post("/register", authController.registerUser);
+router.post("/send-otp", authController.sendOtp);
 router.post("/login", authController.loginUser);
 router.post("/logout", authController.logoutUser);
 router.post("/forgot-password", authController.forgotPassword);

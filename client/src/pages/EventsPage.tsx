@@ -364,6 +364,10 @@ export const EventsPage: React.FC = () => {
                         <span className="px-3.5 py-2 bg-[#1A1114] border border-[#E01B22] text-[#E01B22] font-mono text-xs font-bold rounded-[2px]">
                           Invite-Only
                         </span>
+                      ) : event.status !== 'open' ? (
+                        <span className="px-4 py-2 bg-[#130C0E] border border-[#2A1A1D] text-[#A79798] font-mono text-xs font-bold uppercase rounded-[2px] cursor-not-allowed">
+                          Registration Filled
+                        </span>
                       ) : !isAuthenticated ? (
                         <button
                           onClick={() => navigate('/login')}
