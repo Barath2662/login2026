@@ -10,6 +10,10 @@ export interface UserProfile {
   college_name: string | null;
   department: string | null;
   roll_no: string | null;
+  // 3 logical roles → DB enum values:
+  // admin   → 'admin' | 'super_admin' | 'admin_power'
+  // coord   → 'event_coordinator' | 'special_user' | 'junior_attendance'
+  // student → 'student'
   role: 'student' | 'event_coordinator' | 'junior_attendance' | 'special_user' | 'admin' | 'super_admin' | 'admin_power';
   user_type: 'PARTICIPANT' | 'ALUMNI' | 'STAFF';
   student_id_code?: string | null;
@@ -60,3 +64,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isAuthenticated: false, token: null, user: null, survivor: null });
   },
 }));
+
+// ── Role helpers ────────────────────────────────────────────────────────────
+const ADMIN_ROLES = ['admin', 'super_admin', 'admin_power'] as const;
+const COORD_ROLES = ['event_coordinator', 'special_user', 'junior_attendance'] as const;
+
+export const isAdminRole = (role?: string | null): boolean =>
+  ADMIN_ROLES.includes(role as any);
+
+export const isCoordinatorRole = (role?: string | null): boolean =>
+  COORD_ROLES.includes(role as any);
+
+export const isStudentRole = (role?: string | null): boolean =>
+  role === 'student';
+

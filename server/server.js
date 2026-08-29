@@ -73,39 +73,51 @@ const startServer = async () => {
 
     // --- SEED ACCOUNTS ---
     try {
-      const adminEmail = "25mx336@psgtech.ac.in";
-      const adminExists = await userModel.findOne({ where: { email: adminEmail } });
-      if (!adminExists) {
-        const hashedPassword = await bcrypt.hash("l0gin26", 10);
+      const { Op } = require('sequelize');
+      const hashedAdminPw  = await bcrypt.hash('l0gin26', 10);
+      const hashedCoordPw  = await bcrypt.hash('l0gin26', 10);
+
+      // Admin — login with: ADMIN / l0gin26
+      const adminUser = await userModel.findOne({
+        where: { [Op.or]: [{ login_id: 'ADMIN' }, { email: '25mx336@psgtech.ac.in' }] },
+      });
+      if (!adminUser) {
         await userModel.create({
-          name: "Super Admin",
-          email: adminEmail,
-          password: hashedPassword,
-          role: "super_admin",
-          user_type: "STAFF",
-          login_id: "LOGIN_ADMIN",
-          accommodation_required: false
+          name: 'Super Admin',
+          email: '25mx336@psgtech.ac.in',
+          password: hashedAdminPw,
+          role: 'super_admin',
+          user_type: 'STAFF',
+          login_id: 'ADMIN',
+          accommodation_required: false,
         });
-        console.log("Seeded Super Admin account:", adminEmail);
+        console.log('Seeded Super Admin (login_id: ADMIN, password: l0gin26)');
+      } else {
+        await adminUser.update({ login_id: 'ADMIN', password: hashedAdminPw });
+        console.log('Updated Super Admin seed → login_id: ADMIN, password: l0gin26');
       }
 
-      const coordEmail = "25mx331@psgtech.ac.in";
-      const coordExists = await userModel.findOne({ where: { email: coordEmail } });
-      if (!coordExists) {
-        const hashedPassword = await bcrypt.hash("c00rd26", 10);
+      // Registration Coordinator — login with: COORD / l0gin26
+      const coordUser = await userModel.findOne({
+        where: { [Op.or]: [{ login_id: 'COORD' }, { email: '25mx331@psgtech.ac.in' }] },
+      });
+      if (!coordUser) {
         await userModel.create({
-          name: "Event Coordinator",
-          email: coordEmail,
-          password: hashedPassword,
-          role: "event_coordinator",
-          user_type: "STAFF",
-          login_id: "LOGIN_COORD",
-          accommodation_required: false
+          name: 'Registration Coordinator',
+          email: '25mx331@psgtech.ac.in',
+          password: hashedCoordPw,
+          role: 'event_coordinator',
+          user_type: 'STAFF',
+          login_id: 'COORD',
+          accommodation_required: false,
         });
-        console.log("Seeded Coordinator account:", coordEmail);
+        console.log('Seeded Coordinator (login_id: COORD, password: l0gin26)');
+      } else {
+        await coordUser.update({ login_id: 'COORD', password: hashedCoordPw });
+        console.log('Updated Coordinator seed → login_id: COORD, password: l0gin26');
       }
     } catch (seedErr) {
-      console.warn("Account seeding failed:", seedErr.message);
+      console.warn('Account seeding failed:', seedErr.message);
     }
     // ----------------------
 

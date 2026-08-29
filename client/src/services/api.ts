@@ -62,12 +62,18 @@ export const api = {
     getAll: async () => await axiosInstance.get('/payments/'),
     verify: async (id: number | string, data?: { status?: string; rejection_reason?: string }) => await axiosInstance.put(`/payments/${id}/verify`, data || { status: 'VERIFIED' }),
     refund: async (id: number | string) => await axiosInstance.put(`/payments/${id}/refund`),
+    // CSV payment verification flow
+    uploadCsv: async (formData: FormData) => await axiosInstance.post('/payments/upload-csv', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    bulkVerify: async (payment_ids: number[]) => await axiosInstance.post('/payments/bulk-verify', { payment_ids }),
   },
 
   // Uploads Module
   uploads: {
     uploadReceipt: async (data: FormData) => await axiosInstance.post('/upload/receipt', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    uploadBonafide: async (data: FormData) => await axiosInstance.post('/upload/bonafide', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   },
+
+
 
   // Team Formation Module
   teams: {

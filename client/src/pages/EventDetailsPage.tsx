@@ -210,7 +210,7 @@ export const EventDetailsPage: React.FC = () => {
               </div>
 
               {/* Team Registration Input if applicable */}
-              {selectedEvent.team_type === 'TEAM' && !isRegistered && user?.role !== 'admin' && user?.role !== 'event_coordinator' && user?.role !== 'super_admin' && user?.role !== 'admin_power' && (
+              {selectedEvent.team_type === 'TEAM' && !selectedEvent.is_flagship && !isRegistered && user?.role !== 'admin' && user?.role !== 'event_coordinator' && user?.role !== 'super_admin' && user?.role !== 'admin_power' && (
                 <div className="space-y-4 pt-4 border-t border-[#2A1A1D]">
                   <div className="space-y-2">
                     <label className="mono-label text-[#F7F2F2] block">ENTER YOUR SQUAD / TEAM NAME:</label>

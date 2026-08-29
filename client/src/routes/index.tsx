@@ -14,12 +14,12 @@ import { RegisterPage } from '../pages/RegisterPage';
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { ChangePasswordPage } from '../pages/ChangePasswordPage';
-import { CoordinatorPage } from '../pages/CoordinatorPage';
-import { AdminPage } from '../pages/AdminPage';
 
-// Nested Dashboard imports
+// Shared dashboard layout (role-aware sidebar)
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { DashboardLayout } from '../layouts/DashboardLayout';
+
+// Participant dashboard pages
 import { DashboardHome } from '../pages/dashboard/DashboardHome';
 import { ProfilePage as DashboardProfilePage } from '../pages/dashboard/ProfilePage';
 import { DashboardEventsPage } from '../pages/dashboard/DashboardEventsPage';
@@ -27,6 +27,12 @@ import { MyRegistrationsPage } from '../pages/dashboard/MyRegistrationsPage';
 import { MyPaymentPage } from '../pages/dashboard/MyPaymentPage';
 import { MyTeamsPage } from '../pages/dashboard/MyTeamsPage';
 import { NotificationsPage } from '../pages/dashboard/NotificationsPage';
+
+// Admin pages (rendered inside DashboardLayout)
+import { AdminPage } from '../pages/AdminPage';
+
+// Coordinator pages (rendered inside DashboardLayout)
+import { CoordinatorPage } from '../pages/CoordinatorPage';
 
 export const router = createBrowserRouter([
   {
@@ -49,55 +55,68 @@ export const router = createBrowserRouter([
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'change-password', element: <ChangePasswordPage /> },
-      
-      // Nested Dashboard Routes with ProtectedRoute
+
+      // ── Unified Dashboard (all roles use the same DashboardLayout) ────────
       {
         path: 'dashboard',
         element: (
-          <ProtectedRoute requireRole="student">
+          <ProtectedRoute requireRole="">
             <DashboardLayout />
           </ProtectedRoute>
         ),
         children: [
-          { index: true, element: <DashboardHome /> },
-          { path: 'profile', element: <DashboardProfilePage /> },
-          { path: 'events', element: <DashboardEventsPage /> },
-          { path: 'payment', element: <MyPaymentPage /> },
-          { path: 'registrations', element: <MyRegistrationsPage /> },
-          { path: 'teams', element: <MyTeamsPage /> },
-          { path: 'notifications', element: <NotificationsPage /> },
+          // Participant routes (student role only)
+          {
+            index: true,
+            element: (
+              <ProtectedRoute requireRole="student">
+                <DashboardHome />
+              </ProtectedRoute>
+            ),
+          },
+          { path: 'profile', element: <ProtectedRoute requireRole="student"><DashboardProfilePage /></ProtectedRoute> },
+          { path: 'events', element: <ProtectedRoute requireRole="student"><DashboardEventsPage /></ProtectedRoute> },
+          { path: 'payment', element: <ProtectedRoute requireRole="student"><MyPaymentPage /></ProtectedRoute> },
+          { path: 'registrations', element: <ProtectedRoute requireRole="student"><MyRegistrationsPage /></ProtectedRoute> },
+          { path: 'teams', element: <ProtectedRoute requireRole="student"><MyTeamsPage /></ProtectedRoute> },
+          { path: 'notifications', element: <ProtectedRoute requireRole="student"><NotificationsPage /></ProtectedRoute> },
+
+          // Admin routes — section driven by URL path
+          {
+            path: 'admin',
+            element: <ProtectedRoute requireRole="admin"><AdminPage /></ProtectedRoute>,
+          },
+          {
+            path: 'admin/:section',
+            element: <ProtectedRoute requireRole="admin"><AdminPage /></ProtectedRoute>,
+          },
+
+          // Coordinator routes — section driven by URL path
+          {
+            path: 'coordinator',
+            element: <ProtectedRoute requireRole="coordinator"><CoordinatorPage /></ProtectedRoute>,
+          },
+          {
+            path: 'coordinator/:section',
+            element: <ProtectedRoute requireRole="coordinator"><CoordinatorPage /></ProtectedRoute>,
+          },
         ],
       },
-      
-      // Backward compatibility redirects for legacy routes
+
+      // ── Legacy redirects ──────────────────────────────────────────────────
       { path: 'profile', element: <Navigate to="/dashboard/profile" replace /> },
       { path: 'payment', element: <Navigate to="/dashboard/payment" replace /> },
       { path: 'registered-events', element: <Navigate to="/dashboard/registrations" replace /> },
       { path: 'team', element: <Navigate to="/dashboard/teams" replace /> },
-      
-      // Coordinator and Admin paths
-      {
-        path: 'coordinator',
-        element: (
-          <ProtectedRoute requireRole="event_coordinator">
-            <CoordinatorPage />
-          </ProtectedRoute>
-        ),
-      },
-      { path: 'event-dashboard', element: <Navigate to="/coordinator" replace /> },
-      { path: 'junior-attendance', element: <Navigate to="/coordinator" replace /> },
-      
-      {
-        path: 'admin',
-        element: (
-          <ProtectedRoute requireRole="admin">
-            <AdminPage />
-          </ProtectedRoute>
-        ),
-      },
-      { path: 'admin/access-control', element: <Navigate to="/admin" replace /> },
-      { path: 'special-user', element: <Navigate to="/admin" replace /> },
-      
+
+      // Old standalone admin/coordinator paths → new nested paths
+      { path: 'admin', element: <Navigate to="/dashboard/admin" replace /> },
+      { path: 'admin/access-control', element: <Navigate to="/dashboard/admin/create-user" replace /> },
+      { path: 'coordinator', element: <Navigate to="/dashboard/coordinator" replace /> },
+      { path: 'event-dashboard', element: <Navigate to="/dashboard/coordinator" replace /> },
+      { path: 'junior-attendance', element: <Navigate to="/dashboard/coordinator/attendance" replace /> },
+      { path: 'special-user', element: <Navigate to="/dashboard/admin" replace /> },
+
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

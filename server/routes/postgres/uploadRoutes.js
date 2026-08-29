@@ -55,4 +55,40 @@ router.post("/receipt", verifyJwt, upload.single("receipt"), (req, res) => {
   });
 });
 
+const bonafideDir = path.join(__dirname, "../../public/uploads/bonafides");
+if (!fs.existsSync(bonafideDir)) {
+  fs.mkdirSync(bonafideDir, { recursive: true });
+}
+
+const bonafideStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, bonafideDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "bonafide-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const uploadBonafide = multer({
+  storage: bonafideStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: fileFilter,
+});
+
+router.post("/bonafide", verifyJwt, uploadBonafide.single("bonafide"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded or invalid file format" });
+  }
+  
+  const fileUrl = `/uploads/bonafides/${req.file.filename}`;
+  
+  res.status(200).json({
+    message: "File uploaded successfully",
+    url: fileUrl,
+  });
+});
+
 module.exports = router;

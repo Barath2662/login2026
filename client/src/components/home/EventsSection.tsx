@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { EventOrbit } from '../events/EventOrbit';
 import eventsData from '../../data/events.json';
+import { EventOrbit } from '../events/EventOrbit';
 
 // Static event metadata representing the 11 arenas
 const STATIC_EVENTS = [

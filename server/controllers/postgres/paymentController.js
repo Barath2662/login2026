@@ -1,6 +1,8 @@
 const paymentModel = require("../../models/postgres/paymentModel");
 const userModel = require("../../models/postgres/userModel");
 const { sendPaymentVerificationEmail } = require("../../services/emailService");
+const { parseCsv, extractTransactionId } = require("../../utils/csvParser");
+const xlsx = require("xlsx");
 
 const generateStudentIdCode = async (userId) => {
   const paddedId = String(userId).padStart(4, "0");
@@ -175,10 +177,146 @@ const initiateRefund = async (req, res) => {
   }
 };
 
+/**
+ * POST /payments/upload-csv
+ * Admin/coordinator uploads CSV from payment portal.
+ * Returns matched (found in DB) and unmatched transaction IDs.
+ */
+const uploadAndMatchCsv = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No CSV file uploaded' });
+    }
+
+    const fileBuffer = req.file.buffer;
+    const filename = req.file.originalname || '';
+    
+    let rows = [];
+    if (filename.toLowerCase().endsWith('.xlsx') || filename.toLowerCase().endsWith('.xls')) {
+      const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      rows = xlsx.utils.sheet_to_json(worksheet);
+    } else {
+      const csvText = fileBuffer.toString('utf-8');
+      const csvRows = parseCsv(csvText);
+      // convert array of strings back to object for compatibility
+      if (csvRows.length > 0) {
+        const headers = csvRows[0];
+        for (let i = 1; i < csvRows.length; i++) {
+          const obj = {};
+          headers.forEach((h, idx) => obj[h.toLowerCase()] = csvRows[i][idx]);
+          rows.push(obj);
+        }
+      }
+    }
+
+    if (rows.length === 0) {
+      return res.status(400).json({ message: 'File is empty or could not be parsed' });
+    }
+
+    const matched = [];
+    const unmatched = [];
+
+    for (const row of rows) {
+      // Extract from typical Excel headers or fallback to extractTransactionId for CSV
+      const txnId = row.Receipt_No || row.receipt_no || extractTransactionId(Object.values(row));
+      if (!txnId) continue;
+
+      const payment = await paymentModel.findOne({
+        where: { transaction_reference: txnId },
+        include: [{
+          model: userModel,
+          as: 'student',
+          attributes: ['id', 'name', 'email', 'login_id', 'student_id_code'],
+        }],
+      });
+
+      if (payment) {
+        matched.push({
+          payment_id: payment.id,
+          transaction_reference: txnId,
+          current_status: payment.status,
+          amount: payment.amount,
+          student_name: payment.student ? payment.student.name : null,
+          student_login_id: payment.student ? payment.student.login_id : null,
+          student_email: payment.student ? payment.student.email : null,
+          csv_row: row,
+        });
+      } else {
+        unmatched.push({ transaction_reference: txnId, csv_row: row });
+      }
+    }
+
+    return res.json({
+      message: `CSV processed: ${matched.length} matched, ${unmatched.length} unmatched`,
+      total_rows: rows.length,
+      matched,
+      unmatched,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to process CSV', error: error.message });
+  }
+};
+
+/**
+ * POST /payments/bulk-verify
+ * Verify multiple payments at once (after CSV match).
+ * Body: { payment_ids: number[] }
+ */
+const bulkVerify = async (req, res) => {
+  try {
+    const { payment_ids } = req.body;
+    if (!Array.isArray(payment_ids) || payment_ids.length === 0) {
+      return res.status(400).json({ message: 'payment_ids must be a non-empty array' });
+    }
+
+    const results = { verified: [], skipped: [], failed: [] };
+
+    for (const id of payment_ids) {
+      try {
+        const payment = await paymentModel.findByPk(id);
+        if (!payment) { results.skipped.push({ id, reason: 'Not found' }); continue; }
+        if (payment.status === 'VERIFIED') { results.skipped.push({ id, reason: 'Already verified' }); continue; }
+
+        await payment.update({
+          status: 'VERIFIED',
+          verified_by: req.user.id,
+          verified_at: new Date(),
+          rejection_reason: null,
+        });
+
+        const user = await userModel.findByPk(payment.student_id);
+        if (user && !user.student_id_code) {
+          user.student_id_code = await generateStudentIdCode(user.id);
+          await user.save();
+        }
+        if (user) {
+          sendPaymentVerificationEmail(user, user.student_id_code).catch(() => {});
+        }
+
+        results.verified.push(id);
+      } catch (err) {
+        results.failed.push({ id, error: err.message });
+      }
+    }
+
+    return res.json({
+      message: `Bulk verification complete: ${results.verified.length} verified, ${results.skipped.length} skipped, ${results.failed.length} failed`,
+      ...results,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Bulk verification failed', error: error.message });
+  }
+};
+
 module.exports = {
   getMyPayment,
   createPayment,
   getAllPayments,
   verifyPayment,
   initiateRefund,
+  uploadAndMatchCsv,
+  bulkVerify,
 };
+

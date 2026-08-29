@@ -3,16 +3,25 @@ import { Clock, MapPin, ChevronRight, Zap } from 'lucide-react';
 
 const SCHEDULE_DATA: Record<'DAY_01' | 'DAY_02', Array<{ time: string; title: string; type: string; venue: string; bgClass: string; accent: string }>> = {
   DAY_01: [
-    { time: '08:30 AM', title: 'Inauguration Ceremony', type: 'GENERAL', venue: 'F-Block Auditorium', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
-    { time: '10:00 AM', title: 'Star of LOGIN Prelims', type: 'FLAGSHIP', venue: 'MCA Lab', bgClass: 'from-[#1C0D10] to-[#0A0607]', accent: '#F59E0B' },
-    { time: '11:30 AM', title: 'Net Hunt (Online)', type: 'TECHNICAL', venue: 'Lab 4', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
-    { time: '02:00 PM', title: 'Pitch Perfect (Case Study)', type: 'TECHNICAL', venue: 'Seminar Hall', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981' },
+    { time: '09:00 AM', title: 'Inauguration', type: 'GENERAL', venue: 'F block assembly hall', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
+    { time: '10:00 AM', title: 'Snacks', type: 'GENERAL', venue: 'F Block Canteen', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F59E0B' },
+    { time: '10:30 AM', title: 'Code Relay', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
+    { time: '10:30 AM', title: 'Hunt your Treasure', type: 'NON_TECHNICAL', venue: 'K503, K504, K505', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981' },
+    { time: '12:30 PM', title: 'Lunch', type: 'GENERAL', venue: 'F block Canteen', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316' },
+    { time: '01:30 PM', title: 'Pixel Paradox', type: 'NON_TECHNICAL', venue: 'IS Lab', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
+    { time: '01:30 PM', title: 'Project Phoenix', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
+    { time: '03:00 PM', title: 'In the Slot', type: 'NON_TECHNICAL', venue: 'F202', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981' },
+    { time: '03:30 PM', title: 'Blind Coding', type: 'TECHNICAL', venue: 'CC Lab', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
   ],
   DAY_02: [
-    { time: '09:00 AM', title: 'Star of LOGIN Finals', type: 'FLAGSHIP', venue: 'F-Block Auditorium', bgClass: 'from-[#1C0D10] to-[#0A0607]', accent: '#F59E0B' },
-    { time: '10:30 AM', title: 'Code Storm', type: 'TECHNICAL', venue: 'MCA Lab', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
-    { time: '01:30 PM', title: 'Workshop on Edge Computing', type: 'WORKSHOP', venue: 'IT Seminar Hall', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316' },
-    { time: '03:30 PM', title: 'Valedictory & Prize Distribution', type: 'GENERAL', venue: 'F-Block Auditorium', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
+    { time: '09:30 AM', title: 'The Extraction', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
+    { time: '10:00 AM', title: 'Debug Arena', type: 'TECHNICAL', venue: 'CC Lab', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981' },
+    { time: '12:30 PM', title: 'Star of Login (Round 1)', type: 'TECHNICAL', venue: 'F202', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
+    { time: '01:00 PM', title: 'Lunch', type: 'GENERAL', venue: 'F black Canteen', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316' },
+    { time: '02:00 PM', title: 'Star of Login (Round 2)', type: 'TECHNICAL', venue: 'D block conference hall (Ground floor)', bgClass: 'from-[#13111C] to-[#0A0607]', accent: '#6366F1' },
+    { time: '03:30 PM', title: 'Valedictory', type: 'GENERAL', venue: 'D block conference hall (Ground floor)', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
+    { time: '05:00 PM', title: 'Entertainment', type: 'GENERAL', venue: 'Centenary hall', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981' },
+    { time: '07:30 PM', title: 'Dinner', type: 'GENERAL', venue: 'Near F block canteen', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316' },
   ],
 };
 

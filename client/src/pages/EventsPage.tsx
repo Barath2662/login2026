@@ -9,7 +9,7 @@ interface Event {
   id: number;
   name: string;
   description: string;
-  category: 'TECHNICAL' | 'NON_TECHNICAL';
+  category: 'TECHNICAL' | 'NON_TECHNICAL' | 'FLAGSHIP';
   team_type: 'INDIVIDUAL' | 'TEAM';
   min_team_size: number;
   max_team_size: number;
@@ -214,9 +214,18 @@ export const EventsPage: React.FC = () => {
   };
 
   const filteredEvents = events.filter((e) => {
-    if (categoryParam === 'TECHNICAL') return e.category === 'TECHNICAL';
-    if (categoryParam === 'NON_TECHNICAL') return e.category === 'NON_TECHNICAL';
+    if (categoryParam === 'FLAGSHIP') return e.category === 'FLAGSHIP';
+    if (categoryParam === 'ONLINE') return e.is_online === true;
+    if (categoryParam === 'TECHNICAL') return e.category === 'TECHNICAL' && !e.is_online;
+    if (categoryParam === 'NON_TECHNICAL') return e.category === 'NON_TECHNICAL' && !e.is_online;
     return true;
+  }).sort((a, b) => {
+    // Put Flagship first, then Online
+    if (a.category === 'FLAGSHIP' && b.category !== 'FLAGSHIP') return -1;
+    if (a.category !== 'FLAGSHIP' && b.category === 'FLAGSHIP') return 1;
+    if (a.is_online && !b.is_online) return -1;
+    if (!a.is_online && b.is_online) return 1;
+    return 0;
   });
 
 
@@ -231,19 +240,21 @@ export const EventsPage: React.FC = () => {
         <div className="sticky top-20 z-30 bg-[#130C0E] border border-[#2A1A1D] p-4 rounded-[2px] flex flex-wrap items-center justify-between gap-4 shadow-xl">
           <div className="flex items-center gap-3">
             <span className="mono-label text-[#E01B22] font-bold">CATEGORIES:</span>
-            {['ALL', 'TECHNICAL', 'NON_TECHNICAL'].map((cat) => (
+            {['ALL', 'FLAGSHIP', 'ONLINE', 'TECHNICAL', 'NON_TECHNICAL'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
                 className={`px-4 py-1.5 rounded-[2px] font-mono text-xs font-bold transition-all border ${
                   (cat === 'ALL' && categoryParam === 'ALL') ||
+                  (cat === 'FLAGSHIP' && categoryParam === 'FLAGSHIP') ||
+                  (cat === 'ONLINE' && categoryParam === 'ONLINE') ||
                   (cat === 'TECHNICAL' && categoryParam === 'TECHNICAL') ||
                   (cat === 'NON_TECHNICAL' && categoryParam === 'NON_TECHNICAL')
                     ? 'bg-[#E01B22] text-[#F7F2F2] border-[#E01B22]'
                     : 'bg-[#0A0607] text-[#A79798] border-[#2A1A1D] hover:border-[#A79798]'
                 }`}
               >
-                {cat === 'ALL' ? 'ALL ARENAS' : cat === 'TECHNICAL' ? 'TECHNICAL' : 'NON-TECHNICAL'}
+                {cat === 'ALL' ? 'ALL ARENAS' : cat === 'FLAGSHIP' ? 'FLAGSHIP EVENT' : cat === 'ONLINE' ? 'ONLINE EVENTS' : cat === 'TECHNICAL' ? 'TECHNICAL' : 'NON-TECHNICAL'}
               </button>
             ))}
           </div>
@@ -312,7 +323,7 @@ export const EventsPage: React.FC = () => {
 
                       {/* Sub-header line: Category • Team Size • Duration */}
                       <div className="text-xs font-mono font-semibold text-[#FF2A2A] mt-1">
-                        {event.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical'} • {(event.team_type === 'TEAM' || event.max_team_size > 1) ? `${event.min_team_size || 2}${event.max_team_size > (event.min_team_size || 1) ? `–${event.max_team_size}` : ''} Members` : 'Individual'} • {detail.durationText}
+                        {event.category === 'FLAGSHIP' ? 'Flagship Event' : event.is_online ? 'Online Event' : (event.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical')} • {(event.team_type === 'TEAM' || event.max_team_size > 1) ? `${event.min_team_size || 2}${event.max_team_size > (event.min_team_size || 1) ? `–${event.max_team_size}` : ''} Members` : 'Individual'} • {detail.durationText}
                       </div>
 
                       {/* Short Crisp Summary */}

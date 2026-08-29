@@ -37,12 +37,10 @@ export const LoginPage: React.FC = () => {
 
       if (user.must_change_password) {
         navigate('/change-password');
-      } else if (user.role === 'super_admin' || user.role === 'admin_power') {
-        navigate('/admin/access-control');
-      } else if (user.role === 'admin') {
-        navigate('/admin');
-      } else if (user.role === 'event_coordinator') {
-        navigate('/coordinator');
+      } else if (['super_admin', 'admin_power', 'admin'].includes(user.role)) {
+        navigate('/dashboard/admin');
+      } else if (['event_coordinator', 'special_user', 'junior_attendance'].includes(user.role)) {
+        navigate('/dashboard/coordinator');
       } else {
         navigate('/dashboard');
       }
@@ -52,6 +50,7 @@ export const LoginPage: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-[85vh] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#0A0607] relative overflow-hidden">

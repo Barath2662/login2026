@@ -6,36 +6,36 @@ const MILESTONES = [
   {
     icon: LogIn,
     title: "Registration Opens",
-    date: "07",
-    monthYear: "JUN 2026",
-    desc: "Portal goes live. Assemble your team and lock in your spot before it fills up.",
+    date: "31",
+    monthYear: "AUG 2026",
+    desc: "Portal goes live. Assemble your team and lock in your spot.",
     status: "COMPLETED",
     isGrandFinal: false
   },
   {
     icon: FileText,
-    title: "Idea (PPT) Submission",
-    date: "25",
-    monthYear: "JUL 2026",
-    desc: "Final date to submit your initial idea and presentation deck.",
+    title: "Online Events Reg. Closes",
+    date: "12",
+    monthYear: "SEP 2026",
+    desc: "Last date to register for our online flagship events.",
     status: "ACTIVE",
     isGrandFinal: false
   },
   {
     icon: Users,
-    title: "Shortlisted Teams Announced",
-    date: "07",
-    monthYear: "AUG 2026",
-    desc: "Selected teams notified and briefed on problem statement and next round.",
+    title: "Online Events Go Live",
+    date: "14-15",
+    monthYear: "SEP 2026",
+    desc: "Participate in Nostos and CodeXcape completely online.",
     status: "STANDBY",
     isGrandFinal: false
   },
   {
     icon: Trophy,
-    title: "Grand Final",
-    date: "14",
-    monthYear: "AUG 2026",
-    desc: "24 hours of intense hacking, live judging by industry experts, and the grand award ceremony.",
+    title: "Offline Reg. Closes & Symposium",
+    date: "18-19",
+    monthYear: "SEP 2026",
+    desc: "Last date of registration for offline events, and the grand two-day symposium on campus.",
     status: "STANDBY",
     isGrandFinal: true
   }

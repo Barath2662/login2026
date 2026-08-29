@@ -1,17 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
-import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil } from 'lucide-react';
+import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil, Upload, CheckCircle2, XCircle, FileText } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export const AdminPage: React.FC = () => {
-  const location = useLocation();
+  const { section } = useParams<{ section?: string }>();
   const { user: currentUser } = useAuthStore();
   const isSuperAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'admin_power';
-  
-  const [activeTab, setActiveTab] = useState<'PAYMENTS' | 'PARTICIPANTS' | 'ALUMNI' | 'POWER_PEOPLE' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS'>(
-    location.pathname.includes('access-control') ? 'POWER_PEOPLE' : 'PAYMENTS'
-  );
+
+  type AdminTab = 'PAYMENTS' | 'REGISTRATIONS' | 'ALUMNI' | 'USERS' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS' | 'CSV_UPLOAD';
+
+  const sectionToTab = (s?: string): AdminTab => {
+    switch (s) {
+      case 'users': return 'USERS';
+      case 'registrations': return 'REGISTRATIONS';
+      case 'alumni': return 'ALUMNI';
+      case 'payments': return 'PAYMENTS';
+      case 'csv-upload': return 'CSV_UPLOAD';
+      case 'events': return 'EVENTS';
+      case 'announcements': return 'ANNOUNCEMENTS';
+      default: return 'PAYMENTS';
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState<AdminTab>(sectionToTab(section));
 
   // Data states
   const [payments, setPayments] = useState<any[]>([]);
@@ -19,6 +32,14 @@ export const AdminPage: React.FC = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
+
+  // CSV Upload state
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvLoading, setCsvLoading] = useState(false);
+  const [csvResult, setCsvResult] = useState<{ matched: any[]; unmatched: any[]; total_rows: number } | null>(null);
+  const [csvSelectedIds, setCsvSelectedIds] = useState<Set<number>>(new Set());
+  const [csvBulkLoading, setCsvBulkLoading] = useState(false);
+  const [csvBulkResult, setCsvBulkResult] = useState<string | null>(null);
 
   // Search & Filter States
   const [paymentSearch, setPaymentSearch] = useState('');
@@ -43,6 +64,9 @@ export const AdminPage: React.FC = () => {
   const [newUserCollege, setNewUserCollege] = useState('PSG College of Technology');
   const [newUserDepartment, setNewUserDepartment] = useState('Computer Applications');
   const [creatingUser, setCreatingUser] = useState(false);
+
+  // Edit User Modal State
+  const [editModalUser, setEditModalUser] = useState<any>(null);
 
   const fetchData = async () => {
     try {
@@ -80,6 +104,60 @@ export const AdminPage: React.FC = () => {
     fetchData();
   }, []);
 
+  // Sync sidebar nav → activeTab
+  useEffect(() => {
+    setActiveTab(sectionToTab(section));
+  }, [section]);
+
+  // CSV Upload handlers
+  const handleCsvUpload = async () => {
+    if (!csvFile) return;
+    setCsvLoading(true);
+    setCsvResult(null);
+    setCsvBulkResult(null);
+    try {
+      const form = new FormData();
+      form.append('csv', csvFile);
+      const res = await api.payments.uploadCsv(form);
+      setCsvResult(res.data);
+      // Pre-select all matched pending payments
+      const ids = new Set<number>(
+        res.data.matched
+          .filter((m: any) => m.current_status !== 'VERIFIED')
+          .map((m: any) => m.payment_id)
+      );
+      setCsvSelectedIds(ids);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to process CSV');
+    } finally {
+      setCsvLoading(false);
+    }
+  };
+
+  const toggleCsvSelect = (id: number) => {
+    setCsvSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkVerify = async () => {
+    if (csvSelectedIds.size === 0) return;
+    setCsvBulkLoading(true);
+    setCsvBulkResult(null);
+    try {
+      const res = await api.payments.bulkVerify(Array.from(csvSelectedIds));
+      setCsvBulkResult(res.data.message);
+      setCsvSelectedIds(new Set());
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Bulk verification failed');
+    } finally {
+      setCsvBulkLoading(false);
+    }
+  };
+
   // Handle Add New User
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,6 +190,25 @@ export const AdminPage: React.FC = () => {
       alert(err.response?.data?.message || 'Failed to create user.');
     } finally {
       setCreatingUser(false);
+    }
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editModalUser) return;
+    try {
+      await api.users.updateDetails(editModalUser.id, {
+        name: editModalUser.name,
+        email: editModalUser.email,
+        phone: editModalUser.phone,
+        college: editModalUser.college,
+        department: editModalUser.department,
+        role: editModalUser.role,
+      });
+      setEditModalUser(null);
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update user.');
     }
   };
 
@@ -313,9 +410,6 @@ export const AdminPage: React.FC = () => {
     });
   }, [payments, paymentSearch]);
 
-  const powerUsers = useMemo(() => {
-    return users.filter((u) => u.role !== 'student');
-  }, [users]);
 
   const alumniUsers = useMemo(() => {
     return users.filter((u) => u.user_type === 'ALUMNI');
@@ -350,78 +444,23 @@ export const AdminPage: React.FC = () => {
   const overallAttendancePercentage = totalEnrollments > 0 ? Math.round((totalAttended / totalEnrollments) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0A0607] py-12 px-4 sm:px-6 lg:px-8 text-[#F7F2F2]">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Page Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-[#2A1A1D] pb-6">
-          <div>
-            <span className="mono-label text-[#FF2A2A] font-bold uppercase tracking-wider">COMMAND CENTER</span>
-            <h1 className="display-m text-[#F7F2F2] mt-1">ADMIN CONTROL PANEL</h1>
-          </div>
+    <div className="space-y-8 text-[#F7F2F2]">
+      <div className="border-b border-[#2A1A1D] pb-4">
+        <span className="text-[10px] font-mono text-[#E01B22] uppercase tracking-widest">COMMAND CENTER</span>
+        <h1 className="text-xl font-display font-bold text-[#F7F2F2] mt-1">
+          {activeTab === 'PAYMENTS' && 'Payment Verification Queue'}
+          {activeTab === 'REGISTRATIONS' && 'Event-Wise Participant Roster'}
+          {activeTab === 'ALUMNI' && 'Alumni Roster'}
+          {activeTab === 'USERS' && 'Create / Manage Accounts'}
+          {activeTab === 'DASHBOARD' && 'Telemetry & Stats'}
+          {activeTab === 'ANNOUNCEMENTS' && 'Broadcast Announcements'}
+          {activeTab === 'EVENTS' && `Events (${events.length})`}
+          {activeTab === 'CSV_UPLOAD' && 'CSV Payment Verification'}
+        </h1>
+      </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap items-center gap-2 bg-[#130C0E] p-1.5 rounded-[2px] border border-[#2A1A1D]">
-            <button
-              onClick={() => setActiveTab('PAYMENTS')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'PAYMENTS' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              PAYMENTS QUEUE ({payments.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('PARTICIPANTS')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'PARTICIPANTS' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              EVENT-WISE ROSTER
-            </button>
-            <button
-              onClick={() => setActiveTab('ALUMNI')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'ALUMNI' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              ALUMNI ROSTER ({alumniUsers.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('POWER_PEOPLE')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'POWER_PEOPLE' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              POWER PERSONNEL ({powerUsers.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('DASHBOARD')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'DASHBOARD' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              TELEMETRY &amp; STATS
-            </button>
-            <button
-              onClick={() => setActiveTab('ANNOUNCEMENTS')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'ANNOUNCEMENTS' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              BROADCAST
-            </button>
-            <button
-              onClick={() => setActiveTab('EVENTS')}
-              className={`px-3.5 py-2 rounded-[2px] font-mono text-xs font-bold transition-colors ${
-                activeTab === 'EVENTS' ? 'bg-[#E01B22] text-[#F7F2F2]' : 'text-[#A79798] hover:text-[#F7F2F2]'
-              }`}
-            >
-              EVENTS ({events.length})
-            </button>
-          </div>
-        </div>
 
-        {/* TAB 1: PAYMENTS VERIFICATION QUEUE (Reject Only & CSV Export) */}
+        {/* TAB: PAYMENTS VERIFICATION QUEUE */}
         {activeTab === 'PAYMENTS' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -518,7 +557,7 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* TAB 2: EVENT-WISE REGISTERED PARTICIPANTS LIST & EXPORT */}
-        {activeTab === 'PARTICIPANTS' && (
+        {activeTab === 'REGISTRATIONS' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -680,8 +719,8 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 4: POWER PERSONNEL (Coordinators & Admins Roster + Creation) */}
-        {activeTab === 'POWER_PEOPLE' && (
+        {/* TAB 4: USER MANAGEMENT (All Users & Roster Creation) */}
+        {activeTab === 'USERS' && (
           <div className="space-y-8">
             {/* Create Official / Power User Form */}
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
@@ -750,8 +789,8 @@ export const AdminPage: React.FC = () => {
                         <>
                           <option value="junior_attendance">junior_attendance</option>
                           <option value="special_user">special_user</option>
-                          <option value="super_admin">super_admin</option>
-                          <option value="admin_power">admin_power</option>
+                          <option value="super_admin">Admin</option>
+                          <option value="admin_power">Admin</option>
                         </>
                       )}
                     </select>
@@ -802,10 +841,10 @@ export const AdminPage: React.FC = () => {
               </form>
             </div>
 
-            {/* Power Personnel Table */}
+            {/* User Management Table */}
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
               <h2 className="text-lg font-display font-bold text-[#F7F2F2]">
-                AUTHORIZED POWER PERSONNEL &amp; COORDINATORS ({powerUsers.length})
+                ALL USERS & AUTHORIZED PERSONNEL ({users.length})
               </h2>
 
               <div className="overflow-x-auto">
@@ -821,7 +860,7 @@ export const AdminPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2A1A1D]">
-                    {powerUsers.map((u) => (
+                    {users.map((u) => (
                       <tr key={u.id} className="hover:bg-[#1A1114] transition-colors">
                         <td className="p-3.5 font-mono text-[#6B5A5C]">#{u.id}</td>
                         <td className="p-3.5">
@@ -836,11 +875,12 @@ export const AdminPage: React.FC = () => {
                         </td>
                         <td className="p-3.5 font-mono text-[#FF2A2A] font-bold uppercase">{u.role}</td>
                         <td className="p-3.5">
-                          <select
-                            value={u.role}
-                            onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                            className="bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] px-2.5 py-1 rounded-[2px] text-xs font-mono outline-none"
-                          >
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                              className="bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] px-2.5 py-1 rounded-[2px] text-xs font-mono outline-none"
+                            >
                             <option value="event_coordinator">event_coordinator</option>
                             <option value="admin">admin</option>
                             <option value="student">student</option>
@@ -848,11 +888,18 @@ export const AdminPage: React.FC = () => {
                               <>
                                 <option value="junior_attendance">junior_attendance</option>
                                 <option value="special_user">special_user</option>
-                                <option value="super_admin">super_admin</option>
-                                <option value="admin_power">admin_power</option>
+                                <option value="super_admin">Admin</option>
+                                <option value="admin_power">Admin</option>
                               </>
                             )}
                           </select>
+                          <button
+                            onClick={() => setEditModalUser(u)}
+                            className="px-2.5 py-1 bg-[#1A1114] hover:bg-[#2A1A1D] border border-[#3E2529] hover:border-[#E08A17] text-[#E08A17] text-[10px] font-bold font-mono rounded-[2px] transition-colors"
+                          >
+                            EDIT
+                          </button>
+                        </div>
                         </td>
                       </tr>
                     ))}
@@ -1061,8 +1108,6 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
 
-      </div>
-
       {/* Reject Modal */}
       {rejectModalPaymentId && (
         <div className="fixed inset-0 z-50 bg-[#0A0607]/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1090,6 +1135,292 @@ export const AdminPage: React.FC = () => {
                 className="px-6 py-2 bg-[#E01B22] disabled:opacity-50 text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px]"
               >
                 CONFIRM REJECTION
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: CSV UPLOAD & VERIFY */}
+      {activeTab === 'CSV_UPLOAD' && (
+        <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-8 animate-fade-in-up">
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded bg-[#E01B22]/10 border border-[#E01B22]/20 flex items-center justify-center shrink-0">
+                <FileText className="w-6 h-6 text-[#E01B22]" />
+              </div>
+              <div>
+                <h2 className="text-xl font-display font-bold text-[#F7F2F2]">Batch Verify Payments via CSV</h2>
+                <p className="text-sm font-mono text-[#A79798] mt-1 max-w-2xl">
+                  Upload the transaction report from your payment gateway. The system will match the transaction IDs with pending student registrations.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 mt-6">
+              <input
+                type="file"
+                accept=".csv"
+                id="csv-upload"
+                className="hidden"
+                onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+              />
+              <label
+                htmlFor="csv-upload"
+                className="px-6 py-3 bg-[#1A1114] border border-[#3E2529] hover:border-[#E01B22] text-[#F7F2F2] font-mono text-sm cursor-pointer rounded-[2px] transition-colors flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                {csvFile ? csvFile.name : 'Choose CSV File'}
+              </label>
+              
+              <button
+                onClick={handleCsvUpload}
+                disabled={!csvFile || csvLoading}
+                className="px-8 py-3 bg-[#E01B22] hover:bg-[#FF2A2A] disabled:opacity-50 disabled:cursor-not-allowed text-[#F7F2F2] font-mono text-sm font-bold uppercase rounded-[2px] transition-colors"
+              >
+                {csvLoading ? 'Processing...' : 'Upload & Match'}
+              </button>
+            </div>
+          </div>
+
+          {/* Results Area */}
+          {csvResult && (
+            <div className="pt-6 border-t border-[#2A1A1D] space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-[#1A1114] border border-[#2A1A1D] rounded-[2px]">
+                  <p className="text-xs font-mono text-[#A79798] uppercase">Total Rows Parsed</p>
+                  <p className="text-2xl font-display font-bold text-[#F7F2F2] mt-1">{csvResult.total_rows}</p>
+                </div>
+                <div className="p-4 bg-[#1FA971]/10 border border-[#1FA971]/30 rounded-[2px]">
+                  <p className="text-xs font-mono text-[#1FA971] uppercase">Matched & Found</p>
+                  <p className="text-2xl font-display font-bold text-[#1FA971] mt-1">{csvResult.matched.length}</p>
+                </div>
+                <div className="p-4 bg-[#FF2A2A]/10 border border-[#FF2A2A]/30 rounded-[2px]">
+                  <p className="text-xs font-mono text-[#FF2A2A] uppercase">Unmatched</p>
+                  <p className="text-2xl font-display font-bold text-[#FF2A2A] mt-1">{csvResult.unmatched.length}</p>
+                </div>
+              </div>
+
+              {csvBulkResult && (
+                <div className="p-4 bg-[#1FA971]/10 border border-[#1FA971] text-[#1FA971] font-mono text-sm rounded-[2px] flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 shrink-0" />
+                  {csvBulkResult}
+                </div>
+              )}
+
+              {csvResult.matched.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-display text-lg font-bold text-[#F7F2F2]">Matched Pending Payments</h3>
+                    <button
+                      onClick={handleBulkVerify}
+                      disabled={csvSelectedIds.size === 0 || csvBulkLoading}
+                      className="px-6 py-2 bg-[#1FA971] hover:bg-[#25C786] disabled:opacity-50 text-[#050505] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors"
+                    >
+                      {csvBulkLoading ? 'Verifying...' : `Verify Selected (${csvSelectedIds.size})`}
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto border border-[#2A1A1D] rounded-[2px]">
+                    <table className="w-full text-left text-sm font-mono">
+                      <thead className="bg-[#1A1114] text-[#A79798] text-xs uppercase">
+                        <tr>
+                          <th className="px-4 py-3 w-12 text-center">
+                            <input
+                              type="checkbox"
+                              className="accent-[#E01B22]"
+                              checked={
+                                csvSelectedIds.size > 0 &&
+                                csvSelectedIds.size === csvResult.matched.filter((m: any) => m.current_status !== 'VERIFIED').length
+                              }
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setCsvSelectedIds(
+                                    new Set(
+                                      csvResult.matched
+                                        .filter((m: any) => m.current_status !== 'VERIFIED')
+                                        .map((m: any) => m.payment_id)
+                                    )
+                                  );
+                                } else {
+                                  setCsvSelectedIds(new Set());
+                                }
+                              }}
+                            />
+                          </th>
+                          <th className="px-4 py-3">Transaction ID</th>
+                          <th className="px-4 py-3">Student Name</th>
+                          <th className="px-4 py-3">Login ID</th>
+                          <th className="px-4 py-3">Amount</th>
+                          <th className="px-4 py-3">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#2A1A1D]">
+                        {csvResult.matched.map((match: any, idx: number) => {
+                          const isVerified = match.current_status === 'VERIFIED';
+                          return (
+                            <tr key={idx} className={`hover:bg-[#1A1114] transition-colors ${isVerified ? 'opacity-50' : ''}`}>
+                              <td className="px-4 py-3 text-center">
+                                <input
+                                  type="checkbox"
+                                  className="accent-[#E01B22]"
+                                  disabled={isVerified}
+                                  checked={csvSelectedIds.has(match.payment_id)}
+                                  onChange={() => toggleCsvSelect(match.payment_id)}
+                                />
+                              </td>
+                              <td className="px-4 py-3 text-[#F7F2F2]">{match.transaction_reference}</td>
+                              <td className="px-4 py-3">{match.student_name}</td>
+                              <td className="px-4 py-3">{match.student_login_id}</td>
+                              <td className="px-4 py-3">₹{match.amount}</td>
+                              <td className="px-4 py-3">
+                                {isVerified ? (
+                                  <span className="text-[#1FA971] flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Verified</span>
+                                ) : (
+                                  <span className="text-[#E08A17]">Pending</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {csvResult.unmatched.length > 0 && (
+                <div className="space-y-4 pt-6 border-t border-[#2A1A1D]">
+                  <h3 className="font-display text-lg font-bold text-[#FF2A2A] flex items-center gap-2">
+                    <XCircle className="w-5 h-5" />
+                    Unmatched Transactions
+                  </h3>
+                  <p className="text-xs font-mono text-[#A79798]">These transaction IDs from your CSV did not match any pending student submissions.</p>
+                  
+                  <div className="overflow-x-auto border border-[#2A1A1D] rounded-[2px]">
+                    <table className="w-full text-left text-sm font-mono">
+                      <thead className="bg-[#1A1114] text-[#A79798] text-xs uppercase">
+                        <tr>
+                          <th className="px-4 py-3">Transaction ID from CSV</th>
+                          <th className="px-4 py-3">Raw CSV Row Data</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#2A1A1D]">
+                        {csvResult.unmatched.slice(0, 100).map((um: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-[#1A1114] transition-colors">
+                            <td className="px-4 py-3 text-[#FF2A2A]">{um.transaction_reference || 'N/A'}</td>
+                            <td className="px-4 py-3 text-xs text-[#A79798] truncate max-w-md">
+                              {JSON.stringify(um.csv_row)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* EDIT USER MODAL */}
+      {editModalUser && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-[#0A0607] border border-[#E01B22]/30 w-full max-w-2xl rounded-[2px] shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-[#2A1A1D] flex items-center justify-between bg-[#130C0E]">
+              <h2 className="text-sm font-display font-bold text-[#F7F2F2] flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-[#E08A17]" /> EDIT USER PROFILE
+              </h2>
+              <button onClick={() => setEditModalUser(null)} className="text-[#A79798] hover:text-[#F7F2F2]">
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto font-mono text-xs text-[#A79798] space-y-4">
+              <form id="editUserForm" onSubmit={handleUpdateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 font-semibold text-[#F7F2F2]">Name</label>
+                  <input
+                    type="text"
+                    value={editModalUser.name || ''}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, name: e.target.value })}
+                    className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-[#F7F2F2]">Email</label>
+                  <input
+                    type="email"
+                    value={editModalUser.email || ''}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, email: e.target.value })}
+                    className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-[#F7F2F2]">Phone</label>
+                  <input
+                    type="text"
+                    value={editModalUser.phone || ''}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, phone: e.target.value })}
+                    className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-[#F7F2F2]">Role</label>
+                  <select
+                    value={editModalUser.role || ''}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, role: e.target.value })}
+                    className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
+                  >
+                    <option value="student">student</option>
+                    <option value="event_coordinator">event_coordinator</option>
+                    <option value="admin">admin</option>
+                    {isSuperAdmin && (
+                      <>
+                        <option value="junior_attendance">junior_attendance</option>
+                        <option value="special_user">special_user</option>
+                        <option value="super_admin">Admin</option>
+                        <option value="admin_power">Admin</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-[#F7F2F2]">College</label>
+                  <input
+                    type="text"
+                    value={editModalUser.college || ''}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, college: e.target.value })}
+                    className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold text-[#F7F2F2]">Department</label>
+                  <input
+                    type="text"
+                    value={editModalUser.department || ''}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, department: e.target.value })}
+                    className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
+                  />
+                </div>
+              </form>
+            </div>
+            <div className="p-4 border-t border-[#2A1A1D] bg-[#130C0E] flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setEditModalUser(null)}
+                className="px-4 py-2 border border-[#2A1A1D] text-[#A79798] hover:text-[#F7F2F2] font-mono text-xs font-bold rounded-[2px]"
+              >
+                CANCEL
+              </button>
+              <button
+                type="submit"
+                form="editUserForm"
+                className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold rounded-[2px] shadow-[0_0_15px_rgba(224,27,34,0.3)]"
+              >
+                SAVE CHANGES
               </button>
             </div>
           </div>

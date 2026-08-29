@@ -1,7 +1,15 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { isAdminRole, isCoordinatorRole } from '../store/authStore';
 import { Loader2 } from 'lucide-react';
 
+/**
+ * 3-role model:
+ *  requireRole="admin"       → admin, super_admin, admin_power
+ *  requireRole="coordinator" → event_coordinator, special_user, junior_attendance
+ *  requireRole="student"     → student only (admins/coordinators are NOT students)
+ *  (no requireRole)          → any authenticated user
+ */
 export const ProtectedRoute = ({ children, requireRole }) => {
   const { isAuthenticated, isInitialized, survivor } = useAuthStore();
 
@@ -19,9 +27,18 @@ export const ProtectedRoute = ({ children, requireRole }) => {
 
   if (requireRole) {
     const userRole = survivor?.role || 'student';
-    // Let admin and super_admin access everything
-    if (userRole !== requireRole && userRole !== 'admin' && userRole !== 'super_admin' && userRole !== 'admin_power') {
-      return <Navigate to="/home" replace />;
+    const isAdmin = isAdminRole(userRole);
+    const isCoord = isCoordinatorRole(userRole);
+
+    if (requireRole === 'admin') {
+      if (!isAdmin) return <Navigate to="/dashboard" replace />;
+    } else if (requireRole === 'coordinator') {
+      // Admins can also access coordinator pages
+      if (!isAdmin && !isCoord) return <Navigate to="/dashboard" replace />;
+    } else if (requireRole === 'student') {
+      // Admins and coordinators should NOT see student dashboard — redirect to their own
+      if (isAdmin) return <Navigate to="/dashboard/admin" replace />;
+      if (isCoord) return <Navigate to="/dashboard/coordinator" replace />;
     }
   }
 

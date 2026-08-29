@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { UploadCloud, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { UploadCloud, AlertCircle, CheckCircle, Clock, FileText } from 'lucide-react';
 
 export const MyPaymentPage: React.FC = () => {
   const queryClient = useQueryClient();
 
-  const { data: paymentData, isLoading } = useQuery({
+  const { data: paymentData, isLoading: paymentLoading } = useQuery({
     queryKey: ['payment-status'],
     queryFn: async () => {
       const res = await api.payments.getMyStatus();
+      return res.data;
+    },
+  });
+
+  const { data: bonafideData, isLoading: bonafideLoading } = useQuery({
+    queryKey: ['bonafide-status'],
+    queryFn: async () => {
+      const res = await api.bonafides.getMy();
       return res.data;
     },
   });
@@ -20,7 +28,11 @@ export const MyPaymentPage: React.FC = () => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const status = paymentData?.status || 'NOT_SUBMITTED';
+  const [bonafideFile, setBonafideFile] = useState<File | null>(null);
+  const [isBonafideSubmitting, setIsBonafideSubmitting] = useState(false);
+
+  const paymentStatus = paymentData?.status || 'NOT_SUBMITTED';
+  const bonafideStatus = bonafideData?.status || 'NOT_SUBMITTED';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -63,18 +75,66 @@ export const MyPaymentPage: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return <div className="text-[#6B5A5C] font-mono text-xs text-center py-10">Loading payment status...</div>;
+  const handleBonafideChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setBonafideFile(e.target.files[0]);
+    }
+  };
+
+  const submitBonafide = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bonafideFile) {
+      alert('Please upload a bonafide document.');
+      return;
+    }
+
+    try {
+      setIsBonafideSubmitting(true);
+      
+      const formData = new FormData();
+      formData.append('bonafide', bonafideFile);
+      
+      const uploadRes = await api.uploads.uploadBonafide(formData);
+      const file_url = uploadRes.data.url;
+
+      await api.bonafides.upload({ file_url });
+
+      alert('Bonafide document submitted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['bonafide-status'] });
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to submit bonafide document.');
+    } finally {
+      setIsBonafideSubmitting(false);
+    }
+  };
+
+  if (paymentLoading || bonafideLoading) {
+    return <div className="text-[#6B5A5C] font-mono text-xs text-center py-10">Loading status...</div>;
   }
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="space-y-10 max-w-3xl mx-auto pb-12">
       <div>
-        <h1 className="text-xl font-display font-bold text-[#F7F2F2]">Registration Payment</h1>
-        <p className="text-xs text-[#6B5A5C] font-mono mt-1">Submit your symposium fee to unlock event registrations.</p>
+        <h1 className="text-xl font-display font-bold text-[#F7F2F2]">Mandatory Documents & Payment</h1>
+        <p className="text-xs text-[#6B5A5C] font-mono mt-1">Submit your symposium fee and bonafide document to unlock event registrations.</p>
       </div>
 
-      {status === 'VERIFIED' && (
+      {/* ── INSTRUCTIONS ── */}
+      <div className="bg-[#1A1114] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
+        <h2 className="text-sm font-display font-bold text-[#E01B22] uppercase tracking-widest flex items-center gap-2">
+          <FileText className="w-4 h-4" /> Registration & Payment Steps
+        </h2>
+        <ol className="list-decimal list-inside text-xs font-mono text-[#A79798] space-y-2 leading-relaxed">
+          <li><strong>Open the Portal</strong>: Access the payment gateway through the provided portal link.</li>
+          <li><strong>Fill the fields & verify</strong>: Complete your details on the external payment portal and verify them.</li>
+          <li><strong>Make the payment</strong>: Complete the transaction, download the receipt, and refer to the receipt number.</li>
+          <li><strong>Update the receipt number</strong>: Enter your receipt number below, upload the downloaded receipt, and submit to verify.</li>
+        </ol>
+      </div>
+
+      {/* ── PAYMENT SECTION ── */}
+      <div className="space-y-6">
+      {paymentStatus === 'VERIFIED' && (
         <div className="bg-[#1FA971]/10 border border-[#1FA971] p-8 rounded-[2px] text-center space-y-4 shadow-[0_0_20px_rgba(31,169,113,0.15)]">
           <CheckCircle className="w-12 h-12 text-[#1FA971] mx-auto" />
           <div>
@@ -90,7 +150,7 @@ export const MyPaymentPage: React.FC = () => {
         </div>
       )}
 
-      {status === 'PENDING' && (
+      {paymentStatus === 'PENDING' && (
         <div className="bg-[#130C0E] border border-[#E08A17] p-8 rounded-[2px] text-center space-y-4">
           <Clock className="w-12 h-12 text-[#E08A17] mx-auto" />
           <div>
@@ -102,9 +162,9 @@ export const MyPaymentPage: React.FC = () => {
         </div>
       )}
 
-      {(status === 'NOT_SUBMITTED' || status === 'REJECTED') && (
+      {(paymentStatus === 'NOT_SUBMITTED' || paymentStatus === 'REJECTED') && (
         <div className="space-y-6">
-          {status === 'REJECTED' && (
+          {paymentStatus === 'REJECTED' && (
             <div className="bg-[#4A050A] border border-[#E01B22] p-5 rounded-[2px] flex items-start gap-4">
               <AlertCircle className="w-6 h-6 text-[#FF2A2A] shrink-0" />
               <div>
@@ -164,13 +224,13 @@ export const MyPaymentPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[#A79798] mb-1.5 font-bold font-mono">Transaction Ref / UTR Number *</label>
+                  <label className="block text-[#A79798] mb-1.5 font-bold font-mono">Receipt Number *</label>
                   <input
                     type="text"
                     value={refNumber}
                     onChange={(e) => setRefNumber(e.target.value)}
                     required
-                    placeholder="e.g. 324156789012"
+                    placeholder="e.g. 202608290010"
                     className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] text-[#F7F2F2] p-2.5 rounded-[2px] outline-none font-mono transition-colors"
                   />
                 </div>
@@ -228,6 +288,85 @@ export const MyPaymentPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
+
+      {/* ── BONAFIDE SECTION ── */}
+      <div className="space-y-6 border-t border-[#2A1A1D] pt-8">
+        <h2 className="text-lg font-display font-bold text-[#F7F2F2]">Bonafide Document</h2>
+        
+        {bonafideStatus === 'verified' && (
+          <div className="bg-[#1FA971]/10 border border-[#1FA971] p-6 rounded-[2px] flex items-center gap-4">
+            <CheckCircle className="w-8 h-8 text-[#1FA971] shrink-0" />
+            <div>
+              <h2 className="text-sm font-display font-bold text-[#1FA971] tracking-wider">DOCUMENT VERIFIED</h2>
+              <p className="text-xs text-[#A79798] font-mono mt-1">Your bonafide document has been approved by the registration team.</p>
+            </div>
+          </div>
+        )}
+
+        {(bonafideStatus === 'uploaded' || bonafideStatus === 'under_review') && (
+          <div className="bg-[#130C0E] border border-[#E08A17] p-6 rounded-[2px] flex items-center gap-4">
+            <Clock className="w-8 h-8 text-[#E08A17] shrink-0" />
+            <div>
+              <h2 className="text-sm font-display font-bold text-[#E08A17] tracking-wider">VERIFICATION PENDING</h2>
+              <p className="text-xs text-[#A79798] font-mono mt-1">Your document is currently under review by the coordination team.</p>
+            </div>
+          </div>
+        )}
+
+        {(bonafideStatus === 'NOT_SUBMITTED' || bonafideStatus === 'rejected') && (
+          <div className="space-y-6">
+            {bonafideStatus === 'rejected' && (
+              <div className="bg-[#4A050A] border border-[#E01B22] p-5 rounded-[2px] flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-[#FF2A2A] shrink-0" />
+                <div>
+                  <h3 className="text-sm font-display font-bold text-[#FF2A2A]">DOCUMENT REJECTED</h3>
+                  <p className="text-xs text-[#F7F2F2] font-mono mt-1">Reason: {bonafideData?.remarks || 'Invalid document'}</p>
+                  <p className="text-[10px] text-[#A79798] font-mono mt-2">Please upload a valid bonafide certificate from your college.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px]">
+              <h2 className="text-sm font-display font-bold text-[#F7F2F2] border-b border-[#2A1A1D] pb-3 mb-5">
+                UPLOAD BONAFIDE CERTIFICATE
+              </h2>
+              
+              <form onSubmit={submitBonafide} className="space-y-4 font-body text-xs">
+                <div>
+                  <label className="block text-[#A79798] mb-1.5 font-bold font-mono">College Bonafide (PDF/Image) *</label>
+                  <div className="border-2 border-dashed border-[#2A1A1D] hover:border-[#E01B22] bg-[#0A0607] p-6 text-center rounded-[2px] transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/jpeg, image/png, image/webp, application/pdf"
+                      onChange={handleBonafideChange}
+                      required
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <FileText className="w-8 h-8 text-[#6B5A5C] mx-auto mb-3" />
+                    <span className="text-[#A79798] font-mono text-[11px] block">
+                      {bonafideFile ? bonafideFile.name : 'Click or drag file to upload'}
+                    </span>
+                    <span className="text-[#6B5A5C] font-mono text-[9px] mt-2 block">
+                      Max file size: 5MB. Ensure college seal and signature are clearly visible.
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isBonafideSubmitting}
+                  className="w-full mt-2 py-3 bg-[#E01B22] hover:bg-[#FF2A2A] disabled:opacity-50 text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] shadow-[0_0_15px_rgba(224,27,34,0.2)] transition-all"
+                >
+                  {isBonafideSubmitting ? 'UPLOADING...' : 'SUBMIT BONAFIDE DOCUMENT'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+
     </div>
+
   );
 };

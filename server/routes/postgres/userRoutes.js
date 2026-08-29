@@ -26,16 +26,17 @@ router.put(
 router.get(
   "/",
   verifyJwt,
-  allowRoles("admin", "super_admin", "admin_power"),
+  allowRoles("admin", "coordinator"),
   userController.getAllUsers
 );
 
 router.post(
   "/",
   verifyJwt,
-  allowRoles("admin", "super_admin", "admin_power"),
+  allowRoles("admin", "coordinator"),
   userController.createUserByAdmin
 );
+
 
 router.put(
   "/:id/details",
