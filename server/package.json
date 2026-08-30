@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node --watch server.js",
     "postinstall": "node -e \"console.log('Using PostgreSQL for app data; sqlite rebuild disabled to keep Docker installs stable.')\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

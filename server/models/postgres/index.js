@@ -80,6 +80,8 @@ Attendance.belongsTo(Event, { foreignKey: "event_id", as: "event" });
 // Results
 Event.hasOne(Result, { foreignKey: "event_id", as: "result" });
 Result.belongsTo(Event, { foreignKey: "event_id", as: "event" });
+Result.belongsTo(User, { foreignKey: "winner_id", as: "winner" });
+Result.belongsTo(User, { foreignKey: "runner_id", as: "runner" });
 
 // Notifications & Logs
 User.hasMany(Notification, { foreignKey: "user_id", as: "notifications" });

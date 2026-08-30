@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const { verifyJwt } = require("../../middleware/auth");
 const allowRoles = require("../../middleware/allowRoles");
 const verifyEventCoordinatorAccess = require("../../middleware/eventCoordinatorAccess");
@@ -20,6 +20,12 @@ router.post(
   allowRoles("event_coordinator", "junior_attendance", "admin"),
   verifyEventCoordinatorAccess,
   attendanceController.markAttendance
+);
+
+router.post(
+  "/scan-qr",
+  verifyJwt,
+  attendanceController.markSelfAttendanceByQR
 );
 
 module.exports = router;

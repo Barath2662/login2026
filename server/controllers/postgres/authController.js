@@ -167,32 +167,17 @@ const registerUser = async (req, res) => {
       });
     }
 
-    if (isAlumni && !/^\d{2}MX$/i.test(String(batch_year || ""))) {
+    if (isAlumni && batch_year && !/^\d{2,4}(MX)?$/i.test(String(batch_year).trim())) {
       await transaction.rollback();
       return res.status(400).json({
-        message: "Alumni batch code must use YYMX format, such as 25MX or 95MX",
+        message: "Please enter a valid batch or passing year (e.g. 2015, 15, or 25MX)",
       });
     }
 
     if (!isAlumni) {
-      if (!email || !otp) {
+      if (!email) {
         await transaction.rollback();
-        return res.status(400).json({ message: "Email and OTP are required for participant registration." });
-      }
-
-      const validOtp = await otpModel.findOne({
-        where: { email: email.toLowerCase(), otp },
-        transaction,
-      });
-
-      if (!validOtp) {
-        await transaction.rollback();
-        return res.status(400).json({ message: "Invalid or expired OTP." });
-      }
-
-      if (new Date() > validOtp.expires_at) {
-        await transaction.rollback();
-        return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+        return res.status(400).json({ message: "Email is required for participant registration." });
       }
     }
 
@@ -206,7 +191,7 @@ const registerUser = async (req, res) => {
       if (existingUser) {
         await transaction.rollback();
         return res.status(409).json({
-          message: "Email already registered",
+          message: "Email address is already registered",
         });
       }
     }
@@ -221,10 +206,10 @@ const registerUser = async (req, res) => {
         email: finalEmail,
         phone: finalPhone,
         password: hashedPassword,
-        college_name,
-        department,
+        college_name: college_name || "PSG College of Technology",
+        department: department || "MCA",
         roll_no,
-        user_type: user_type.toUpperCase() === "ALUMNI" ? "ALUMNI" : "PARTICIPANT",
+        user_type: isAlumni ? "ALUMNI" : "PARTICIPANT",
         gender,
         year_of_study,
         batch_year,
@@ -241,60 +226,91 @@ const registerUser = async (req, res) => {
 
     await pairPendingTeamInvite(user.id, user.email);
 
-    if (!isAlumni && email) {
-      await otpModel.destroy({ where: { email: email.toLowerCase() }, transaction });
-    }
-
-    // Send welcome email with LOGIN ID only if a real email was provided
+    // Send welcome email with calendar invite only if email is provided
     if (email) {
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=LOGIN+2K26+35th+Edition+Alumni+Reunion&dates=20260918T033000Z/20260919T113000Z&details=Welcome+back+to+PSG+Tech+for+the+35th+Edition+of+LOGIN+2K26+National+Cyber+Symposium!&location=PSG+College+of+Technology,+Coimbatore";
+      
+      const emailSubject = isAlumni
+        ? `[LOGIN 2K26] Welcome Back, Alumni! Confirmation & Event Calendar Reminder`
+        : `[LOGIN 2K26] Welcome! Your Participant ID & Credentials`;
+
+      const emailHtml = isAlumni ? `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; border-radius: 6px; max-width: 600px; margin: 0 auto; border: 1px solid #2A1A1D;">
+          <div style="border-bottom: 2px solid #E01B22; padding-bottom: 16px; margin-bottom: 24px; text-align: center;">
+            <h1 style="color: #E01B22; margin: 0; font-size: 26px; letter-spacing: 3px;">LOGIN 2K26</h1>
+            <p style="color: #E08A17; margin: 6px 0 0 0; font-size: 13px; font-family: monospace; font-weight: bold;">35TH EDITION • ALUMNI REUNION</p>
+            <p style="color: #A79798; margin: 4px 0 0 0; font-size: 11px;">Department of Computer Applications • PSG College of Technology</p>
+          </div>
+          
+          <h2 style="color: #F7F2F2; font-size: 22px; margin-top: 0; text-align: center;">WELCOME BACK, ${user.name.toUpperCase()}!</h2>
+          
+          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">
+            We are honored to have you register for the <strong style="color: #F7F2F2;">35th Edition of LOGIN 2K26</strong>! You were part of the journey, and we are excited to have you back as part of the legacy.
+          </p>
+
+          <div style="background: #130C0E; border: 2px solid #E08A17; padding: 20px; margin: 24px 0; border-radius: 4px; text-align: center;">
+            <p style="color: #E08A17; font-size: 11px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 2px; font-family: monospace;">Official Alumni Registration Pass</p>
+            <h3 style="color: #F7F2F2; font-size: 24px; margin: 0 0 8px 0; font-family: monospace;">${loginId}</h3>
+            <p style="color: #A79798; font-size: 12px; margin: 0;">Batch: <strong style="color: #F7F2F2;">${batch_year || 'Alumni'}</strong> • Location: <strong style="color: #F7F2F2;">${place || 'PSG Tech'}</strong></p>
+          </div>
+
+          <div style="background: #1A0306; border-left: 4px solid #E01B22; padding: 16px; margin-bottom: 24px; border-radius: 2px;">
+            <p style="color: #F7F2F2; font-size: 13px; margin: 0 0 6px 0; font-weight: bold;">📅 MARK YOUR CALENDAR</p>
+            <p style="color: #A79798; font-size: 12px; margin: 0;">Dates: September 18-19, 2026<br/>Venue: PSG College of Technology, Coimbatore</p>
+          </div>
+
+          <div style="margin: 32px 0; text-align: center;">
+            <a href="${calendarLink}" target="_blank" style="background-color: #E01B22; color: #F7F2F2; text-decoration: none; padding: 14px 28px; border-radius: 2px; font-weight: bold; font-family: monospace; letter-spacing: 1px; display: inline-block; box-shadow: 0 4px 15px rgba(224,27,34,0.4);">+ ADD TO GOOGLE CALENDAR</a>
+          </div>
+
+          <p style="color: #6B5A5C; font-size: 12px; margin-top: 24px; border-top: 1px solid #2A1A1D; padding-top: 16px; text-align: center;">
+            🔒 Your information is strictly used for LOGIN 2K26 coordination.<br/>
+            Organized by Department of Computer Applications, PSG College of Technology.
+          </p>
+        </div>
+      ` : `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; border-radius: 6px; max-width: 600px; margin: 0 auto; border: 1px solid #2A1A1D;">
+          <div style="border-bottom: 2px solid #E01B22; padding-bottom: 16px; margin-bottom: 24px;">
+            <h1 style="color: #E01B22; margin: 0; font-size: 24px; letter-spacing: 2px;">LOGIN 2K26</h1>
+            <p style="color: #A79798; margin: 6px 0 0 0; font-size: 12px; font-family: monospace;">Department of Computer Applications • PSG College of Technology</p>
+          </div>
+          <h2 style="color: #F7F2F2; font-size: 20px; margin-top: 0;">Welcome to LOGIN 2K26!</h2>
+          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Hello <strong style="color: #F7F2F2;">${user.name}</strong>,</p>
+          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Your participant account has been created successfully. Here are your login credentials:</p>
+          
+          <div style="background: #130C0E; border: 2px solid #E01B22; padding: 24px; margin: 24px 0; border-radius: 4px; text-align: center;">
+            <p style="color: #A79798; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 2px;">Your Participant ID (Username)</p>
+            <h2 style="color: #E01B22; font-size: 32px; margin: 0 0 16px 0; letter-spacing: 4px; font-family: monospace;">${loginId}</h2>
+            
+            <p style="color: #A79798; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 2px;">Your Password</p>
+            <div style="background: #0A0607; border: 1px dashed #E01B22; display: inline-block; padding: 8px 16px; color: #F7F2F2; font-family: monospace; font-size: 18px; letter-spacing: 2px;">
+              ${rawPassword}
+            </div>
+          </div>
+
+          <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Use these credentials to log in at <a href="${frontendUrl}/login" style="color: #E01B22;">${frontendUrl}/login</a>.</p>
+          
+          <div style="margin: 32px 0; text-align: center;">
+            <a href="${calendarLink}" target="_blank" style="background-color: #E01B22; color: #F7F2F2; text-decoration: none; padding: 12px 24px; border-radius: 2px; font-weight: bold; font-family: monospace; letter-spacing: 1px; display: inline-block;">+ ADD TO GOOGLE CALENDAR</a>
+          </div>
+
+          <p style="color: #6B5A5C; font-size: 12px; margin-top: 24px; border-top: 1px solid #2A1A1D; padding-top: 16px;">
+            For assistance, contact the organizing team at <a href="mailto:login@psgtech.ac.in" style="color: #E01B22;">login@psgtech.ac.in</a>.
+          </p>
+        </div>
+      `;
+
       sendEmail({
         to: finalEmail,
-        subject: `[LOGIN 2026] Welcome! Your Participant ID: ${loginId}`,
-        html: `
-          <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; border-radius: 6px; max-width: 600px; margin: 0 auto; border: 1px solid #2A1A1D;">
-            <div style="border-bottom: 2px solid #E01B22; padding-bottom: 16px; margin-bottom: 24px;">
-              <h1 style="color: #E01B22; margin: 0; font-size: 24px; letter-spacing: 2px;">LOGIN 2026</h1>
-              <p style="color: #A79798; margin: 6px 0 0 0; font-size: 12px; font-family: monospace;">Department of Computer Applications • PSG College of Technology</p>
-            </div>
-            <h2 style="color: #F7F2F2; font-size: 20px; margin-top: 0;">Welcome to LOGIN 2026!</h2>
-            <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Hello <strong style="color: #F7F2F2;">${user.name}</strong>,</p>
-            <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Your participant account has been created successfully.</p>
-            <div style="background: #130C0E; border: 2px solid #E01B22; padding: 24px; margin: 24px 0; border-radius: 4px; text-align: center;">
-              <p style="color: #A79798; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 2px;">Your Participant ID</p>
-              <h2 style="color: #E01B22; font-size: 36px; margin: 0; letter-spacing: 4px; font-family: monospace;">${loginId}</h2>
-            </div>
-            <p style="color: #A79798; font-size: 14px; line-height: 1.6;">Use this ID along with your password to log in at <a href="${frontendUrl}/login" style="color: #E01B22;">${frontendUrl}/login</a>.</p>
-            <p style="color: #6B5A5C; font-size: 12px; margin-top: 24px; border-top: 1px solid #2A1A1D; padding-top: 16px;">
-              For assistance, contact the organizing team at <a href="mailto:login@psgtech.ac.in" style="color: #E01B22;">login@psgtech.ac.in</a>.
-            </p>
-          </div>
-        `,
-      });
+        subject: emailSubject,
+        html: emailHtml,
+      }).catch(err => console.error("Failed to send welcome email:", err));
     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        role: normalizedRole,
-        user_type: user.user_type,
-      },
-      jwtSecret,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     return res.status(201).json({
-      message: "User registered successfully",
-      token,
-      loginId,
-      user: buildUserResponse(user, false, []),
+      message: "User registered successfully.",
+      loginId
     });
   } catch (error) {
     try { await transaction.rollback(); } catch (_) {}
@@ -444,17 +460,18 @@ const forgotPassword = async (req, res) => {
       await otpModel.create({ email: email.toLowerCase(), otp, expires_at: expiresAt });
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetLink = `${frontendUrl}/reset-password?email=${encodeURIComponent(user.email)}&otp=${otp}`;
+
     await sendEmail({
       to: user.email,
-      subject: "[LOGIN 2026] Password Reset OTP",
+      subject: "[LOGIN 2026] Password Reset Link",
       html: `
-        <div style="font-family: Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 24px; border-radius: 6px; border: 1px solid #2A1A1D; text-align: center;">
-          <h2 style="color: #E01B22; margin-top: 0;">Password Reset</h2>
-          <p>Your OTP code to reset your password is:</p>
-          <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #F7F2F2; background: #130C0E; padding: 16px; display: inline-block; border: 1px solid #E01B22; border-radius: 4px; margin: 16px 0;">
-            ${otp}
-          </div>
-          <p style="color: #A79798; font-size: 14px;">This code expires in 10 minutes. If you did not request this, please ignore this email.</p>
+        <div style="font-family: Arial, sans-serif; background-color: #0A0607; color: #F7F2F2; padding: 32px; border-radius: 6px; border: 1px solid #2A1A1D; text-align: center; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #E01B22; margin-top: 0; font-size: 24px;">Password Reset Request</h2>
+          <p style="color: #A79798; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">We received a request to reset your password. Click the secure button below to set a new password for your account.</p>
+          <a href="${resetLink}" style="background-color: #E01B22; color: #F7F2F2; text-decoration: none; padding: 14px 28px; border-radius: 2px; font-weight: bold; font-family: monospace; letter-spacing: 1px; display: inline-block;">RESET PASSWORD</a>
+          <p style="color: #6B5A5C; font-size: 12px; margin-top: 32px; border-top: 1px solid #2A1A1D; padding-top: 16px;">This link will expire in 10 minutes. If you did not request a password reset, you can safely ignore this email.</p>
         </div>
       `,
     });
@@ -524,6 +541,28 @@ const changePassword = async (req, res) => {
   }
 };
 
+const checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ exists: false, message: "Email is required" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await userModel.findOne({
+      where: { email: normalizedEmail },
+    });
+
+    if (user) {
+      return res.json({ exists: true, message: "This email address is already registered." });
+    }
+
+    return res.json({ exists: false, message: "Email is available." });
+  } catch (error) {
+    return res.status(500).json({ exists: false, message: "Failed to check email", error: error.message });
+  }
+};
+
 module.exports = {
   sendOtp,
   registerUser,
@@ -532,4 +571,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   changePassword,
+  checkEmail,
 };

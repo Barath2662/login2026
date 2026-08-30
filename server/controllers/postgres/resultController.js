@@ -1,9 +1,28 @@
-﻿const resultModel = require("../../models/postgres/resultModel");
+const { Result, Event, User } = require("../../models/postgres");
+
+const getAllResults = async (req, res) => {
+  try {
+    const results = await Result.findAll({
+      include: [
+        { model: Event, as: 'event', attributes: ['id', 'name', 'category', 'banner_url', 'day', 'start_time', 'end_time'] },
+        { model: User, as: 'winner', attributes: ['id', 'name', 'college_name', 'department', 'roll_no'] },
+        { model: User, as: 'runner', attributes: ['id', 'name', 'college_name', 'department', 'roll_no'] },
+      ],
+    });
+    return res.json({ status: 'success', data: results });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch results", error: error.message });
+  }
+};
 
 const getEventResult = async (req, res) => {
   try {
-    const result = await resultModel.findOne({
+    const result = await Result.findOne({
       where: { event_id: req.params.eventId },
+      include: [
+        { model: User, as: 'winner', attributes: ['id', 'name', 'college_name', 'department'] },
+        { model: User, as: 'runner', attributes: ['id', 'name', 'college_name', 'department'] },
+      ],
     });
 
     return res.json(result || null);
@@ -16,7 +35,7 @@ const saveEventResult = async (req, res) => {
   try {
     const { winner_id, runner_id, remarks } = req.body;
 
-    const [result] = await resultModel.findOrCreate({
+    const [result] = await Result.findOrCreate({
       where: { event_id: req.params.eventId },
       defaults: {
         event_id: req.params.eventId,
@@ -37,6 +56,7 @@ const saveEventResult = async (req, res) => {
 };
 
 module.exports = {
+  getAllResults,
   getEventResult,
   saveEventResult,
 };
