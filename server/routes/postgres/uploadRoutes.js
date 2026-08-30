@@ -7,9 +7,14 @@ const { verifyJwt } = require("../../middleware/auth");
 const router = express.Router();
 
 // Ensure uploads directory exists
-const uploadDir = path.join(__dirname, "../../public/uploads/receipts");
+const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
+const uploadDir = isVercel ? "/tmp/uploads/receipts" : path.join(__dirname, "../../public/uploads/receipts");
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+  try {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  } catch (e) {
+    console.error("Failed to create uploadDir:", e);
+  }
 }
 
 // Configure Multer storage
@@ -55,9 +60,13 @@ router.post("/receipt", verifyJwt, upload.single("receipt"), (req, res) => {
   });
 });
 
-const bonafideDir = path.join(__dirname, "../../public/uploads/bonafides");
+const bonafideDir = isVercel ? "/tmp/uploads/bonafides" : path.join(__dirname, "../../public/uploads/bonafides");
 if (!fs.existsSync(bonafideDir)) {
-  fs.mkdirSync(bonafideDir, { recursive: true });
+  try {
+    fs.mkdirSync(bonafideDir, { recursive: true });
+  } catch (e) {
+    console.error("Failed to create bonafideDir:", e);
+  }
 }
 
 const bonafideStorage = multer.diskStorage({
