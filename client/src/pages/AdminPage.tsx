@@ -677,6 +677,7 @@ export const AdminPage: React.FC = () => {
                               <th className="py-2 px-3">PARTICIPANT</th>
                               <th className="py-2 px-3">COLLEGE</th>
                               <th className="py-2 px-3">TEAM / SQUAD</th>
+                              <th className="py-2 px-3">ACCOMMODATION</th>
                               <th className="py-2 px-3">ATTENDANCE</th>
                               <th className="py-2 px-3">ACTIONS</th>
                             </tr>
@@ -696,6 +697,11 @@ export const AdminPage: React.FC = () => {
                                 </td>
                                 <td className="py-2 px-3 font-mono text-[#E08A17]">
                                   {reg.team?.name || reg.team_name || 'SOLO'}
+                                </td>
+                                <td className="py-2 px-3 font-mono text-[#A79798]">
+                                  {reg.student?.accommodation_required || reg.user?.accommodation_required ? (
+                                    <span className="text-[#E01B22]">YES</span>
+                                  ) : 'NO'}
                                 </td>
                                 <td className="py-2 px-3">
                                   <span className={`px-2 py-0.5 rounded-[2px] font-mono text-[10px] font-bold ${
@@ -753,6 +759,7 @@ export const AdminPage: React.FC = () => {
                       <th className="p-3.5">BATCH</th>
                       <th className="p-3.5">PLACE</th>
                       <th className="p-3.5">ORGANIZATION</th>
+                      <th className="p-3.5">ACCOMMODATION</th>
                       <th className="p-3.5">ACTIONS</th>
                     </tr>
                   </thead>
@@ -765,6 +772,9 @@ export const AdminPage: React.FC = () => {
                         <td className="p-3.5 font-mono text-[#E08A17]">{alumni.batch_year || '-'}</td>
                         <td className="p-3.5 text-[#A79798]">{alumni.place || '-'}</td>
                         <td className="p-3.5 text-[#A79798]">{alumni.current_organization || '-'}</td>
+                        <td className="p-3.5 font-mono text-[#A79798]">
+                          {alumni.accommodation_required ? <span className="text-[#E01B22]">YES</span> : 'NO'}
+                        </td>
                         <td className="p-3.5">
                           <div className="flex items-center gap-2">
                             <button onClick={() => editManagedUser(alumni)} title="Edit alumni details" className="p-1.5 text-[#E08A17] hover:text-[#F7F2F2]"><Pencil className="w-3.5 h-3.5" /></button>

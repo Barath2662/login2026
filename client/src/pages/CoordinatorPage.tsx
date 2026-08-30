@@ -273,6 +273,7 @@ export const CoordinatorPage: React.FC = () => {
                           <th className="pb-2 font-normal">ID</th>
                           <th className="pb-2 font-normal">College</th>
                           <th className="pb-2 font-normal">Team</th>
+                          <th className="pb-2 font-normal">Accommodation</th>
                           <th className="pb-2 font-normal">Status</th>
                         </tr>
                       </thead>
@@ -283,6 +284,11 @@ export const CoordinatorPage: React.FC = () => {
                             <td className="py-2 text-[#A79798]">{r.student?.student_id_code || r.user?.student_id_code}</td>
                             <td className="py-2 truncate max-w-[150px]">{r.student?.college_name || r.user?.college_name}</td>
                             <td className="py-2">{r.team?.name || r.team_name || '-'}</td>
+                            <td className="py-2 font-mono text-[#A79798]">
+                              {r.student?.accommodation_required || r.user?.accommodation_required ? (
+                                <span className="text-[#E01B22]">YES</span>
+                              ) : 'NO'}
+                            </td>
                             <td className="py-2">{r.attendance_status || (r.attended ? 'PRESENT' : 'ABSENT')}</td>
                           </tr>
                         ))}
