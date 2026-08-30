@@ -9,7 +9,7 @@ export const AdminPage: React.FC = () => {
   const { user: currentUser } = useAuthStore();
   const isSuperAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'admin_power';
 
-  type AdminTab = 'PAYMENTS' | 'REGISTRATIONS' | 'ALUMNI' | 'USERS' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS' | 'CSV_UPLOAD';
+  type AdminTab = 'PAYMENTS' | 'REGISTRATIONS' | 'ALUMNI' | 'USERS' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS' | 'CSV_UPLOAD' | 'SETTINGS';
 
   const sectionToTab = (s?: string): AdminTab => {
     switch (s) {
@@ -20,6 +20,7 @@ export const AdminPage: React.FC = () => {
       case 'csv-upload': return 'CSV_UPLOAD';
       case 'events': return 'EVENTS';
       case 'announcements': return 'ANNOUNCEMENTS';
+      case 'settings': return 'SETTINGS';
       default: return 'PAYMENTS';
     }
   };
@@ -32,6 +33,8 @@ export const AdminPage: React.FC = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
+  const [showWinnersSetting, setShowWinnersSetting] = useState<boolean>(false);
+  const [updatingSetting, setUpdatingSetting] = useState<boolean>(false);
 
   // CSV Upload state
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -70,16 +73,18 @@ export const AdminPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [payRes, userRes, annoRes, eventRes] = await Promise.all([
+      const [payRes, userRes, annoRes, eventRes, settingsRes] = await Promise.all([
         api.payments.getAll(),
         api.users.getAll(),
         api.announcements.getActive(),
         api.events.getAll(),
+        api.settings.get().catch(() => ({ data: { show_winners: 'false' } })),
       ]);
 
       if (Array.isArray(payRes.data)) setPayments(payRes.data);
       if (Array.isArray(userRes.data)) setUsers(userRes.data);
       if (Array.isArray(annoRes.data)) setAnnouncements(annoRes.data);
+      if (settingsRes?.data) setShowWinnersSetting(settingsRes.data.show_winners === 'true');
       
       if (Array.isArray(eventRes.data)) {
         setEvents(eventRes.data);
@@ -443,6 +448,20 @@ export const AdminPage: React.FC = () => {
   });
   const overallAttendancePercentage = totalEnrollments > 0 ? Math.round((totalAttended / totalEnrollments) * 100) : 0;
 
+  const handleToggleShowWinners = async () => {
+    try {
+      setUpdatingSetting(true);
+      const newValue = !showWinnersSetting;
+      await api.settings.update({ show_winners: newValue ? 'true' : 'false' });
+      setShowWinnersSetting(newValue);
+      alert(`Winners & Results navigation link is now ${newValue ? 'ENABLED (Visible in navbars & sidebar)' : 'DISABLED (Hidden from navbars)'}.`);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update system setting.');
+    } finally {
+      setUpdatingSetting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 text-[#F7F2F2]">
       <div className="border-b border-[#2A1A1D] pb-4">
@@ -456,8 +475,49 @@ export const AdminPage: React.FC = () => {
           {activeTab === 'ANNOUNCEMENTS' && 'Broadcast Announcements'}
           {activeTab === 'EVENTS' && `Events (${events.length})`}
           {activeTab === 'CSV_UPLOAD' && 'CSV Payment Verification'}
+          {activeTab === 'SETTINGS' && 'System Feature Settings'}
         </h1>
       </div>
+
+        {/* TAB: SYSTEM FEATURE SETTINGS */}
+        {activeTab === 'SETTINGS' && (
+          <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
+            <div>
+              <h2 className="text-lg font-display font-bold text-[#F7F2F2]">
+                SYSTEM FEATURE CONTROLS
+              </h2>
+              <p className="text-xs text-[#A79798] font-mono mt-0.5">
+                Enable or disable global symposium features across participant views and navigation menus.
+              </p>
+            </div>
+
+            <div className="bg-[#0A0607] border border-[#2A1A1D] p-6 rounded-[2px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-[#E08A17]" />
+                  <h3 className="font-display font-bold text-sm text-[#F7F2F2]">
+                    WINNERS & RESULTS NAVIGATION LINK
+                  </h3>
+                </div>
+                <p className="text-xs font-mono text-[#A79798] max-w-xl">
+                  When enabled, the 🏆 Winners link will appear in the main navigation bar and participant dashboard sidebar. Disable this until symposium events conclude.
+                </p>
+              </div>
+
+              <button
+                onClick={handleToggleShowWinners}
+                disabled={updatingSetting}
+                className={`px-5 py-2.5 rounded-[2px] font-mono text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
+                  showWinnersSetting
+                    ? 'bg-[#1FA971] hover:bg-[#27C487] text-[#0A0607]'
+                    : 'bg-[#1A1114] hover:bg-[#2A1A1D] text-[#A79798] border border-[#3E2529] hover:border-[#E01B22]'
+                }`}
+              >
+                {showWinnersSetting ? '✓ ENABLED (Visible)' : 'OFF (Hidden)'}
+              </button>
+            </div>
+          </div>
+        )}
 
 
         {/* TAB: PAYMENTS VERIFICATION QUEUE */}

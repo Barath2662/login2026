@@ -9,6 +9,7 @@ import { TimelinePage } from '../pages/TimelinePage';
 import { GalleryPage } from '../pages/GalleryPage';
 import { ContactPage } from '../pages/ContactPage';
 import { CoordinatorsPage } from '../pages/CoordinatorsPage';
+import { WinnersPage } from '../pages/WinnersPage';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
@@ -27,6 +28,7 @@ import { MyRegistrationsPage } from '../pages/dashboard/MyRegistrationsPage';
 import { MyPaymentPage } from '../pages/dashboard/MyPaymentPage';
 import { MyTeamsPage } from '../pages/dashboard/MyTeamsPage';
 import { NotificationsPage } from '../pages/dashboard/NotificationsPage';
+import { CertificatesPage } from '../pages/dashboard/CertificatesPage';
 
 // Admin pages (rendered inside DashboardLayout)
 import { AdminPage } from '../pages/AdminPage';
@@ -44,6 +46,7 @@ export const router = createBrowserRouter([
       { path: 'about', element: <AboutPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'events/:id', element: <EventDetailsPage /> },
+      { path: 'winners', element: <WinnersPage /> },
       { path: 'timeline', element: <TimelinePage /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'contact', element: <ContactPage /> },
@@ -78,6 +81,8 @@ export const router = createBrowserRouter([
           { path: 'events', element: <ProtectedRoute requireRole="student"><DashboardEventsPage /></ProtectedRoute> },
           { path: 'payment', element: <ProtectedRoute requireRole="student"><MyPaymentPage /></ProtectedRoute> },
           { path: 'registrations', element: <ProtectedRoute requireRole="student"><MyRegistrationsPage /></ProtectedRoute> },
+          { path: 'certificates', element: <ProtectedRoute requireRole="student"><CertificatesPage /></ProtectedRoute> },
+          { path: 'winners', element: <ProtectedRoute requireRole=""><WinnersPage /></ProtectedRoute> },
           { path: 'teams', element: <ProtectedRoute requireRole="student"><MyTeamsPage /></ProtectedRoute> },
           { path: 'notifications', element: <ProtectedRoute requireRole="student"><NotificationsPage /></ProtectedRoute> },
 

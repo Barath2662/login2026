@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
 import { Ticker } from '../components/Ticker';
 import { UnpaidBanner } from '../components/UnpaidBanner';
@@ -59,25 +58,18 @@ export const MainLayout: React.FC = () => {
 
           {/* Main Content Area */}
           <main className="flex-grow">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, filter: 'blur(10px)', scale: 0.98 }}
-                animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
-                exit={{ opacity: 0, filter: 'blur(10px)', scale: 1.02 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="h-full"
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
+            <div className="h-full">
+              <Outlet />
+            </div>
           </main>
 
-          {/* Unpaid Nudge Banner (Fixed bottom stack for unverified participants) */}
-          <UnpaidBanner />
-
-          {/* Footer */}
-          <Footer onReplayIntro={() => setShowIntro(true)} />
+          {/* Conditionally hide public footer and global unpaid banner on dashboard routes */}
+          {!location.pathname.startsWith('/dashboard') && (
+            <>
+              <UnpaidBanner />
+              <Footer onReplayIntro={() => setShowIntro(true)} />
+            </>
+          )}
 
           {/* Command Search Modal (Ctrl+K) */}
           <CommandSearchModal

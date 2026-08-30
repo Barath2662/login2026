@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { UploadCloud, AlertCircle, CheckCircle, Clock, FileText } from 'lucide-react';
+import Tesseract from 'tesseract.js';
 
 export const MyPaymentPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -34,9 +35,29 @@ export const MyPaymentPage: React.FC = () => {
   const paymentStatus = paymentData?.status || 'NOT_SUBMITTED';
   const bonafideStatus = bonafideData?.status || 'NOT_SUBMITTED';
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setReceiptFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setReceiptFile(file);
+      
+      if (file.type.startsWith('image/')) {
+        setIsScanning(true);
+        try {
+          const { data: { text } } = await Tesseract.recognize(file, 'eng');
+          const matches = text.match(/\b\d{10,20}\b/g); 
+          if (matches && matches.length > 0) {
+            const likelyRef = matches.find(m => m.length >= 12) || matches[0];
+            setRefNumber(likelyRef);
+            alert(`Auto-detected reference number: ${likelyRef}.\nPlease verify it is correct.`);
+          }
+        } catch (error) {
+          console.error('OCR Error:', error);
+        } finally {
+          setIsScanning(false);
+        }
+      }
     }
   };
 
@@ -61,7 +82,7 @@ export const MyPaymentPage: React.FC = () => {
       await api.payments.initiate({
         transaction_reference: refNumber,
         receipt_url,
-        amount: 150,
+        amount: 100,
         payment_date: paymentDate,
         payment_method: paymentMethod
       });
@@ -184,7 +205,7 @@ export const MyPaymentPage: React.FC = () => {
               <div className="space-y-4 font-mono text-xs text-[#A79798]">
                 <div className="flex justify-between items-center bg-[#0A0607] p-3 border border-[#2A1A1D] rounded-[2px]">
                   <span>Registration Fee:</span>
-                  <span className="text-lg font-bold text-[#F7F2F2]">₹150</span>
+                  <span className="text-lg font-bold text-[#F7F2F2]">₹100</span>
                 </div>
                 
                 <div className="pt-2">
@@ -204,6 +225,19 @@ export const MyPaymentPage: React.FC = () => {
                   <p className="text-[10px] text-[#E08A17] font-bold">IMPORTANT STEP</p>
                   <p className="text-[10px] mt-1">After completing the payment on the external portal, you MUST return here and submit your Transaction Reference Number and payment screenshot to get verified.</p>
                 </div>
+
+                <div className="pt-5 border-t border-[#2A1A1D]">
+                  <p className="text-[10px] text-[#1FA971] font-bold">NEED HELP?</p>
+                  <p className="text-[10px] mt-1">Stuck or facing issues with payment?</p>
+                  <a
+                    href="https://wa.me/919876543210"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 px-4 py-2 bg-[#1FA971]/10 border border-[#1FA971]/30 hover:bg-[#1FA971]/20 text-[#1FA971] font-mono text-[10px] font-bold uppercase rounded-[2px] transition-colors"
+                  >
+                    CONTACT US ON WHATSAPP 💬
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -217,21 +251,9 @@ export const MyPaymentPage: React.FC = () => {
                   <label className="block text-[#A79798] mb-1.5 font-bold font-mono">Amount Paid *</label>
                   <input
                     type="text"
-                    value="₹150"
+                    value="₹100"
                     disabled
                     className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#6B5A5C] p-2.5 rounded-[2px] outline-none font-mono cursor-not-allowed"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[#A79798] mb-1.5 font-bold font-mono">Receipt Number *</label>
-                  <input
-                    type="text"
-                    value={refNumber}
-                    onChange={(e) => setRefNumber(e.target.value)}
-                    required
-                    placeholder="e.g. 202608290010"
-                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] text-[#F7F2F2] p-2.5 rounded-[2px] outline-none font-mono transition-colors"
                   />
                 </div>
 
@@ -261,19 +283,33 @@ export const MyPaymentPage: React.FC = () => {
 
                 <div>
                   <label className="block text-[#A79798] mb-1.5 font-bold font-mono">Payment Screenshot / Receipt *</label>
-                  <div className="border-2 border-dashed border-[#2A1A1D] hover:border-[#E01B22] bg-[#0A0607] p-4 text-center rounded-[2px] transition-colors relative">
+                  <div className={`border-2 border-dashed ${isScanning ? 'border-[#E01B22] bg-[#E01B22]/5' : 'border-[#2A1A1D] hover:border-[#E01B22] bg-[#0A0607]'} p-4 text-center rounded-[2px] transition-colors relative`}>
                     <input
                       type="file"
                       accept="image/jpeg, image/png, image/webp, application/pdf"
                       onChange={handleFileChange}
                       required
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isScanning}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                     />
-                    <UploadCloud className="w-6 h-6 text-[#6B5A5C] mx-auto mb-2" />
-                    <span className="text-[#A79798] font-mono text-[10px]">
-                      {receiptFile ? receiptFile.name : 'Click or drag file to upload'}
+                    <UploadCloud className={`w-6 h-6 mx-auto mb-2 ${isScanning ? 'text-[#E01B22] animate-pulse' : 'text-[#6B5A5C]'}`} />
+                    <span className={`font-mono text-[10px] ${isScanning ? 'text-[#E01B22] font-bold' : 'text-[#A79798]'}`}>
+                      {isScanning ? 'Scanning receipt for reference number...' : receiptFile ? receiptFile.name : 'Click or drag file to upload'}
                     </span>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-[#A79798] mb-1.5 font-bold font-mono">Receipt Number *</label>
+                  <input
+                    type="text"
+                    value={refNumber}
+                    onChange={(e) => setRefNumber(e.target.value)}
+                    required
+                    disabled={isScanning}
+                    placeholder={isScanning ? 'Auto-fetching...' : 'e.g. 202608290010'}
+                    className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] text-[#F7F2F2] p-2.5 rounded-[2px] outline-none font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
                 </div>
 
                 <button

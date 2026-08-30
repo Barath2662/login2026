@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
-import { Trophy, Users, Search, CheckCircle2, XCircle, Lock, Unlock, Save, RefreshCw, AlertCircle } from 'lucide-react';
+import { Trophy, Users, Search, CheckCircle2, XCircle, Lock, Unlock, Save, RefreshCw, AlertCircle, QrCode, Maximize2 } from 'lucide-react';
+import { SafeQRCode } from '../components/common/SafeQRCode';
 
 export const CoordinatorPage: React.FC = () => {
   const { section } = useParams<{ section?: string }>();
@@ -36,6 +37,7 @@ export const CoordinatorPage: React.FC = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [resultsMessage, setResultsMessage] = useState<string | null>(null);
   const [resultsError, setResultsError] = useState<string | null>(null);
+  const [showFullQR, setShowFullQR] = useState(false);
 
   // 1. Fetch Events & Global Data based on section
   useEffect(() => {
@@ -375,6 +377,83 @@ export const CoordinatorPage: React.FC = () => {
               <div className="text-xs font-mono text-[#A79798]">No Events Available</div>
             )}
           </div>
+
+          {/* Live Attendance QR Code Display Card */}
+          {selectedEventId && (
+            <div className="bg-[#130C0E] border border-[#E01B22]/60 p-6 rounded-[2px] shadow-[0_0_20px_rgba(224,27,34,0.15)] flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+              <div className="space-y-3 flex-1 text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <QrCode className="w-5 h-5 text-[#E01B22] animate-pulse" />
+                  <span className="text-xs font-mono font-bold text-[#E08A17] uppercase tracking-widest">
+                    LIVE EVENT ATTENDANCE QR CODE
+                  </span>
+                </div>
+                <h2 className="text-xl md:text-2xl font-display font-bold text-[#F7F2F2]">
+                  {selectedEvent?.name}
+                </h2>
+                <p className="text-xs font-mono text-[#A79798]">
+                  Display this QR code on classroom display/projector. Participants can scan this QR code from their Participant Dashboard to automatically mark attendance.
+                </p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                  <div className="bg-[#0A0607] border border-[#2A1A1D] px-3 py-1.5 rounded-[2px] text-xs font-mono">
+                    <span className="text-[#A79798]">PASSCODE / ID: </span>
+                    <span className="text-[#E01B22] font-bold">LOGIN2K26-ATTENDANCE-EVT-{selectedEventId}</span>
+                  </div>
+                  <button
+                    onClick={() => setShowFullQR(true)}
+                    className="px-4 py-1.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] text-xs font-mono font-bold rounded-[2px] flex items-center gap-1.5 transition-colors"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" /> FULLSCREEN MODE
+                  </button>
+                </div>
+              </div>
+
+              {/* QR Code Container */}
+              <div className="bg-[#F7F2F2] p-4 rounded-[4px] shadow-xl shrink-0 flex flex-col items-center justify-center border-4 border-[#E01B22]">
+                <SafeQRCode
+                  value={`LOGIN2K26-ATTENDANCE-EVT-${selectedEventId}`}
+                  size={160}
+                  bgColor="#F7F2F2"
+                  fgColor="#0A0607"
+                />
+                <span className="text-[10px] font-mono font-bold text-[#0A0607] mt-2 tracking-widest uppercase">
+                  SCAN TO MARK PRESENT
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Fullscreen QR Modal */}
+          {showFullQR && selectedEventId && (
+            <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-6 space-y-6">
+              <button
+                onClick={() => setShowFullQR(false)}
+                className="absolute top-6 right-6 px-4 py-2 bg-[#E01B22] text-white text-xs font-mono font-bold rounded-[2px]"
+              >
+                ✕ CLOSE FULLSCREEN
+              </button>
+
+              <div className="text-center space-y-2">
+                <span className="text-sm font-mono text-[#E08A17] tracking-widest uppercase">PSG COLLEGE OF TECHNOLOGY • LOGIN 2K26</span>
+                <h1 className="text-3xl md:text-5xl font-display font-bold text-white uppercase">{selectedEvent?.name}</h1>
+                <p className="text-sm font-mono text-[#A79798]">Scan QR code on your mobile dashboard to mark attendance</p>
+              </div>
+
+              <div className="bg-white p-8 rounded-[8px] border-8 border-[#E01B22] shadow-[0_0_50px_rgba(224,27,34,0.5)]">
+                <SafeQRCode
+                  value={`LOGIN2K26-ATTENDANCE-EVT-${selectedEventId}`}
+                  size={320}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                />
+              </div>
+
+              <div className="bg-[#130C0E] border border-[#2A1A1D] px-6 py-3 rounded-[2px] text-center font-mono text-sm">
+                <span className="text-[#A79798]">EVENT CODE: </span>
+                <span className="text-[#E08A17] font-bold">LOGIN2K26-ATTENDANCE-EVT-{selectedEventId}</span>
+              </div>
+            </div>
+          )}
 
           {/* Telemetry Stats Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

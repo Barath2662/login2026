@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import eventsData from '../data/events.json';
 import { useAuthStore } from '../store/authStore';
 import { CheckCircle2, Filter } from 'lucide-react';
+import { TimelineSection } from '../components/home/TimelineSection';
 
 interface Event {
   id: number;
@@ -189,9 +190,7 @@ export const EventsPage: React.FC = () => {
   const [events] = useState<Event[]>(eventsData as any);
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
 
-  // Category Filter state from URL query parameter ?category=
   const categoryParam = searchParams.get('category')?.toUpperCase() || 'ALL';
-
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'student') {
@@ -200,7 +199,6 @@ export const EventsPage: React.FC = () => {
           setUserRegistrations(res.data.map((r: any) => r.event_id));
         }
       }).catch(() => {});
-
     }
   }, [isAuthenticated, user]);
 
@@ -220,7 +218,6 @@ export const EventsPage: React.FC = () => {
     if (categoryParam === 'NON_TECHNICAL') return e.category === 'NON_TECHNICAL' && !e.is_online;
     return true;
   }).sort((a, b) => {
-    // Put Flagship first, then Online
     if (a.category === 'FLAGSHIP' && b.category !== 'FLAGSHIP') return -1;
     if (a.category !== 'FLAGSHIP' && b.category === 'FLAGSHIP') return 1;
     if (a.is_online && !b.is_online) return -1;
@@ -228,23 +225,19 @@ export const EventsPage: React.FC = () => {
     return 0;
   });
 
-
-
-
-
   return (
-    <div className="min-h-screen bg-[#0A0607] py-12 px-4 sm:px-6 lg:px-8 text-[#F7F2F2]">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#0A0607] py-12 text-[#F7F2F2]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Sticky Filter Bar */}
-        <div className="sticky top-20 z-30 bg-[#130C0E] border border-[#2A1A1D] p-4 rounded-[2px] flex flex-wrap items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center gap-3">
-            <span className="mono-label text-[#E01B22] font-bold">CATEGORIES:</span>
+        <div className="sticky top-16 sm:top-20 z-30 bg-[#130C0E]/95 backdrop-blur-md border border-[#2A1A1D] p-3 sm:p-4 rounded-[2px] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-xl">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-1 w-full sm:w-auto">
+            <span className="mono-label text-[#E01B22] font-bold shrink-0 text-[10px] sm:text-xs mr-1">CATEGORIES:</span>
             {['ALL', 'FLAGSHIP', 'ONLINE', 'TECHNICAL', 'NON_TECHNICAL'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-4 py-1.5 rounded-[2px] font-mono text-xs font-bold transition-all border ${
+                className={`px-3 sm:px-4 py-1.5 rounded-[2px] font-mono text-[10px] sm:text-xs font-bold transition-all border whitespace-nowrap shrink-0 ${
                   (cat === 'ALL' && categoryParam === 'ALL') ||
                   (cat === 'FLAGSHIP' && categoryParam === 'FLAGSHIP') ||
                   (cat === 'ONLINE' && categoryParam === 'ONLINE') ||
@@ -259,7 +252,7 @@ export const EventsPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="mono-label text-[#6B5A5C]">
+          <div className="mono-label text-[#6B5A5C] text-[10px] sm:text-xs text-right sm:text-left shrink-0">
             SHOWING {filteredEvents.length} OF 11 EVENTS
           </div>
         </div>
@@ -316,22 +309,18 @@ export const EventsPage: React.FC = () => {
                   {/* Clean Card Body Format */}
                   <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                     <div>
-                      {/* Event Title */}
                       <h2 className="text-xl font-display font-bold text-[#F7F2F2] hover:text-[#E01B22] transition-colors leading-tight">
                         {event.name}
                       </h2>
 
-                      {/* Sub-header line: Category • Team Size • Duration */}
                       <div className="text-xs font-mono font-semibold text-[#FF2A2A] mt-1">
                         {event.category === 'FLAGSHIP' ? 'Flagship Event' : event.is_online ? 'Online Event' : (event.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical')} • {(event.team_type === 'TEAM' || event.max_team_size > 1) ? `${event.min_team_size || 2}${event.max_team_size > (event.min_team_size || 1) ? `–${event.max_team_size}` : ''} Members` : 'Individual'} • {detail.durationText}
                       </div>
 
-                      {/* Short Crisp Summary */}
                       <p className="text-xs text-[#A79798] leading-relaxed mt-3 line-clamp-3">
                         {event.description || detail.shortDesc}
                       </p>
 
-                      {/* Skills Tags */}
                       {detail.skills && detail.skills.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-[#2A1A1D]/60 flex flex-wrap gap-1.5">
                           {detail.skills.map((skill, sIdx) => (
@@ -343,7 +332,6 @@ export const EventsPage: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Card Actions Footer */}
                     <div className="pt-4 border-t border-[#2A1A1D] flex items-center justify-between gap-2 mt-auto">
                       <button
                         onClick={() => navigate(`/events/${(event as any).slug}`)}
@@ -352,7 +340,6 @@ export const EventsPage: React.FC = () => {
                         View Details
                       </button>
 
-                      {/* CTA State Vocabulary */}
                       {user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'admin_power' || user?.role === 'event_coordinator' ? (
                         <button
                           onClick={() => navigate(user?.role?.includes('coord') ? '/coordinator' : '/admin')}
@@ -398,7 +385,10 @@ export const EventsPage: React.FC = () => {
 
       </div>
 
-
+      {/* ── EVENT TIMELINE EMBEDDED IN EVENTS ROUTE ── */}
+      <div className="mt-20">
+        <TimelineSection />
+      </div>
 
     </div>
   );

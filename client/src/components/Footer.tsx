@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 pb-10 sm:pb-12 border-b border-[#2A1A1D]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-6 pb-10 sm:pb-12 border-b border-[#2A1A1D]">
           
           {/* Column 1: Brand & Theme */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
@@ -133,23 +133,29 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
                   +91 99528 73426
                 </a>
               </li>
-              <li className="pt-3 border-t border-[#2A1A1D]">
-                <span className="text-[10px] font-mono font-bold text-[#6B5A5C] uppercase tracking-wider block mb-1.5">SECURE NETWORKS</span>
-                <div className="flex items-center gap-2.5 text-[11px] font-mono">
-                  <a href="https://instagram.com/login2k26" target="_blank" rel="noopener noreferrer" className="text-[#A79798] hover:text-[#E01B22] transition-colors">
-                    Instagram
-                  </a>
-                  <span className="text-[#2A1A1D]">&middot;</span>
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-[#A79798] hover:text-[#E01B22] transition-colors">
-                    LinkedIn
-                  </a>
-                  <span className="text-[#2A1A1D]">&middot;</span>
-                  <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-[#A79798] hover:text-[#E01B22] transition-colors">
-                    YouTube
-                  </a>
-                </div>
-              </li>
             </ul>
+          </div>
+
+          {/* Column 5: Venue Map Location */}
+          <div className="space-y-3 sm:col-span-2 lg:col-span-1">
+            <h4 className="font-display text-xs font-bold text-[#F7F2F2] uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#E01B22]" /> Venue Location
+            </h4>
+            <div className="w-full overflow-hidden rounded-[2px] border border-[#2A1A1D] shadow-lg hover:border-[#E01B22] transition-colors bg-[#130C0E]">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d902.5634547345201!2d77.00260053961405!3d11.023924099305132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8582f1435fa59%3A0x137d95bfd8909293!2sPSG%20College%20Of%20Technology!5e0!3m2!1sen!2sin!4v1788077911187!5m2!1sen!2sin"
+                width="100%"
+                height="180"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="PSG College of Technology Map"
+              />
+            </div>
+            <p className="text-[10px] font-mono text-[#A79798]">
+              Peelamedu, Coimbatore, Tamil Nadu
+            </p>
           </div>
 
         </div>

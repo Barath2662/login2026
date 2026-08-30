@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
@@ -8,27 +8,29 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
 
-  const [loginId, setLoginId] = useState('');
-  const [password, setPassword] = useState('');
+  const location = useLocation();
+  
+  const [loginId, setLoginId] = useState(location.state?.prefillLoginId || '');
+  const [password, setPassword] = useState(location.state?.prefillPassword || '');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [useEmail, setUseEmail] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!loginId.trim() || !password) {
-      setError(useEmail ? 'Email and password are required.' : 'LOGIN ID and password are required.');
+      setError('LOGIN ID / Email and password are required.');
       return;
     }
 
     try {
       setLoading(true);
-      const payload = useEmail
-        ? { email: loginId.trim(), password }
-        : { loginId: loginId.trim().toUpperCase(), password };
+      const trimmed = loginId.trim();
+      const payload = trimmed.includes('@')
+        ? { email: trimmed.toLowerCase(), password }
+        : { loginId: trimmed.toUpperCase(), password };
 
       const res = await api.auth.login(payload);
       const { token, user } = res.data;
@@ -79,14 +81,14 @@ export const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body">
           <div>
             <label className="block text-[#A79798] mb-1.5 font-semibold text-xs">
-              {useEmail ? 'Email Address *' : 'LOGIN ID *'}
+              LOGIN ID or Email Address *
             </label>
             <div className="relative">
               <input
-                type={useEmail ? 'email' : 'text'}
+                type="text"
                 value={loginId}
-                onChange={(e) => setLoginId(useEmail ? e.target.value : e.target.value.toUpperCase())}
-                placeholder={useEmail ? 'user@domain.com' : 'LOGIN101'}
+                onChange={(e) => setLoginId(e.target.value)}
+                placeholder="LOGIN101 or user@domain.com"
                 required
                 className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-3 pl-11 text-[#F7F2F2] outline-none input-glow text-sm font-mono tracking-wider"
               />
@@ -126,16 +128,6 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        {/* Toggle between LOGIN ID and Email */}
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => { setUseEmail(!useEmail); setLoginId(''); setError(null); }}
-            className="text-[11px] text-[#6B5A5C] hover:text-[#A79798] transition-colors font-mono"
-          >
-            {useEmail ? '← Sign in with LOGIN ID' : 'Admin/Coordinator? Sign in with email →'}
-          </button>
-        </div>
 
         <div className="text-center text-xs text-[#6B5A5C] border-t border-[#2A1A1D] pt-5">
           Don't have an account yet?{' '}

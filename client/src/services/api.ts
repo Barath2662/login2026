@@ -15,6 +15,7 @@ export const api = {
   // Auth Module
   auth: {
     register: async (data: any) => await axiosInstance.post('/auth/register', data),
+    checkEmail: async (email: string) => await axiosInstance.post('/auth/check-email', { email }),
     sendOtp: async (email: string) => await axiosInstance.post('/auth/send-otp', { email }),
     login: async (data: { loginId?: string; email?: string; password: string }) => await axiosInstance.post('/auth/login', data),
     logout: async () => await axiosInstance.post('/auth/logout'),
@@ -103,6 +104,7 @@ export const api = {
   attendance: {
     getEventList: async (eventId: number | string) => await axiosInstance.get(`/attendance/event/${eventId}`),
     mark: async (data: { event_id: number; student_id: number; status: string }) => await axiosInstance.post('/attendance/', data),
+    markByQR: async (data: { qr_code: string }) => await axiosInstance.post('/attendance/scan-qr', data),
   },
 
   // Notifications Module
@@ -115,6 +117,9 @@ export const api = {
 
   // Competition Results Module
   results: {
+    getAll: async () => await axiosInstance.get('/results'),
+    getForEvent: async (eventId: number | string) => await axiosInstance.get(`/results/event/${eventId}`),
+    saveForEvent: async (eventId: number | string, data: any) => await axiosInstance.put(`/results/event/${eventId}`, data),
     getEventResult: async (eventId: number | string) => await axiosInstance.get(`/results/event/${eventId}`),
     saveEventResult: async (eventId: number | string, data: any) => await axiosInstance.put(`/results/event/${eventId}`, data),
   },

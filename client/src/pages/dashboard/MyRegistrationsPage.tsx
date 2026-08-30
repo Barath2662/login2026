@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { Calendar, MapPin, Clock, Trash2, ClipboardList } from 'lucide-react';
+import { Calendar, MapPin, Clock, Trash2, ClipboardList, QrCode } from 'lucide-react';
+import { QrScannerModal } from '../../components/dashboard/QrScannerModal';
 
 export const MyRegistrationsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const { data: registrations = [], isLoading } = useQuery({
     queryKey: ['my-registrations'],
@@ -18,9 +20,17 @@ export const MyRegistrationsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-display font-bold text-[#F7F2F2]">My Registrations</h1>
-        <p className="text-xs text-[#6B5A5C] font-mono mt-1">{registrations.length} event{registrations.length !== 1 ? 's' : ''} registered</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#2A1A1D] pb-4">
+        <div>
+          <h1 className="text-xl font-display font-bold text-[#F7F2F2]">My Registrations</h1>
+          <p className="text-xs text-[#6B5A5C] font-mono mt-1">{registrations.length} event{registrations.length !== 1 ? 's' : ''} registered</p>
+        </div>
+        <button
+          onClick={() => setIsQrModalOpen(true)}
+          className="px-4 py-2 bg-[#1FA971] hover:bg-[#27C487] text-[#0A0607] font-mono text-xs font-bold uppercase rounded-[2px] flex items-center gap-2 shadow-md transition-colors"
+        >
+          <QrCode className="w-4 h-4" /> SCAN ATTENDANCE QR
+        </button>
       </div>
 
       {isLoading ? (
@@ -99,6 +109,8 @@ export const MyRegistrationsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <QrScannerModal isOpen={isQrModalOpen} onClose={() => setIsQrModalOpen(false)} />
     </div>
   );
 };

@@ -1,0 +1,78 @@
+Unused files (11)
+src/components/AuthModal.tsx             
+src/components/CinematicIntro.tsx        
+src/components/Loader.tsx                
+src/components/ProfileCompletionModal.tsx
+src/components/ui/UnifiedDossierModal.tsx
+src/constants/worlds.ts                  
+src/pages/LegacyPage.tsx                 
+src/pages/NotFoundPage.tsx               
+src/types/notification.ts                
+src/types/team.ts                        
+src/types/user.ts                        
+Unused dependencies (5)
+@types/qrcode-generator  package.json:16:6
+clsx                     package.json:19:6
+date-fns                 package.json:20:6
+docx                     package.json:21:6
+tailwind-merge           package.json:31:6
+Unused devDependencies (3)
+autoprefixer  package.json:42:6
+husky         package.json:43:6
+postcss       package.json:44:6
+Unused exports (24)
+default        variable  src/animations/DecryptedText.tsx:380:16           
+default        variable  src/animations/SplitText.tsx:79:16                
+App                      src/App.tsx:15:14                                 
+EventHub                 src/components/events/EventHub.tsx:9:14           
+EventNode                src/components/events/EventNode.tsx:19:14         
+default        variable  src/components/events/EventOrbit.tsx:244:16       
+default        variable  src/components/home/CommunitySection.tsx:47:16    
+default        variable  src/components/home/CoordinatorsSection.tsx:125:16
+default        variable  src/components/home/EventsSection.tsx:117:16      
+default        variable  src/components/home/NewsSection.tsx:102:16        
+default        variable  src/components/home/ScheduleSection.tsx:340:16    
+default        variable  src/components/home/TimelineSection.tsx:251:16    
+default        variable  src/components/IntroVideo.tsx:249:16              
+default        variable  src/components/Navbar.tsx:283:16                  
+default        variable  src/pages/AdminPage.tsx:1494:16                   
+default        variable  src/pages/ContactPage.tsx:225:16                  
+default        variable  src/pages/CoordinatorsPage.tsx:101:16             
+default        variable  src/pages/dashboard/NotificationsPage.tsx:101:16  
+default        variable  src/pages/EventDetailsPage.tsx:355:16             
+default        variable  src/pages/EventsPage.tsx:397:16                   
+default        variable  src/pages/GalleryPage.tsx:305:16                  
+default        variable  src/pages/HomePage.tsx:66:16                      
+default        variable  src/pages/TimelinePage.tsx:403:16                 
+isStudentRole            src/store/authStore.ts:78:14                      
+Unused exported types (6)
+GradientWavesDetail  type       src/animations/GradientWaves.tsx:3:13
+GradientWavesProps   interface  src/animations/GradientWaves.tsx:5:18
+UserProfile          interface  src/store/authStore.ts:3:18          
+EventType            type       src/types/event.ts:1:13              
+EventCategory        type       src/types/event.ts:2:13              
+EventStatus          type       src/types/event.ts:3:13              
+Duplicate exports (23)
+DecryptedText|default        src/animations/DecryptedText.tsx           
+SplitText|default            src/animations/SplitText.tsx               
+App|default                  src/App.tsx                                
+EventHub|default             src/components/events/EventHub.tsx         
+EventNode|default            src/components/events/EventNode.tsx        
+EventOrbit|default           src/components/events/EventOrbit.tsx       
+CommunitySection|default     src/components/home/CommunitySection.tsx   
+CoordinatorsSection|default  src/components/home/CoordinatorsSection.tsx
+EventsSection|default        src/components/home/EventsSection.tsx      
+NewsSection|default          src/components/home/NewsSection.tsx        
+ScheduleSection|default      src/components/home/ScheduleSection.tsx    
+TimelineSection|default      src/components/home/TimelineSection.tsx    
+IntroVideo|default           src/components/IntroVideo.tsx              
+Navbar|default               src/components/Navbar.tsx                  
+AdminPage|default            src/pages/AdminPage.tsx                    
+ContactPage|default          src/pages/ContactPage.tsx                  
+CoordinatorsPage|default     src/pages/CoordinatorsPage.tsx             
+NotificationsPage|default    src/pages/dashboard/NotificationsPage.tsx  
+EventDetailsPage|default     src/pages/EventDetailsPage.tsx             
+EventsPage|default           src/pages/EventsPage.tsx                   
+GalleryPage|default          src/pages/GalleryPage.tsx                  
+HomePage|default             src/pages/HomePage.tsx                     
+TimelinePage|default         src/pages/TimelinePage.tsx                 

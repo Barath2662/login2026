@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore, isAdminRole, isCoordinatorRole } from '../store/authStore';
 import { api } from '../services/api';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, User, Calendar, ClipboardList, Users, Bell,
-  LogOut, Menu, X, ChevronRight, KeyRound, CreditCard,
-  UserPlus, Megaphone, Upload, CheckSquare, Shield, GraduationCap,
+  LogOut, ChevronRight, CreditCard, Trophy,
+  UserPlus, Megaphone, Upload, CheckSquare, Shield, GraduationCap, Award, Settings
 } from 'lucide-react';
 
 // ── Nav item definitions per role ──────────────────────────────────────────
@@ -17,6 +17,8 @@ const participantNavItems = [
   { to: '/dashboard/events', icon: Calendar, label: 'Events' },
   { to: '/dashboard/payment', icon: CreditCard, label: 'Registration Fee' },
   { to: '/dashboard/registrations', icon: ClipboardList, label: 'My Registrations' },
+  { to: '/dashboard/certificates', icon: Award, label: 'E-Certificates' },
+  { to: '/dashboard/winners', icon: Trophy, label: 'Winners & Results' },
   { to: '/dashboard/teams', icon: Users, label: 'My Teams' },
   { to: '/dashboard/notifications', icon: Bell, label: 'Notifications', badge: true },
 ];
@@ -30,6 +32,7 @@ const adminNavItems = [
   { to: '/dashboard/admin/csv-upload', icon: Upload, label: 'Upload Payment CSV' },
   { to: '/dashboard/admin/events', icon: Calendar, label: 'Events' },
   { to: '/dashboard/admin/announcements', icon: Megaphone, label: 'Announcements' },
+  { to: '/dashboard/admin/settings', icon: Settings, label: 'System Settings' },
 ];
 
 const coordinatorNavItems = [
@@ -53,17 +56,32 @@ const roleLabel = (role?: string | null) => {
 export const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, resetAuth } = useAuthStore();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAdmin = isAdminRole(user?.role);
   const isCoord = isCoordinatorRole(user?.role);
 
   // Determine which nav set to show
-  const navItems = isAdmin
+  const rawNavItems = isAdmin
     ? adminNavItems
     : isCoord
     ? coordinatorNavItems
     : participantNavItems;
+
+  const { data: settingsData } = useQuery({
+    queryKey: ['system-settings'],
+    queryFn: async () => {
+      const res = await api.settings.get();
+      return res.data;
+    },
+    staleTime: 60000,
+  });
+
+  const showWinners = settingsData?.show_winners === 'true';
+
+  const navItems = rawNavItems.filter((item: any) => {
+    if (item.to === '/dashboard/winners' && !showWinners) return false;
+    return true;
+  });
 
   const { data: unreadData } = useQuery({
     queryKey: ['unread-count'],
@@ -93,6 +111,15 @@ export const DashboardLayout: React.FC = () => {
 
   const sidebar = (
     <div className="flex flex-col h-full">
+      {/* Brand Header */}
+      <div className="p-5 border-b border-[#2A1A1D]">
+        <h1 className="text-xl font-display font-bold text-[#E01B22] tracking-widest">LOGIN 2K26</h1>
+        <div className="h-px bg-[#2A1A1D] my-2" />
+        <p className="text-[10px] font-mono text-[#A79798] uppercase tracking-widest">
+          {isAdmin ? 'ADMIN PANEL' : isCoord ? 'COORDINATOR PANEL' : 'PARTICIPANT PANEL'}
+        </p>
+      </div>
+
       {/* Profile Header */}
       <div className="p-5 border-b border-[#2A1A1D]">
         <div className="flex items-start gap-3">
@@ -133,7 +160,6 @@ export const DashboardLayout: React.FC = () => {
             key={to}
             to={to}
             end={end}
-            onClick={() => setMobileMenuOpen(false)}
             className={linkClass}
           >
             <Icon className="w-4 h-4 shrink-0" />
@@ -166,48 +192,52 @@ export const DashboardLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0607] flex relative">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-[#130C0E] border-r border-[#2A1A1D] flex-col fixed top-0 lg:top-[80px] left-0 h-screen lg:h-[calc(100vh-80px)] z-30">
+      {/* Desktop/Tablet Sidebar */}
+      <aside className="hidden md:flex w-64 bg-[#130C0E] border-r border-[#2A1A1D] flex-col fixed top-[81px] left-0 h-[calc(100vh-81px)] z-30">
         {sidebar}
       </aside>
 
-      {/* Mobile Header Bar */}
-      <div className="lg:hidden sticky top-0 z-30 bg-[#130C0E] border-b border-[#2A1A1D] px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-[#E01B22]" />
-          <span className="text-sm font-mono font-bold text-[#E01B22]">
-            {user?.login_id || 'DASHBOARD'}
-          </span>
-        </div>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 text-[#A79798] hover:text-[#F7F2F2] transition-colors"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {/* Mobile Overlay */}
-      {mobileMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <aside className="fixed top-0 left-0 w-72 h-screen bg-[#130C0E] border-r border-[#2A1A1D] z-50 lg:hidden">
-            {sidebar}
-          </aside>
-        </>
-      )}
-
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 min-h-screen w-full">
-        <div className="pt-4 lg:pt-0">
+      <main className="flex-1 md:ml-64 min-h-screen min-w-0 flex flex-col pb-[72px] md:pb-0">
+        <div className="flex-1">
           <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full overflow-x-hidden">
             <Outlet />
           </div>
         </div>
+
+        {/* Minimal Dashboard Footer */}
+        <footer className="border-t border-[#2A1A1D] p-4 text-center mt-auto hidden md:block">
+          <p className="text-[10px] font-mono text-[#6B5A5C] uppercase tracking-widest">
+            LOGIN 2K26 © 2026 • SUPPORT • PRIVACY
+          </p>
+        </footer>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0A0607] border-t border-[#2A1A1D] z-50 safe-pb">
+        <div className="flex items-center justify-around p-2">
+          {navItems
+            .filter((i: any) => ['Dashboard', 'Overview', 'Events', 'My Events', 'E-Certificates', 'My Teams', 'My Profile', 'Registrations'].includes(i.label))
+            .slice(0, 5)
+            .map(({ to, icon: Icon, label, end }: any) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center w-full py-1.5 gap-1 transition-colors ${
+                  isActive ? 'text-[#E01B22]' : 'text-[#6B5A5C] hover:text-[#A79798]'
+                }`
+              }
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-center line-clamp-1 px-1">
+                {label.replace('My ', '')}
+              </span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 };

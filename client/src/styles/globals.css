@@ -15,6 +15,14 @@
   --color-text-muted: var(--text-faint);
 }
 
+html {
+  scroll-behavior: smooth !important;
+  scroll-padding-top: 80px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 @layer base {
   body {
     background-color: var(--void);
@@ -22,6 +30,8 @@
     font-family: var(--font-body);
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 0;
     padding: 0;
     /* Faint dot grid background texture */
@@ -416,4 +426,14 @@
   .display-m {
     font-size: clamp(18px, 4.5vw, 28px) !important;
   }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }

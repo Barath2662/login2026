@@ -1,22 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { KeyRound, ArrowRight, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { KeyRound, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const ForgotPasswordPage: React.FC = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
-  const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +23,7 @@ export const ForgotPasswordPage: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.auth.forgotPassword(email);
-      setMessage(res.data.message || 'OTP sent to your email.');
-      setStep(2);
+      setMessage(res.data.message || 'A password reset link has been sent to your email.');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to process request.');
     } finally {
@@ -40,29 +31,6 @@ export const ForgotPasswordPage: React.FC = () => {
     }
   };
 
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setMessage(null);
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await api.auth.resetPassword({ email, otp, newPassword });
-      setMessage(res.data.message || 'Password reset successfully.');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to reset password.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const inputClass = "w-full bg-[#0A0A0C] border border-[#2A1416] focus:border-[#E01B24] rounded-[2px] px-3.5 py-2.5 text-[#F2F2F4] outline-none text-xs";
 
@@ -76,7 +44,7 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
           <h1 className="text-xl font-display font-extrabold text-[#F2F2F4]">RECOVER PASSWORD</h1>
           <p className="text-xs text-[#9A9AA2]">
-            {step === 1 ? 'Enter your registered email to receive an OTP' : 'Enter the OTP and your new password'}
+            Enter your registered email to receive a password reset link
           </p>
         </div>
 
@@ -94,7 +62,6 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
         )}
 
-        {step === 1 ? (
           <form onSubmit={handleSendOtp} className="space-y-4 text-xs font-body">
             <div>
               <label className="block text-[#9A9AA2] mb-1 font-semibold">Registered Email *</label>
@@ -109,69 +76,13 @@ export const ForgotPasswordPage: React.FC = () => {
             </div>
             <button
               type="submit"
-              disabled={loading}
-              className="shimmer-btn w-full py-3 bg-[#E01B24] hover:bg-[#FF3B30] text-[#F2F2F4] font-bold font-mono rounded-[2px] transition-transform hover:scale-[1.01] flex items-center justify-center gap-2"
+              disabled={loading || !!message}
+              className="shimmer-btn w-full py-3 bg-[#E01B24] hover:bg-[#FF3B30] text-[#F2F2F4] font-bold font-mono rounded-[2px] transition-transform hover:scale-[1.01] flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              {loading ? 'SENDING OTP...' : 'SEND OTP'}
+              {loading ? 'SENDING LINK...' : 'SEND RESET LINK'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-        ) : (
-          <form onSubmit={handleResetPassword} className="space-y-4 text-xs font-body">
-            <div>
-              <label className="block text-[#9A9AA2] mb-1 font-semibold">OTP *</label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="Enter 6-digit OTP"
-                required
-                maxLength={6}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="block text-[#9A9AA2] mb-1 font-semibold">New Password *</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className={`${inputClass} pr-11`}
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white">
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-[#9A9AA2] mb-1 font-semibold">Confirm New Password *</label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className={`${inputClass} pr-11`}
-                />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white">
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="shimmer-btn w-full py-3 bg-[#E01B24] hover:bg-[#FF3B30] text-[#F2F2F4] font-bold font-mono rounded-[2px] transition-transform hover:scale-[1.01] flex items-center justify-center gap-2"
-            >
-              {loading ? 'RESETTING...' : 'RESET PASSWORD'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </form>
-        )}
 
         <div className="text-center text-xs text-[#9A9AA2]">
           Remembered your password?{' '}

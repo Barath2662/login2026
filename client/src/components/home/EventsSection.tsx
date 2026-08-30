@@ -44,7 +44,7 @@ export const EventsSection: React.FC = () => {
     <motion.section 
       id="events-section" 
       className="w-full py-24 bg-[#0A0607] border-b border-[#2A1A1D] relative overflow-hidden"
-      style={{ paddingLeft: 'clamp(24px, 5vw, 100px)', paddingRight: 'clamp(24px, 5vw, 100px)' }}
+      style={{ paddingLeft: 'clamp(16px, 3vw, 64px)', paddingRight: 'clamp(16px, 3vw, 64px)' }}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
@@ -57,9 +57,9 @@ export const EventsSection: React.FC = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#130c0e_1px,transparent_1px),linear-gradient(to_bottom,#130c0e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* 1. Left — Introduction (25% on desktop) */}
+          {/* 1. Left — Introduction (3 columns) */}
           <motion.div 
             className="lg:col-span-3 space-y-4 text-center lg:text-left select-none"
             variants={{
@@ -81,14 +81,14 @@ export const EventsSection: React.FC = () => {
             </p>
           </motion.div>
 
-          {/* 2. Center — Circular Event System (50% on desktop) */}
-          <div className="lg:col-span-6 flex justify-center relative">
+          {/* 2. Center — Expanded Circular Event System (7 columns) */}
+          <div className="lg:col-span-7 flex justify-center relative">
             <EventOrbit events={events} isExploreHovered={isExploreHovered} />
           </div>
 
-          {/* 3. Right — CTA Link (25% on desktop) */}
+          {/* 3. Right — CTA Link (2 columns) */}
           <motion.div 
-            className="lg:col-span-3 flex justify-center lg:justify-end"
+            className="lg:col-span-2 flex justify-center lg:justify-end"
             variants={{
               hidden: { opacity: 0, x: -20 },
               visible: { opacity: 1, x: 0, transition: { duration: 0.8, delay: 0.6, ease: "easeOut" } }
@@ -104,7 +104,6 @@ export const EventsSection: React.FC = () => {
                 EXPLORE ALL EVENTS
               </span>
               <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
-              {/* Expandable red line on hover */}
               <span className="absolute -bottom-1 left-0 w-0 h-[1.5px] bg-[#E01B22] transition-all duration-300 group-hover:w-full" />
             </Link>
           </motion.div>

@@ -1,8 +1,0 @@
-/* Typography classes and font definitions */
-body {
-  font-family: var(--font-sans);
-}
-
-code, pre, kbd {
-  font-family: var(--font-mono);
-}

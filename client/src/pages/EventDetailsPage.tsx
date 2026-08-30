@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { api } from '../services/api';
 import eventsData from '../data/events.json';
-import { Monitor, ArrowLeft, Clock, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Monitor, ArrowLeft, Clock, ShieldAlert, CheckCircle2, MapPin, Users, Phone, Sparkles, Terminal, Check } from 'lucide-react';
 
 export const EventDetailsPage: React.FC = () => {
-  const { id: slug } = useParams(); // Using slug as id in the url
+  const { id: slug } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user, survivor } = useAuthStore();
   
-  const [registering, setRegistering] = useState(false);
-  const [teamNameInput, setTeamNameInput] = useState('');
-  const [teamMemberEmails, setTeamMemberEmails] = useState<string[]>(['']);
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
 
   useEffect(() => {
@@ -27,266 +24,211 @@ export const EventDetailsPage: React.FC = () => {
 
   const selectedEvent = eventsData.find((e: any) => e.slug === slug) as any;
 
-  useEffect(() => {
-    if (!selectedEvent) return;
-    setTeamNameInput('');
-    setTeamMemberEmails(Array.from({ length: Math.max(1, (selectedEvent.min_team_size || 1) - 1) }, () => ''));
-  }, [selectedEvent]);
-
   if (!selectedEvent) {
     return (
-      <div className="min-h-screen bg-[#0A0607] py-12 px-4 flex flex-col items-center justify-center text-center">
-        <ShieldAlert className="w-16 h-16 text-[#E01B22] mb-4" />
-        <h1 className="text-3xl font-display font-bold text-[#F7F2F2]">EVENT NOT FOUND</h1>
-        <p className="text-[#A79798] mt-2 font-mono">The specified arena data is missing or corrupted.</p>
+      <div className="min-h-screen bg-[#0A0607] py-20 px-4 flex flex-col items-center justify-center text-center text-[#F7F2F2]">
+        <div className="w-16 h-16 rounded-full bg-[#E01B22]/10 border border-[#E01B22] flex items-center justify-center mb-4">
+          <ShieldAlert className="w-8 h-8 text-[#E01B22]" />
+        </div>
+        <h1 className="text-3xl font-display font-black tracking-wider uppercase">ARENA NOT FOUND</h1>
+        <p className="text-xs font-mono text-[#A79798] mt-2 max-w-md">
+          The requested symposium arena data does not exist or has been relocated.
+        </p>
         <button
           onClick={() => navigate('/events')}
-          className="mt-6 px-6 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px]"
+          className="mt-6 px-6 py-3 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-all flex items-center gap-2"
         >
-          Return to Arenas
+          <ArrowLeft className="w-4 h-4" />
+          <span>RETURN TO ARENAS</span>
         </button>
       </div>
     );
   }
 
-  const detail = selectedEvent.detail;
+  const detail = selectedEvent.detail || {};
   const isRegistered = userRegistrations.includes(selectedEvent.id) || survivor?.registrations?.some((r: any) => r.worldId === selectedEvent.id);
 
-  const handleRegisterEvent = async () => {
+  const handleRegisterClick = () => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
-    }
-
-    const minMembers = Math.max(1, selectedEvent.min_team_size || 1);
-    const maxMembers = Math.max(minMembers, selectedEvent.max_team_size || minMembers);
-    const enteredTeammates = teamMemberEmails.map((email) => email.trim()).filter(Boolean);
-    const totalMembers = 1 + enteredTeammates.length;
-
-    if (selectedEvent.team_type === 'TEAM' && (totalMembers < minMembers || totalMembers > maxMembers)) {
-      alert(`This event requires ${minMembers}–${maxMembers} members total. Please adjust the teammate list.`);
-      return;
-    }
-
-    try {
-      setRegistering(true);
-
-      const payload: any = {
-        event_id: selectedEvent.id,
-        team_name: selectedEvent.team_type === 'TEAM' ? teamNameInput : undefined,
-      };
-
-      if (selectedEvent.team_type === 'TEAM') {
-        payload.team_members = enteredTeammates;
-      }
-
-      await api.registrations.register(payload);
-      setUserRegistrations([...userRegistrations, selectedEvent.id]);
-      alert("Registration successful!");
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to register for event.');
-    } finally {
-      setRegistering(false);
+    } else {
+      navigate('/dashboard/events');
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#0A0607] py-12 px-4 sm:px-6 lg:px-8 text-[#F7F2F2] animate-in fade-in">
-      <div className="max-w-5xl mx-auto">
-        <button
-          onClick={() => navigate('/events')}
-          className="mb-8 inline-flex items-center gap-2 text-[#A79798] hover:text-[#F7F2F2] font-mono text-xs uppercase transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Arenas
-        </button>
+  const coordinatorNames = (selectedEvent.coordinator_name || '').split(';').map((s: string) => s.trim()).filter(Boolean);
+  const coordinatorPhones = (selectedEvent.coordinator_phone || '').split(';').map((s: string) => s.trim()).filter(Boolean);
 
-        <div className="bg-[#130C0E] border border-[#E01B22] rounded-[2px] shadow-2xl overflow-hidden relative corner-bracket-container">
+  return (
+    <div className="min-h-screen bg-[#0A0607] pt-24 pb-16 px-4 sm:px-6 lg:px-8 text-[#F7F2F2] relative overflow-hidden">
+      
+      {/* Background ambient accents */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[radial-gradient(ellipse_at_center,_rgba(224,27,34,0.08)_0%,_transparent_70%)] pointer-events-none filter blur-3xl z-0" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#130c0e_1px,transparent_1px),linear-gradient(to_bottom,#130c0e_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none z-0" />
+
+      <div className="max-w-6xl mx-auto space-y-8 relative z-10">
+        
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center justify-between border-b border-[#2A1A1D] pb-4 font-mono text-xs">
+          <button
+            onClick={() => navigate('/events')}
+            className="inline-flex items-center gap-2 text-[#A79798] hover:text-[#E01B22] font-bold uppercase transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>ALL ARENAS</span>
+          </button>
+          
+          <div className="flex items-center gap-2 text-[10px] text-[#A79798] uppercase tracking-widest">
+            <Link to="/events" className="hover:text-white">EVENTS</Link>
+            <span>/</span>
+            <span className="text-[#E01B22] font-bold">{selectedEvent.category}</span>
+          </div>
+        </div>
+
+        {/* HERO CARD */}
+        <div className="bg-[#130C0E]/90 border border-[#2A1A1D] rounded-[2px] shadow-2xl overflow-hidden relative corner-bracket-container">
           <div className="corner-bracket-tl" />
           <div className="corner-bracket-br" />
 
-          {/* Split Layout: Left Guardian Panel vs Right Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
             
-            {/* Left Guardian Panel */}
-            <div className="lg:col-span-5 bg-[#0A0607] p-8 border-b lg:border-b-0 lg:border-r border-[#2A1A1D] flex flex-col items-center justify-center text-center scanlines relative min-h-[400px]">
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#e01b22_1px,transparent_1px),linear-gradient(to_bottom,#e01b22_1px,transparent_1px)] bg-[size:20px_20px] opacity-[0.03]" />
+            {/* Left Guardian Spotlight */}
+            <div className="lg:col-span-5 bg-[#070405] p-8 border-b lg:border-b-0 lg:border-r border-[#2A1A1D] flex flex-col items-center justify-center text-center relative scanlines min-h-[360px]">
+              <div className="absolute top-4 left-4 bg-black/60 border border-[#2A1A1D] px-2.5 py-1 rounded-[1px] font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase">
+                GUARDIAN NODE
+              </div>
+
               <img
                 src={selectedEvent.guardian_asset || '/assets/login.png'}
-                alt="Guardian Art"
-                className="max-h-72 w-auto object-contain mb-6 animate-float-slow drop-shadow-[0_0_30px_rgba(224,27,34,0.3)] z-10"
+                alt={detail.guardianName || 'Guardian Art'}
+                className="max-h-64 w-auto object-contain my-4 animate-float-slow drop-shadow-[0_0_35px_rgba(224,27,34,0.35)]"
               />
-              <div className="z-10 bg-[#0A0607]/80 backdrop-blur-sm p-4 rounded border border-[#2A1A1D]">
-                <span className="mono-label text-[#FF2A2A] font-bold block mb-2 text-sm tracking-widest">
-                  GUARDIAN // {detail.guardianName}
+
+              <div className="bg-[#0A0607]/90 border border-[#2A1A1D] p-3.5 rounded-[2px] w-full max-w-sm mt-2">
+                <span className="font-mono text-xs font-bold text-[#E01B22] tracking-wider block uppercase mb-1">
+                  {detail.guardianName || 'EVENT GUARDIAN'}
                 </span>
-                <p className="text-xs font-mono italic text-[#A79798]">
-                  "{detail.quote}"
-                </p>
+                {detail.quote && (
+                  <p className="text-[11px] font-mono italic text-[#A79798] leading-tight">
+                    "{detail.quote}"
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Right Content Column */}
-            <div className="lg:col-span-7 p-6 sm:p-10 space-y-8 font-body text-xs text-[#F7F2F2]">
+            {/* Right Event Main Information */}
+            <div className="lg:col-span-7 p-6 sm:p-10 space-y-6 flex flex-col justify-between">
               
-              <div>
-                <span className="mono-label text-[#E01B22] uppercase tracking-widest">
-                  {selectedEvent.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical'} • DAY {selectedEvent.day} SEP
-                </span>
-                <h1 className="text-3xl sm:text-4xl font-display font-black text-[#F7F2F2] mt-2 leading-none">
-                  {selectedEvent.name}
-                </h1>
-                {selectedEvent.is_online && (
-                  <span className="inline-flex items-center gap-1.5 text-[#FF2A2A] font-mono text-xs tracking-widest mt-3">
-                    <Monitor className="w-4 h-4" /> ONLINE EVENT
+              <div className="space-y-4">
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
+                  <span className={`px-2.5 py-1 rounded-[1px] font-bold tracking-widest uppercase border ${
+                    selectedEvent.category === 'TECHNICAL'
+                      ? 'bg-[#E01B22]/10 border-[#E01B22] text-[#E01B22]'
+                      : selectedEvent.category === 'FLAGSHIP'
+                      ? 'bg-[#E08A17]/10 border-[#E08A17] text-[#E08A17]'
+                      : 'bg-[#1FA971]/10 border-[#1FA971] text-[#1FA971]'
+                  }`}>
+                    {selectedEvent.category}
                   </span>
-                )}
-                <p className="text-sm font-mono text-[#FF2A2A] mt-2 opacity-90">
-                  {selectedEvent.team_type === 'TEAM' ? `Team (${selectedEvent.min_team_size}${selectedEvent.max_team_size > selectedEvent.min_team_size ? `–${selectedEvent.max_team_size}` : ''} Members)` : 'Individual'} • Duration: {detail.durationText}
-                </p>
-              </div>
 
-              {/* Detailed Description */}
-              <div className="space-y-3">
-                <h3 className="mono-label text-[#A79798] border-b border-[#2A1A1D] pb-2">EVENT OVERVIEW</h3>
-                <p className="text-sm text-[#F7F2F2] leading-relaxed opacity-90">
-                  {detail.fullDesc}
-                </p>
-              </div>
+                  <span className="px-2.5 py-1 bg-[#1A1114] border border-[#2A1A1D] text-[#A79798] font-bold tracking-wider">
+                    DAY {selectedEvent.day} SEP
+                  </span>
 
-              {(selectedEvent.coordinator_name || selectedEvent.coordinator_phone) && (
-                <div className="space-y-3">
-                  <h3 className="mono-label text-[#A79798] border-b border-[#2A1A1D] pb-2">EVENT COORDINATORS</h3>
-                  <div className="text-sm text-[#F7F2F2] leading-relaxed space-y-1 opacity-90">
-                    {(selectedEvent.coordinator_name || '').split(';').map((name: string, index: number) => (
-                      <div key={name}>
-                        Coordinator {index + 1} - {name.trim()} {selectedEvent.coordinator_phone?.split(';')[index]?.trim() && `- ${selectedEvent.coordinator_phone.split(';')[index].trim()}`}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Skills Tags */}
-              <div className="space-y-3">
-                <h3 className="mono-label text-[#A79798] border-b border-[#2A1A1D] pb-2">CORE SKILLS EVALUATED</h3>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {detail.skills.map((skill: string, idx: number) => (
-                    <span key={idx} className="px-3 py-1.5 text-xs font-mono bg-[#1A1114] text-[#E01B22] border border-[#3E2529] rounded-[2px] shadow-sm">
-                      • {skill}
+                  {selectedEvent.is_online && (
+                    <span className="px-2.5 py-1 bg-[#4A050A] border border-[#E01B22] text-[#FF2A2A] font-bold tracking-widest flex items-center gap-1">
+                      <Monitor className="w-3 h-3" /> ONLINE
                     </span>
-                  ))}
-                </div>
-              </div>
+                  )}
 
-              {/* Tactical Console Briefing Dialogue */}
-              <div className="bg-[#0A0607] border border-[#5C1116] p-5 rounded-[2px] space-y-3 font-mono shadow-[inset_0_0_20px_rgba(224,27,34,0.05)]">
-                <div className="flex items-center justify-between text-xs text-[#FF2A2A] border-b border-[#2A1A1D] pb-2">
-                  <span className="flex items-center gap-2"><Clock className="w-3 h-3" /> CONSOLE BRIEFING // ENCRYPTED</span>
-                  <span>TACTICAL HUD</span>
+                  {selectedEvent.is_flagship && (
+                    <span className="px-2.5 py-1 bg-[#E08A17] text-[#0A0607] font-bold tracking-widest flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> FLAGSHIP
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm text-[#F7F2F2] leading-relaxed pt-1 opacity-90">
-                  {detail.briefing}
-                </p>
-              </div>
 
-              {/* Specs Strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#0A0607] p-5 rounded-[2px] border border-[#2A1A1D] text-center font-mono">
+                {/* Title */}
                 <div>
-                  <span className="mono-label block mb-1">FORMAT</span>
-                  <strong className="text-[#E01B22]">{selectedEvent.team_type}</strong>
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-black uppercase text-[#F7F2F2] tracking-wide leading-tight">
+                    {selectedEvent.name}
+                  </h1>
+                  <p className="text-xs font-mono text-[#A79798] mt-2 leading-relaxed">
+                    {selectedEvent.description || detail.shortDesc}
+                  </p>
                 </div>
-                <div>
-                  <span className="mono-label block mb-1">VENUE</span>
-                  <strong className="text-[#F7F2F2]">{selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'TBA')}</strong>
-                </div>
-                <div>
-                  <span className="mono-label block mb-1">START TIME</span>
-                  <strong className="text-[#F7F2F2]">{selectedEvent.start_time.slice(0, 5)}</strong>
-                </div>
-                <div>
-                  <span className="mono-label block mb-1">FEE</span>
-                  <strong className="text-[#1FA971]">INCLUDED</strong>
-                </div>
-              </div>
 
-              {/* Team Registration Input if applicable */}
-              {selectedEvent.team_type === 'TEAM' && !selectedEvent.is_flagship && !isRegistered && user?.role !== 'admin' && user?.role !== 'event_coordinator' && user?.role !== 'super_admin' && user?.role !== 'admin_power' && (
-                <div className="space-y-4 pt-4 border-t border-[#2A1A1D]">
-                  <div className="space-y-2">
-                    <label className="mono-label text-[#F7F2F2] block">ENTER YOUR SQUAD / TEAM NAME:</label>
-                    <input
-                      type="text"
-                      value={teamNameInput}
-                      onChange={(e) => setTeamNameInput(e.target.value)}
-                      placeholder="e.g. CyberVipers"
-                      className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] px-4 py-3 text-sm font-mono text-[#F7F2F2] rounded-[2px] outline-none transition-colors"
-                    />
+                {/* Quick Info Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 font-mono text-xs">
+                  <div className="bg-[#0A0607] border border-[#2A1A1D] p-3 rounded-[2px]">
+                    <span className="text-[10px] text-[#A79798] block mb-1">FORMAT</span>
+                    <span className="font-bold text-[#F7F2F2] flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-[#E01B22]" />
+                      {selectedEvent.team_type === 'TEAM' 
+                        ? `${selectedEvent.min_team_size}${selectedEvent.max_team_size > selectedEvent.min_team_size ? `-${selectedEvent.max_team_size}` : ''} Members` 
+                        : 'Solo'}
+                    </span>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="mono-label text-[#F7F2F2] block">TEAM MEMBER EMAILS:</label>
-                    {teamMemberEmails.map((email, index) => (
-                      <input
-                        key={`teammate-${index}`}
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                          const next = [...teamMemberEmails];
-                          next[index] = e.target.value;
-                          setTeamMemberEmails(next);
-                        }}
-                        placeholder={`Teammate ${index + 1} email`}
-                        className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] px-4 py-3 text-sm font-mono text-[#F7F2F2] rounded-[2px] outline-none transition-colors"
-                      />
-                    ))}
-                    <p className="text-[11px] font-mono text-[#A79798] mt-1">
-                      Team size must be between {Math.max(1, selectedEvent.min_team_size || 1)} and {Math.max(Math.max(1, selectedEvent.min_team_size || 1), selectedEvent.max_team_size || Math.max(1, selectedEvent.min_team_size || 1))} members total.
-                    </p>
+                  <div className="bg-[#0A0607] border border-[#2A1A1D] p-3 rounded-[2px]">
+                    <span className="text-[10px] text-[#A79798] block mb-1">VENUE</span>
+                    <span className="font-bold text-[#F7F2F2] flex items-center gap-1.5 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-[#E01B22]" />
+                      {selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'TBA')}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#0A0607] border border-[#2A1A1D] p-3 rounded-[2px]">
+                    <span className="text-[10px] text-[#A79798] block mb-1">TIMING</span>
+                    <span className="font-bold text-[#F7F2F2] flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-[#E01B22]" />
+                      {selectedEvent.start_time ? selectedEvent.start_time.slice(0, 5) : 'TBA'}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#0A0607] border border-[#2A1A1D] p-3 rounded-[2px]">
+                    <span className="text-[10px] text-[#A79798] block mb-1">ENTRY FEE</span>
+                    <span className="font-bold text-[#1FA971] flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" /> INCLUDED
+                    </span>
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* Register Action */}
-              <div className="pt-6 border-t border-[#2A1A1D] flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Status & Redirect Action Button */}
+              <div className="pt-4 border-t border-[#2A1A1D]">
                 {user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'admin_power' || user?.role === 'event_coordinator' ? (
                   <button
                     onClick={() => navigate(user?.role?.includes('coord') ? '/coordinator' : '/admin')}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-[#E08A17] text-[#0A0607] font-mono text-sm font-bold uppercase rounded-[2px] transition-colors shadow-lg hover:bg-[#FFA500]"
+                    className="w-full py-3.5 bg-[#E08A17] hover:bg-[#FFA500] text-[#0A0607] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors"
                   >
-                    Go to Event Control Hub →
+                    GO TO EVENT CONTROL DASHBOARD →
                   </button>
                 ) : selectedEvent.is_flagship ? (
-                  <div className="w-full bg-[#1A1114] border border-[#E01B22] p-4 text-center rounded-[2px]">
-                    <span className="text-[#E01B22] font-mono text-sm font-bold uppercase tracking-widest">
-                      Invite-Only (Competition Winners)
-                    </span>
-                  </div>
-                ) : selectedEvent.status !== 'open' ? (
-                  <div className="w-full bg-[#130C0E] border border-[#2A1A1D] p-4 text-center rounded-[2px]">
-                    <span className="text-[#A79798] font-mono text-sm font-bold uppercase tracking-widest cursor-not-allowed">
-                      Registration Filled
+                  <div className="bg-[#1A1114] border border-[#E01B22] p-3.5 text-center rounded-[2px]">
+                    <span className="text-[#E01B22] font-mono text-xs font-bold uppercase tracking-wider">
+                      ★ INVITE-ONLY FLAGSHIP ARENA (QUALIFIER WINNERS)
                     </span>
                   </div>
                 ) : isRegistered ? (
-                  <div className="w-full bg-[#0F291E] border border-[#1FA971] p-4 text-center rounded-[2px] shadow-[0_0_20px_rgba(31,169,113,0.1)]">
-                    <span className="text-[#1FA971] font-mono text-sm font-bold flex items-center justify-center gap-2 uppercase tracking-widest">
-                      <CheckCircle2 className="w-5 h-5" /> Registration Confirmed
+                  <div className="bg-[#0F291E] border border-[#1FA971] p-3.5 text-center rounded-[2px] flex items-center justify-between">
+                    <span className="text-[#1FA971] font-mono text-xs font-bold flex items-center gap-2 uppercase tracking-widest">
+                      <CheckCircle2 className="w-4 h-4" /> REGISTRATION CONFIRMED
                     </span>
+                    <button
+                      onClick={() => navigate('/dashboard/events')}
+                      className="text-[10px] font-mono text-[#F7F2F2] underline hover:text-[#1FA971]"
+                    >
+                      VIEW DASHBOARD →
+                    </button>
                   </div>
                 ) : (
                   <button
-                    onClick={handleRegisterEvent}
-                    disabled={
-                      registering ||
-                      (selectedEvent.team_type === 'TEAM' && (
-                        !teamNameInput.trim() ||
-                        (1 + teamMemberEmails.filter((email) => email.trim()).length) < Math.max(1, selectedEvent.min_team_size || 1) ||
-                        (1 + teamMemberEmails.filter((email) => email.trim()).length) > Math.max(Math.max(1, selectedEvent.min_team_size || 1), selectedEvent.max_team_size || Math.max(1, selectedEvent.min_team_size || 1))
-                      ))
-                    }
-                    className="w-full px-8 py-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] disabled:opacity-50 disabled:cursor-not-allowed text-[#F7F2F2] font-mono text-sm font-bold uppercase rounded-[2px] transition-all shadow-[0_0_20px_rgba(224,27,34,0.3)] hover:shadow-[0_0_30px_rgba(255,42,42,0.5)]"
+                    onClick={handleRegisterClick}
+                    className="w-full py-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-all shadow-[0_0_20px_rgba(224,27,34,0.3)] flex items-center justify-center gap-2"
                   >
-                    {registering ? 'Transmitting...' : 'Confirm Registration'}
+                    <span>REGISTER FOR THIS EVENT (GO TO DASHBOARD) &rarr;</span>
                   </button>
                 )}
               </div>
@@ -294,6 +236,117 @@ export const EventDetailsPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* DETAILED CONTENT SECTION GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Main Overview & Briefing (Col 8) */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Overview Card */}
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] space-y-4">
+              <h2 className="text-base font-display font-bold text-[#F7F2F2] uppercase tracking-wider border-b border-[#2A1A1D] pb-3 flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-[#E01B22]" />
+                <span>ARENA SPECIFICATIONS & BRIEFING</span>
+              </h2>
+              <p className="text-xs font-mono text-[#A79798] leading-relaxed">
+                {detail.fullDesc || selectedEvent.description}
+              </p>
+
+              {detail.skills && detail.skills.length > 0 && (
+                <div className="pt-4 border-t border-[#2A1A1D]/60 space-y-2">
+                  <span className="text-[10px] font-mono text-[#A79798] uppercase tracking-wider block font-bold">
+                    CORE SKILLS & EVALUATION CRITERIA:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {detail.skills.map((skill: string, idx: number) => (
+                      <span key={idx} className="px-3 py-1 bg-[#0A0607] border border-[#2A1A1D] text-[#E01B22] text-[11px] font-mono rounded-[2px]">
+                        • {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Tactical Encrypted Briefing */}
+            {detail.briefing && (
+              <div className="bg-[#0A0607] border border-[#5C1116] p-6 rounded-[2px] space-y-3 font-mono">
+                <div className="flex items-center justify-between text-xs text-[#FF2A2A] border-b border-[#2A1A1D] pb-2">
+                  <span className="flex items-center gap-2 font-bold"><Clock className="w-3.5 h-3.5" /> CONSOLE BRIEFING</span>
+                  <span className="text-[10px] text-[#A79798]">TACTICAL HUD</span>
+                </div>
+                <p className="text-xs text-[#F7F2F2] leading-relaxed pt-1">
+                  {detail.briefing}
+                </p>
+              </div>
+            )}
+
+          </div>
+
+          {/* Sidebar / Coordinators (Col 4) */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* Event Coordinators Card */}
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
+              <h3 className="text-xs font-mono font-bold text-[#E01B22] uppercase tracking-wider border-b border-[#2A1A1D] pb-3 flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5" />
+                <span>EVENT COORDINATORS</span>
+              </h3>
+
+              {coordinatorNames.length > 0 ? (
+                <div className="space-y-3 font-mono text-xs">
+                  {coordinatorNames.map((name: string, idx: number) => {
+                    const phone = coordinatorPhones[idx] || '';
+                    return (
+                      <div key={idx} className="bg-[#0A0607] border border-[#2A1A1D] p-3 rounded-[2px] space-y-1">
+                        <span className="text-[#F7F2F2] font-bold block">{name}</span>
+                        {phone && (
+                          <a
+                            href={`https://wa.me/91${phone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-[#1FA971] hover:underline flex items-center gap-1"
+                          >
+                            <Phone className="w-3 h-3" /> +91 {phone}
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs font-mono text-[#A79798]">
+                  Coordinators will be assigned at the venue desk.
+                </p>
+              )}
+            </div>
+
+            {/* Event Guidelines Card */}
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-3 font-mono text-xs">
+              <h3 className="font-bold text-[#F7F2F2] uppercase tracking-wider text-[11px] border-b border-[#2A1A1D] pb-2">
+                GENERAL RULES & ENTRY
+              </h3>
+              <ul className="space-y-2 text-[#A79798] text-[11px]">
+                <li className="flex items-start gap-1.5">
+                  <span className="text-[#E01B22] font-bold">•</span>
+                  <span>Bring valid College Student ID Card to enter PSG Tech campus.</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-[#E01B22] font-bold">•</span>
+                  <span>Arrive 15 minutes prior to start time at designated venue.</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-[#E01B22] font-bold">•</span>
+                  <span>Single registration pass grants access to all non-clashing events.</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
