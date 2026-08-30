@@ -18,7 +18,7 @@ export const IntroVideo: React.FC<IntroVideoProps> = ({ onComplete }) => {
   const handleFinish = () => {
     if (hasFinished.current) return;
     hasFinished.current = true;
-    sessionStorage.setItem('hasPlayedIntro', 'true');
+    localStorage.setItem('hasPlayedIntro', 'true');
     onComplete();
   };
 
