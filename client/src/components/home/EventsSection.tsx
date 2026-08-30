@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import eventsData from '../../data/events.json';
 import { EventOrbit } from '../events/EventOrbit';
 
@@ -21,6 +22,7 @@ const STATIC_EVENTS = [
 
 export const EventsSection: React.FC = () => {
   const [events, setEvents] = useState(STATIC_EVENTS);
+  const [isExploreHovered, setIsExploreHovered] = useState(false);
 
   useEffect(() => {
     if (eventsData && eventsData.length > 0) {
@@ -39,7 +41,18 @@ export const EventsSection: React.FC = () => {
   }, []);
 
   return (
-    <section id="events-section" className="py-24 px-4 bg-[#0A0607] border-b border-[#2A1A1D] relative overflow-hidden">
+    <motion.section 
+      id="events-section" 
+      className="w-full py-24 bg-[#0A0607] border-b border-[#2A1A1D] relative overflow-hidden"
+      style={{ paddingLeft: 'clamp(24px, 5vw, 100px)', paddingRight: 'clamp(24px, 5vw, 100px)' }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      variants={{
+        visible: { transition: { staggerChildren: 0.2 } },
+        hidden: {}
+      }}
+    >
       {/* Subtle Background Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#130c0e_1px,transparent_1px),linear-gradient(to_bottom,#130c0e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
 
@@ -47,7 +60,13 @@ export const EventsSection: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* 1. Left — Introduction (25% on desktop) */}
-          <div className="lg:col-span-3 space-y-4 text-center lg:text-left select-none">
+          <motion.div 
+            className="lg:col-span-3 space-y-4 text-center lg:text-left select-none"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+            }}
+          >
             <span className="font-mono text-[11px] text-[#E01B22] font-black tracking-[0.25em] block">
               [ DIRECTIVE // 02 ]
             </span>
@@ -60,27 +79,39 @@ export const EventsSection: React.FC = () => {
               One ultimate challenge. <br />
               Are you ready?
             </p>
-          </div>
+          </motion.div>
 
           {/* 2. Center — Circular Event System (50% on desktop) */}
-          <div className="lg:col-span-6 flex justify-center">
-            <EventOrbit events={events} />
+          <div className="lg:col-span-6 flex justify-center relative">
+            <EventOrbit events={events} isExploreHovered={isExploreHovered} />
           </div>
 
           {/* 3. Right — CTA Link (25% on desktop) */}
-          <div className="lg:col-span-3 flex justify-center lg:justify-end">
+          <motion.div 
+            className="lg:col-span-3 flex justify-center lg:justify-end"
+            variants={{
+              hidden: { opacity: 0, x: -20 },
+              visible: { opacity: 1, x: 0, transition: { duration: 0.8, delay: 0.6, ease: "easeOut" } }
+            }}
+          >
             <Link
               to="/events"
-              className="inline-flex items-center gap-2 font-mono text-xs text-[#E01B22] hover:text-[#FF2A2A] font-bold group tracking-wider transition-colors duration-300"
+              className="relative inline-flex items-center gap-2 font-mono text-xs text-[#E01B22] hover:text-[#FF2A2A] font-bold group transition-all duration-300"
+              onMouseEnter={() => setIsExploreHovered(true)}
+              onMouseLeave={() => setIsExploreHovered(false)}
             >
-              EXPLORE ALL EVENTS 
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+              <span className="tracking-wider group-hover:tracking-normal transition-all duration-300">
+                EXPLORE ALL EVENTS
+              </span>
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
+              {/* Expandable red line on hover */}
+              <span className="absolute -bottom-1 left-0 w-0 h-[1.5px] bg-[#E01B22] transition-all duration-300 group-hover:w-full" />
             </Link>
-          </div>
+          </motion.div>
 
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 
