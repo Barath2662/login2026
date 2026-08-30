@@ -27,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <img
-                src="/assets/login.png"
+                src="/assets/login.webp"
                 alt="LOGIN 2026 Logo"
                 className="h-14 w-14 object-contain animate-float-slow drop-shadow-[0_0_15px_rgba(224,27,34,0.4)]"
               />

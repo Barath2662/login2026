@@ -296,7 +296,7 @@ export const DashboardHome: React.FC = () => {
         
         {/* Browse Events */}
         <div className="bg-[#130C0E] border border-[#2A1A1D] hover:-translate-y-1 hover:border-[#3E2529] p-6 rounded-[2px] flex flex-col justify-between transition-all duration-300 group relative overflow-hidden">
-          <img src="/assets/events/code_relay.png" alt="Events Preview" className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-30 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
+          <img src="/assets/events/code_relay.webp" alt="Events Preview" className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-30 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#130C0E] via-[#130C0E]/80 to-transparent pointer-events-none" />
           <div className="relative z-10">
             <Calendar className="w-6 h-6 mb-3 text-[#A79798] group-hover:text-[#F7F2F2] transition-colors" />
@@ -316,7 +316,7 @@ export const DashboardHome: React.FC = () => {
 
         {/* My Teams */}
         <div className="bg-[#130C0E] border border-[#2A1A1D] hover:-translate-y-1 hover:border-[#3E2529] p-6 rounded-[2px] flex flex-col justify-between transition-all duration-300 group relative overflow-hidden">
-          <img src="/assets/gallery-2.png" alt="Teams Preview" className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-30 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
+          <img src="/assets/gallery-2.webp" alt="Teams Preview" className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-30 group-hover:scale-105 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#130C0E] via-[#130C0E]/80 to-transparent pointer-events-none" />
           <div className="relative z-10">
             <Users className="w-6 h-6 mb-3 text-[#A79798] group-hover:text-[#F7F2F2] transition-colors" />
@@ -330,7 +330,7 @@ export const DashboardHome: React.FC = () => {
 
         {/* Payment */}
         <div className={`bg-[#130C0E] border ${pStatus === 'NOT_SUBMITTED' ? 'border-[#E01B22] shadow-[0_0_20px_rgba(224,27,34,0.15)] hover:shadow-[0_0_30px_rgba(224,27,34,0.25)]' : 'border-[#2A1A1D] hover:border-[#3E2529]'} hover:-translate-y-1 p-6 rounded-[2px] flex flex-col justify-between transition-all duration-300 group relative overflow-hidden`}>
-          <img src="/assets/events/star_of_login.png" alt="Payment Background" className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 transition-all duration-500 pointer-events-none" />
+          <img src="/assets/events/star_of_login.webp" alt="Payment Background" className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 transition-all duration-500 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#130C0E] via-[#130C0E]/80 to-transparent pointer-events-none" />
           <div className="relative z-10">
             <CreditCard className={`w-6 h-6 mb-3 ${pStatus === 'NOT_SUBMITTED' ? 'text-[#E01B22]' : pStatus === 'VERIFIED' ? 'text-[#1FA971]' : 'text-[#E08A17]'}`} />

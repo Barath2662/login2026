@@ -44,7 +44,7 @@ export const CoordinatorsSection: React.FC = () => {
 
           {/* Image */}
           <img 
-            src="/coords.png" 
+            src="/coords.webp" 
             alt="Department Coordinators" 
             className="w-full max-h-[500px] object-cover object-top relative z-10 filter contrast-105"
             onError={(e) => {

@@ -240,7 +240,7 @@ export const TimelinePage: React.FC = () => {
                           {/* Event Thumbnail & Details */}
                           <div className="flex items-center gap-3 min-w-0">
                             <img
-                              src={evt.guardian_asset || '/assets/login.png'}
+                              src={evt.guardian_asset || '/assets/login.webp'}
                               alt={evt.name}
                               className="w-10 h-10 object-contain shrink-0 drop-shadow-[0_0_8px_rgba(224,27,34,0.3)]"
                             />

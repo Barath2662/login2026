@@ -206,14 +206,27 @@ export const EventOrbit: React.FC<EventOrbitProps> = ({ events, isExploreHovered
         </div>
 
         {/* Uniform Grid of Event Cards */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        <motion.div 
+          className="grid grid-cols-2 gap-3 pt-1"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.1 } }
+          }}
+        >
           {events.map((evt, idx) => {
             const isLastSingle = (events.length % 2 !== 0) && (idx === events.length - 1);
 
             return (
-              <button
+              <motion.button
                 key={evt.id}
                 onClick={() => handleNodeClick(evt)}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9, y: 10 },
+                  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                }}
                 className={`h-[110px] w-full flex flex-col items-center justify-center p-3 rounded-[2px] bg-[#0A0607]/90 border border-[#2A1A1D] active:border-[#E01B22] hover:border-[#E01B22]/60 transition-all text-center group ${
                   isLastSingle ? 'col-span-2 max-w-[200px] justify-self-center' : ''
                 }`}
@@ -223,7 +236,7 @@ export const EventOrbit: React.FC<EventOrbitProps> = ({ events, isExploreHovered
                     src={evt.logo}
                     alt={evt.name}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/assets/login.png';
+                      (e.target as HTMLImageElement).src = '/assets/login.webp';
                     }}
                     className="max-h-full max-w-full object-contain filter brightness-110 group-active:scale-105 transition-transform"
                   />
@@ -231,10 +244,10 @@ export const EventOrbit: React.FC<EventOrbitProps> = ({ events, isExploreHovered
                 <span className="text-[11px] font-mono font-black text-[#F7F2F2] leading-tight block uppercase tracking-wider group-hover:text-[#E01B22] transition-colors line-clamp-1">
                   {evt.shortName}
                 </span>
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
       </div>
     </div>

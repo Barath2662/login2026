@@ -344,7 +344,7 @@ END:VCALENDAR`;
           </div>
         ) : (
           <div className="text-center space-y-3">
-            <img src="/assets/login.png" alt="LOGIN 2K26 Logo" className="h-16 w-auto mx-auto drop-shadow-[0_0_15px_rgba(224,27,34,0.4)]" />
+            <img src="/assets/login.webp" alt="LOGIN 2K26 Logo" className="h-16 w-auto mx-auto drop-shadow-[0_0_15px_rgba(224,27,34,0.4)]" />
             <h1 className="text-3xl font-display font-black text-[#F7F2F2] uppercase tracking-wider">
               REGISTER FOR LOGIN 2K26
             </h1>

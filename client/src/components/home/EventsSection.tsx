@@ -7,17 +7,17 @@ import { EventOrbit } from '../events/EventOrbit';
 
 // Static event metadata representing the 11 arenas
 const STATIC_EVENTS = [
-  { id: 1, name: "NOSTOS: The Journey Home", shortName: "Nostos", logo: "/assets/events/nostos.png", category: "NON_TECHNICAL", slug: "nostos" },
-  { id: 2, name: "Code Relay", shortName: "Code Relay", logo: "/assets/events/code_relay.png", category: "TECHNICAL", slug: "code-relay" },
-  { id: 3, name: "In The Slot", shortName: "In The Slot", logo: "/assets/events/in_the_slot.png", category: "NON_TECHNICAL", slug: "in-the-slot" },
-  { id: 4, name: "Debug Arena", shortName: "Debug Arena", logo: "/assets/events/debug_arena.png", category: "TECHNICAL", slug: "debug-arena" },
-  { id: 5, name: "CodeXcape", shortName: "CodeXcape", logo: "/assets/events/code_x_cape.png", category: "TECHNICAL", slug: "codexcape" },
-  { id: 6, name: "Blind Coding", shortName: "Blind Coding", logo: "/assets/events/blind_coding.png", category: "TECHNICAL", slug: "blind-coding" },
-  { id: 7, name: "The Extraction", shortName: "The Extraction", logo: "/assets/events/the_extraction.png", category: "TECHNICAL", slug: "the-extraction" },
-  { id: 8, name: "Pixel Paradox: AI or Reality?", shortName: "Pixel Paradox", logo: "/assets/events/pixel_paradox.png", category: "NON_TECHNICAL", slug: "pixel-paradox" },
-  { id: 9, name: "Project Phoenix: System Recovery", shortName: "Proj Phoenix", logo: "/assets/events/phoenix.png", category: "TECHNICAL", slug: "project-phoenix" },
-  { id: 10, name: "Hunt your Treasure — QR Escape Challenge", shortName: "QR Hunt", logo: "/assets/events/hunt_your_treasure.png", category: "NON_TECHNICAL", slug: "hunt-your-treasure" },
-  { id: 11, name: "Star of LOGIN", shortName: "Star of LOGIN", logo: "/assets/events/star_of_login.png", category: "TECHNICAL", slug: "star-of-login" }
+  { id: 1, name: "NOSTOS: The Journey Home", shortName: "Nostos", logo: "/assets/events/nostos.webp", category: "NON_TECHNICAL", slug: "nostos" },
+  { id: 2, name: "Code Relay", shortName: "Code Relay", logo: "/assets/events/code_relay.webp", category: "TECHNICAL", slug: "code-relay" },
+  { id: 3, name: "In The Slot", shortName: "In The Slot", logo: "/assets/events/in_the_slot.webp", category: "NON_TECHNICAL", slug: "in-the-slot" },
+  { id: 4, name: "Debug Arena", shortName: "Debug Arena", logo: "/assets/events/debug_arena.webp", category: "TECHNICAL", slug: "debug-arena" },
+  { id: 5, name: "CodeXcape", shortName: "CodeXcape", logo: "/assets/events/code_x_cape.webp", category: "TECHNICAL", slug: "codexcape" },
+  { id: 6, name: "Blind Coding", shortName: "Blind Coding", logo: "/assets/events/blind_coding.webp", category: "TECHNICAL", slug: "blind-coding" },
+  { id: 7, name: "The Extraction", shortName: "The Extraction", logo: "/assets/events/the_extraction.webp", category: "TECHNICAL", slug: "the-extraction" },
+  { id: 8, name: "Pixel Paradox: AI or Reality?", shortName: "Pixel Paradox", logo: "/assets/events/pixel_paradox.webp", category: "NON_TECHNICAL", slug: "pixel-paradox" },
+  { id: 9, name: "Project Phoenix: System Recovery", shortName: "Proj Phoenix", logo: "/assets/events/phoenix.webp", category: "TECHNICAL", slug: "project-phoenix" },
+  { id: 10, name: "Hunt your Treasure — QR Escape Challenge", shortName: "QR Hunt", logo: "/assets/events/hunt_your_treasure.webp", category: "NON_TECHNICAL", slug: "hunt-your-treasure" },
+  { id: 11, name: "Star of LOGIN", shortName: "Star of LOGIN", logo: "/assets/events/star_of_login.webp", category: "TECHNICAL", slug: "star-of-login" }
 ];
 
 export const EventsSection: React.FC = () => {

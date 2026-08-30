@@ -71,28 +71,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
         <div className="flex flex-col items-center select-none space-y-1.5 mb-4 sm:mb-6">
           <div className="flex flex-col items-center justify-center gap-3">
             <div className="flex items-center gap-3 justify-center select-none">
-              {/* PSG Main Logo */}
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border border-[#2A1A1D]/60 flex items-center justify-center p-1.5 shadow-lg">
                 <img 
-                  src="/assets/logos/psg-main.png" 
+                  src="/assets/logos/psg-main.webp" 
                   alt="PSG Main" 
-                  className="w-full h-full object-contain" 
+                  className="w-full h-full object-contain"
+                  loading="eager"
+                  fetchPriority="high"
                 />
               </div>
-              {/* PSG Centenary Logo */}
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border border-[#2A1A1D]/60 flex items-center justify-center p-1.5 shadow-lg">
                 <img 
-                  src="/assets/logos/psg-100.png" 
+                  src="/assets/logos/psg-100.webp" 
                   alt="PSG Centenary" 
-                  className="w-full h-full object-contain" 
+                  className="w-full h-full object-contain"
+                  loading="eager"
                 />
               </div>
-              {/* PSG 75th Year Logo */}
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border border-[#2A1A1D]/60 flex items-center justify-center p-1.5 shadow-lg">
                 <img 
-                  src="/assets/logos/psg-75.png" 
+                  src="/assets/logos/psg-75.webp" 
                   alt="PSG 75" 
-                  className="w-full h-full object-contain" 
+                  className="w-full h-full object-contain"
+                  loading="eager"
                 />
               </div>
             </div>

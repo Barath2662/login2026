@@ -92,7 +92,7 @@ export const EventNode: React.FC<EventNodeProps> = ({
               src={logo}
               alt={name}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/assets/login.png';
+                (e.target as HTMLImageElement).src = '/assets/login.webp';
               }}
               className="max-w-full max-h-full object-contain filter brightness-110 contrast-125 group-hover:brightness-130 transition-transform duration-300"
             />
