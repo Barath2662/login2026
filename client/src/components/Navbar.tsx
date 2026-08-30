@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
         ? 'bg-transparent border-b border-transparent'
         : 'bg-[#130C0E]/95 backdrop-blur-md border-b border-[#2A1A1D] shadow-2xl'
     }`}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2">
           
           {/* Logo / Brand Header */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 group select-none shrink">
