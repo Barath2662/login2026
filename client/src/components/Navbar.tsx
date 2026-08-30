@@ -60,18 +60,18 @@ export const Navbar: React.FC<NavbarProps> = () => {
           <Link to="/" className="flex items-center gap-2 sm:gap-3 group select-none shrink">
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* LOGIN Logo */}
-              <div className="flex items-center justify-center p-1 relative z-10 w-8 h-8 md:w-9 md:h-9">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-[#2A1A1D] bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
                 <img 
                   src="/assets/login.webp" 
-                  alt="LOGIN 2K26" 
-                  className="w-full h-full object-contain relative z-20"
+                  alt="LOGIN Logo" 
+                  className="w-full h-full object-contain"
                 />
               </div>
               {/* CAA Logo */}
-              <div className="flex items-center justify-center p-1">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-[#2A1A1D] bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
                 <img 
                   src="/assets/logos/caa.webp" 
-                  alt="CAA" 
+                  alt="CAA Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
