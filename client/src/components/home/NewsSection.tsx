@@ -2,7 +2,7 @@ import React from 'react';
 
 export const NewsSection: React.FC = () => {
   const stats = [
-    { label: 'TOTAL PRIZE POOL', value: '₹1,00,000+', desc: 'ACROSS ALL ARENAS' },
+    { label: 'TOTAL PRIZE POOL', value: '₹1,00,000', desc: 'ACROSS ALL ARENAS' },
     { label: 'COMPETITION ARENAS', value: '11 EVENTS', desc: 'TECHNICAL & NON-TECHNICAL' },
     { label: 'PARTICIPATING INSTITUTIONS', value: '100+\nCOLLEGES', desc: 'NATIONAL LEVEL' },
     { label: 'EXPECTED PARTICIPANTS', value: '1000+\nSTUDENTS', desc: 'ACROSS THE COUNTRY' },

@@ -7,9 +7,10 @@ interface AdvisorCardProps {
   role: string;
   designation: string;
   node: string;
+  phone?: string;
 }
 
-const AdvisorCard: React.FC<AdvisorCardProps> = ({ name, role, designation, node }) => {
+const AdvisorCard: React.FC<AdvisorCardProps> = ({ name, role, designation, node, phone }) => {
   return (
     <div className="border border-[#2A1A1D] bg-[#130C0E]/40 p-5 rounded-[2px] relative overflow-hidden group hover:border-[#E01B22]/40 transition-colors">
       <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#E01B22]/30 group-hover:border-[#E01B22] transition-all" />
@@ -32,6 +33,11 @@ const AdvisorCard: React.FC<AdvisorCardProps> = ({ name, role, designation, node
           <p className="text-[10px] font-mono text-[#6B5A5C] tracking-wide pt-1">
             {designation}
           </p>
+          {phone && (
+            <p className="text-[10px] font-mono text-[#E01B22] tracking-wide pt-1">
+              {phone}
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -71,24 +77,20 @@ export const CoordinatorsPage: React.FC = () => {
         </div>
 
         {/* Advisors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <AdvisorCard 
-            name="Dr. G. R. Karpagam"
+            name="Dr. Ilayaraja N"
             role="Head of Department"
             designation="Dept. of Computer Applications"
             node="NODE // HOD"
+            phone="9171432005"
           />
           <AdvisorCard 
-            name="Dr. J. Jasmine"
+            name="Ms. Kalyani A"
             role="Faculty Advisor"
             designation="Computer Applications Association"
             node="NODE // ADV_01"
-          />
-          <AdvisorCard 
-            name="Dr. A. B. Ramesh"
-            role="Co-Faculty Advisor"
-            designation="Computer Applications Association"
-            node="NODE // ADV_02"
+            phone="9944473831"
           />
         </div>
 

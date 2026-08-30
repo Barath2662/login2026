@@ -97,12 +97,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
                 />
               </div>
             </div>
-            <span 
-              className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] text-[#B8B2B2] uppercase"
+            <div 
+              className="flex flex-col items-center text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] text-[#B8B2B2] uppercase text-center space-y-1"
               style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 0, 0, 0.6)' }}
             >
-              PSG COLLEGE OF TECHNOLOGY PRESENTS
-            </span>
+              <span>PSG College of Technology</span>
+              <span>Department of Computer Applications</span>
+              <span>Computer Applications Association</span>
+              <span>Presents</span>
+            </div>
           </div>
           <div className="flex flex-col items-center gap-1 font-mono tracking-[0.2em] text-[#F7F2F2] font-bold text-[10px] sm:text-xs uppercase text-center mt-2">
             <span style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 0, 0, 0.7)' }}>
