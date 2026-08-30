@@ -6,17 +6,30 @@ const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
 
 const app = express();
-const allowedOrigins = [
+const allowedOrigins = new Set([
   process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+  "https://login2026-client.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://frontend:5173",
-].filter(Boolean);
+].filter(Boolean));
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+
+  if (allowedOrigins.has(origin)) return true;
+
+  return (
+    origin.includes("login2026-client") &&
+    (origin.includes(".vercel.app") || origin.includes("localhost"))
+  );
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }
@@ -24,6 +37,8 @@ app.use(
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 
