@@ -64,7 +64,7 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E01B22] shrink-0" />
-                <strong className="text-[#F7F2F2]">Organizer:</strong> Dept. of Computer Applications
+                <strong className="text-[#F7F2F2]">Organizer:</strong> Computer Applications Association
               </li>
             </ul>
           </div>

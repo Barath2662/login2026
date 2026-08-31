@@ -80,7 +80,7 @@ export const CoordinatorsSection: React.FC = () => {
                 TREASURER
               </p>
               <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">
-                SWARNA RTNA A
+                SWARNA RATHNA A
               </h3>
             </div>
 

@@ -173,9 +173,9 @@ export const EventDetailsPage: React.FC = () => {
 
                   <div className="bg-[#0A0607] border border-[#2A1A1D] p-3 rounded-[2px]">
                     <span className="text-[10px] text-[#A79798] block mb-1">VENUE</span>
-                    <span className="font-bold text-[#F7F2F2] flex items-center gap-1.5 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-[#E01B22]" />
-                      {selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'TBA')}
+                    <span className="font-bold text-[#F7F2F2] flex items-start gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#E01B22] shrink-0" />
+                      <span className="leading-tight">{selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'TBA')}</span>
                     </span>
                   </div>
 
