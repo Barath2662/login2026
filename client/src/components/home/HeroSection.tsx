@@ -15,14 +15,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
   return (
     <section 
       className="relative min-h-[100dvh] flex flex-col justify-center items-center text-center overflow-hidden pt-20"
-      style={{
-        backgroundImage: "url('/final_hero_doom.webp')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
     >
-      {/* ── Cinematic Overlays for Readability ── */}
+      {/* Absolute Background Image for parallax */}
+      <div 
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{
+          backgroundImage: "url('/final_hero_doom.webp')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }}
+      />
       
       {/* Layer 1: Dark Base Vignette Overlay */}
       <div className="absolute inset-0 bg-black/25 pointer-events-none z-0" />
