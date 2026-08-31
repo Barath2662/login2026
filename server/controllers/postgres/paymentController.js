@@ -9,6 +9,13 @@ const generateStudentIdCode = async (userId) => {
   return `LGN26-${paddedId}`;
 };
 
+const normalizeReportRow = (row) => Object.fromEntries(
+  Object.entries(row).map(([key, value]) => [
+    key.toLowerCase().replace(/[^a-z0-9]/g, ''),
+    typeof value === 'string' ? value.trim() : value,
+  ])
+);
+
 const getMyPayment = async (req, res) => {
   try {
     const payment = await paymentModel.findOne({
@@ -185,7 +192,7 @@ const initiateRefund = async (req, res) => {
 const uploadAndMatchCsv = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: 'No CSV file uploaded' });
+      return res.status(400).json({ message: 'No CSV, XLS, or XLSX file uploaded' });
     }
 
     const fileBuffer = req.file.buffer;
@@ -219,8 +226,8 @@ const uploadAndMatchCsv = async (req, res) => {
     const unmatched = [];
 
     for (const row of rows) {
-      // Extract from typical Excel headers or fallback to extractTransactionId for CSV
-      const txnId = row.Receipt_No || row.receipt_no || extractTransactionId(Object.values(row));
+      const normalizedRow = normalizeReportRow(row);
+      const txnId = normalizedRow.receiptno || normalizedRow.receiptnumber || normalizedRow.transactionid || normalizedRow.utr || extractTransactionId(Object.values(row));
       if (!txnId) continue;
 
       const payment = await paymentModel.findOne({

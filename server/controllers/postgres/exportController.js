@@ -2,6 +2,7 @@ const { stringify } = require("csv-stringify/sync");
 const registrationModel = require("../../models/postgres/registrationModel");
 const attendanceModel = require("../../models/postgres/attendanceModel");
 const userModel = require("../../models/postgres/userModel");
+const alumniModel = require("../../models/postgres/alumniModel");
 const paymentModel = require("../../models/postgres/paymentModel");
 const teamModel = require("../../models/postgres/teamModel");
 
@@ -158,8 +159,7 @@ const exportTeams = async (req, res) => {
 
 const exportAlumni = async (req, res) => {
   try {
-    const alumni = await userModel.findAll({
-      where: { user_type: "ALUMNI" },
+    const alumni = await alumniModel.findAll({
       order: [["createdAt", "ASC"]],
     });
 

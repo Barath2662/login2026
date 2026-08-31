@@ -134,7 +134,7 @@ export const AdminPage: React.FC = () => {
       );
       setCsvSelectedIds(ids);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to process CSV');
+      alert(err.response?.data?.message || 'Failed to process payment report');
     } finally {
       setCsvLoading(false);
     }
@@ -279,10 +279,14 @@ export const AdminPage: React.FC = () => {
     }
 
     try {
-      await api.users.updateDetails(user.id, {
-        name: name.trim(), email: email.trim(), phone: phone.trim(), college_name: college_name.trim(),
-        department: department.trim(), roll_no: roll_no.trim(), ...alumniFields,
-      });
+      if (user.user_type === 'ALUMNI') {
+        await api.alumni.update(user.id, { name: name.trim(), email: email.trim(), phone: phone.trim(), ...alumniFields });
+      } else {
+        await api.users.updateDetails(user.id, {
+          name: name.trim(), email: email.trim(), phone: phone.trim(), college_name: college_name.trim(),
+          department: department.trim(), roll_no: roll_no.trim(),
+        });
+      }
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to update user details.');
@@ -293,7 +297,7 @@ export const AdminPage: React.FC = () => {
     if (!window.confirm(`Delete ${user.name || 'this user'} permanently?`)) return;
 
     try {
-      await api.users.delete(user.id);
+      await (user.user_type === 'ALUMNI' ? api.alumni.delete(user.id) : api.users.delete(user.id));
       fetchData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to delete user.');
@@ -475,7 +479,7 @@ export const AdminPage: React.FC = () => {
           {activeTab === 'DASHBOARD' && 'Telemetry & Stats'}
           {activeTab === 'ANNOUNCEMENTS' && 'Broadcast Announcements'}
           {activeTab === 'EVENTS' && `Events (${events.length})`}
-          {activeTab === 'CSV_UPLOAD' && 'CSV Payment Verification'}
+          {activeTab === 'CSV_UPLOAD' && 'Payment Report Verification'}
           {activeTab === 'SETTINGS' && 'System Feature Settings'}
         </h1>
       </div>
@@ -1221,9 +1225,9 @@ export const AdminPage: React.FC = () => {
                 <FileText className="w-6 h-6 text-[#E01B22]" />
               </div>
               <div>
-                <h2 className="text-xl font-display font-bold text-[#F7F2F2]">Batch Verify Payments via CSV</h2>
+                <h2 className="text-xl font-display font-bold text-[#F7F2F2]">Batch Verify Payments via CSV or Excel</h2>
                 <p className="text-sm font-mono text-[#A79798] mt-1 max-w-2xl">
-                  Upload the transaction report from your payment gateway. The system will match the transaction IDs with pending student registrations.
+                  Upload a CSV, XLS, or XLSX transaction report. The system will match receipt or transaction IDs with pending student registrations.
                 </p>
               </div>
             </div>
@@ -1231,7 +1235,7 @@ export const AdminPage: React.FC = () => {
             <div className="flex items-center gap-4 mt-6">
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv,.xlsx,.xls"
                 id="csv-upload"
                 className="hidden"
                 onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
@@ -1241,7 +1245,7 @@ export const AdminPage: React.FC = () => {
                 className="px-6 py-3 bg-[#1A1114] border border-[#3E2529] hover:border-[#E01B22] text-[#F7F2F2] font-mono text-sm cursor-pointer rounded-[2px] transition-colors flex items-center gap-2"
               >
                 <Upload className="w-4 h-4" />
-                {csvFile ? csvFile.name : 'Choose CSV File'}
+                {csvFile ? csvFile.name : 'Choose CSV or Excel File'}
               </label>
               
               <button

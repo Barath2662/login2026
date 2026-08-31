@@ -3,6 +3,7 @@ const paymentModel = require("../../models/postgres/paymentModel");
 const registrationModel = require("../../models/postgres/registrationModel");
 const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
 const eventModel = require("../../models/postgres/eventModel");
+const alumniModel = require("../../models/postgres/alumniModel");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -20,7 +21,8 @@ const getAllUsers = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    return res.json(users);
+    const alumni = await alumniModel.findAll({ order: [["createdAt", "DESC"]], raw: true });
+    return res.json([...users, ...alumni.map((record) => ({ ...record, user_type: "ALUMNI", role: "alumni", record_type: "alumni" }))]);
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch users", error: error.message });
   }
@@ -294,6 +296,30 @@ const createUserByAdmin = async (req, res) => {
   }
 };
 
+const updateAlumni = async (req, res) => {
+  try {
+    const alumni = await alumniModel.findByPk(req.params.id);
+    if (!alumni) return res.status(404).json({ message: "Alumni record not found" });
+    const allowedFields = ["name", "email", "phone", "batch_year", "gender", "place", "current_organization", "accommodation_required"];
+    const updates = Object.fromEntries(allowedFields.filter((field) => req.body[field] !== undefined).map((field) => [field, req.body[field]]));
+    await alumni.update(updates);
+    return res.json({ message: "Alumni details updated", alumni });
+  } catch (error) {
+    return res.status(400).json({ message: "Failed to update alumni details", error: error.message });
+  }
+};
+
+const deleteAlumni = async (req, res) => {
+  try {
+    const alumni = await alumniModel.findByPk(req.params.id);
+    if (!alumni) return res.status(404).json({ message: "Alumni record not found" });
+    await alumni.destroy();
+    return res.json({ message: "Alumni record deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to delete alumni record", error: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getMyProfile,
@@ -304,5 +330,7 @@ module.exports = {
   deleteUser,
   updateUserStatus,
   createUserByAdmin,
+  updateAlumni,
+  deleteAlumni,
 };
 

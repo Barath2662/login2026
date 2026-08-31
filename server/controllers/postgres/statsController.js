@@ -3,6 +3,7 @@ const paymentModel = require("../../models/postgres/paymentModel");
 const registrationModel = require("../../models/postgres/registrationModel");
 const eventModel = require("../../models/postgres/eventModel");
 const attendanceModel = require("../../models/postgres/attendanceModel");
+const alumniModel = require("../../models/postgres/alumniModel");
 
 const getParticipantStats = async (req, res) => {
   try {
@@ -20,9 +21,7 @@ const getParticipantStats = async (req, res) => {
       where: { status: "registered" },
     });
 
-    const totalAlumni = await userModel.count({
-      where: { user_type: "ALUMNI" },
-    });
+    const totalAlumni = await alumniModel.count();
 
     const totalEvents = await eventModel.count();
 

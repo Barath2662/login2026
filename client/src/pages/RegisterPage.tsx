@@ -55,7 +55,7 @@ export const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Success state
-  const [alumniSuccessData, setAlumniSuccessData] = useState<{ loginId: string; name: string; email: string; batch_year?: string } | null>(null);
+  const [alumniSuccessData, setAlumniSuccessData] = useState<{ name: string; email: string; batch_year?: string } | null>(null);
   const [successData, setSuccessData] = useState<{ loginId: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -125,7 +125,6 @@ export const RegisterPage: React.FC = () => {
 
       if (userType === 'ALUMNI') {
         setAlumniSuccessData({
-          loginId: res.data.loginId,
           name: data.name,
           email: data.email,
           batch_year: data.batch_year,
@@ -321,10 +320,9 @@ END:VCALENDAR`;
           <div className="text-center space-y-4 sm:space-y-6 pt-2 sm:pt-4">
             {/* Timeline Legacy Badge */}
             <div className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1 sm:py-1.5 bg-[#1A0306] border border-[#E01B22] rounded-[2px] font-mono text-[10px] sm:text-xs font-bold text-[#E08A17] max-w-full overflow-hidden">
-              <span>1991</span>
+              <span>1983</span>
               <div className="w-8 sm:w-16 h-[1px] bg-[#E01B22] shrink" />
               <span>2026</span>
-              <span className="text-[#A79798] border-l border-[#2A1A1D] pl-2 sm:pl-3 ml-0.5 sm:ml-1 truncate">35 YEARS OF LEGACY</span>
             </div>
 
             {/* Title */}
@@ -464,7 +462,7 @@ END:VCALENDAR`;
                     <input
                       type="text"
                       {...register('batch_year')}
-                      placeholder="e.g. 2015 or 25MX"
+                      placeholder="e.g. 25MX"
                       className={inputClass}
                     />
                     {errors.batch_year && <p className={errorClass}>{(errors.batch_year as any).message}</p>}

@@ -37,6 +37,11 @@ export const api = {
     updateStatus: async (id: number | string, is_active: boolean) => await axiosInstance.put(`/users/${id}/status`, { is_active }),
   },
 
+  alumni: {
+    update: async (id: number | string, data: any) => await axiosInstance.put(`/users/alumni/${id}`, data),
+    delete: async (id: number | string) => await axiosInstance.delete(`/users/alumni/${id}`),
+  },
+
   // Events Module
   events: {
     getAll: async () => await axiosInstance.get('/events/'),

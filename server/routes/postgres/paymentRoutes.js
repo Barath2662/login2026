@@ -6,15 +6,21 @@ const paymentController = require('../../controllers/postgres/paymentController'
 
 const router = express.Router();
 
-// multer: store CSV in memory (no disk write needed — we parse the buffer directly)
+// Store payment reports in memory; CSV and Excel files are parsed from the buffer.
 const csvUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+    const filename = file.originalname.toLowerCase();
+    const excelMimeTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'application/octet-stream',
+    ];
+    if (file.mimetype === 'text/csv' || excelMimeTypes.includes(file.mimetype) || /\.(csv|xlsx|xls)$/.test(filename)) {
       cb(null, true);
     } else {
-      cb(new Error('Only CSV files are allowed'));
+      cb(new Error('Only CSV, XLS, or XLSX files are allowed'));
     }
   },
 });

@@ -9,6 +9,7 @@ const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
 const otpModel = require("../../models/postgres/otpModel");
 const { sendEmail } = require("../../services/emailService");
+const alumniModel = require("../../models/postgres/alumniModel");
 
 const jwtSecret = process.env.JWT_SECRET || "super_secret_jwt_key_login_2026";
 
@@ -154,10 +155,9 @@ const registerUser = async (req, res) => {
 
     const isAlumni = String(user_type).toUpperCase() === "ALUMNI";
 
-    // Generate unique LOGIN ID first so we can use it for the dummy email
-    const loginId = await generateLoginId(transaction);
+    const loginId = isAlumni ? null : await generateLoginId(transaction);
 
-    const finalEmail = email ? email.toLowerCase() : `${loginId.toLowerCase()}@login2k26.psgtech.ac.in`;
+    const finalEmail = email ? email.toLowerCase().trim() : null;
     const finalPhone = phone || null;
 
     if (!name || (!isAlumni && !password)) {
@@ -174,14 +174,20 @@ const registerUser = async (req, res) => {
       });
     }
 
-    if (!isAlumni) {
-      if (!email) {
-        await transaction.rollback();
-        return res.status(400).json({ message: "Email is required for participant registration." });
-      }
+    if (!email) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Email is required for registration." });
     }
 
-    // Only check for existing user if a real email was provided
+    const existingAlumni = isAlumni && email
+      ? await alumniModel.findOne({ where: { email: finalEmail }, transaction })
+      : null;
+    if (existingAlumni) {
+      await transaction.rollback();
+      return res.status(409).json({ message: "Email address is already registered" });
+    }
+
+    // Only check for an existing user when registering a participant or staff account.
     if (email) {
       const existingUser = await userModel.findOne({
         where: { email: finalEmail },
@@ -196,8 +202,28 @@ const registerUser = async (req, res) => {
       }
     }
 
-    const rawPassword = password || `AlumniRSVP_${Math.random().toString(36).slice(-8)}`;
-    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+    if (isAlumni) {
+      const alumni = await alumniModel.create({
+        name,
+        email: finalEmail,
+        phone: finalPhone,
+        batch_year: String(batch_year || "").trim(),
+        gender,
+        place,
+        current_organization,
+        accommodation_required: Boolean(accommodation_required),
+      }, { transaction });
+      await transaction.commit();
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      sendEmail({
+        to: finalEmail,
+        subject: "[LOGIN 2K26] Welcome Back, Alumni! Confirmation",
+        html: `<p>Welcome back, ${alumni.name}! Your LOGIN 2K26 alumni RSVP is confirmed.</p><p>Visit <a href="${frontendUrl}">${frontendUrl}</a> for event updates.</p>`,
+      }).catch((err) => console.error("Failed to send alumni welcome email:", err));
+      return res.status(201).json({ message: "Alumni registration saved successfully." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const normalizedRole = "student";
     const user = await userModel.create(
@@ -209,7 +235,7 @@ const registerUser = async (req, res) => {
         college_name: college_name || "PSG College of Technology",
         department: department || "MCA",
         roll_no,
-        user_type: isAlumni ? "ALUMNI" : "PARTICIPANT",
+        user_type: "PARTICIPANT",
         gender,
         year_of_study,
         batch_year,

@@ -37,6 +37,9 @@ router.post(
   userController.createUserByAdmin
 );
 
+router.put("/alumni/:id", verifyJwt, allowRoles("admin", "super_admin", "admin_power"), userController.updateAlumni);
+router.delete("/alumni/:id", verifyJwt, allowRoles("admin", "super_admin", "admin_power"), userController.deleteAlumni);
+
 
 router.put(
   "/:id/details",

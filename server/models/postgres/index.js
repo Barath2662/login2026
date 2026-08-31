@@ -17,6 +17,7 @@ const EventChangeLog = require("./eventChangeLogModel");
 const { LegacyEdition, LegacyItem } = require("./legacyModel");
 const EmailLog = require("./emailLogModel");
 const Otp = require("./otpModel");
+const Alumni = require("./alumniModel");
 
 // User -> Registrations
 User.hasMany(Registration, { foreignKey: "student_id", as: "registrations" });
@@ -111,4 +112,5 @@ module.exports = {
   LegacyItem,
   EmailLog,
   Otp,
+  Alumni,
 };
