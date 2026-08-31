@@ -80,7 +80,7 @@ export const CoordinatorsPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <AdvisorCard 
             name="Dr. Ilayaraja N"
-            role="Head of Department"
+            role="Head of Department (i/c)"
             designation="Dept. of Computer Applications"
             node="NODE // HOD"
             phone="9171432005"
@@ -91,6 +91,18 @@ export const CoordinatorsPage: React.FC = () => {
             designation="Computer Applications Association"
             node="NODE // ADV_01"
             phone="9944473831"
+          />
+          <AdvisorCard 
+            name="Mr. Sundar C"
+            role="Website Faculty Coordinator"
+            designation="Dept. of Computer Applications"
+            node="NODE // WEB_01"
+          />
+          <AdvisorCard 
+            name="Ms A Manoranjitham"
+            role="Website Faculty Coordinator"
+            designation="Dept. of Computer Applications"
+            node="NODE // WEB_02"
           />
         </div>
 

@@ -11,7 +11,7 @@ export const CoordinatorsSection: React.FC = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[radial-gradient(circle,_rgba(224,27,34,0.08)_0%,_transparent_75%)] pointer-events-none filter blur-3xl z-0" />
 
       <div className="max-w-7xl mx-auto space-y-10 relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center space-y-2 select-none">
           <span className="font-mono text-[10px] text-[#E01B22] font-black tracking-[0.3em] block uppercase">
@@ -43,9 +43,9 @@ export const CoordinatorsSection: React.FC = () => {
           </div>
 
           {/* Image */}
-          <img 
-            src="/coords.webp" 
-            alt="Department Coordinators" 
+          <img
+            src="/coords.webp"
+            alt="Department Coordinators"
             className="w-full max-h-[500px] object-cover object-top relative z-10 filter contrast-105"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/coords_bold.webp';
@@ -53,70 +53,127 @@ export const CoordinatorsSection: React.FC = () => {
           />
         </div>
 
-        {/* 5 Coordinators Grid - Perfectly Aligned & Uniform Heights */}
-        <div className="space-y-6 max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
-            <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
-              ORGANIZING CORE LEADERSHIP
-            </span>
+        {/* Coordinators Grid */}
+        <div className="space-y-12 max-w-5xl mx-auto pb-10">
+          
+          {/* CORE LEADERSHIP */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+              <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
+                CORE LEADERSHIP
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">TREASURER</p>
+                <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">SWARNA RATHNA A</h3>
+              </div>
+              <div className="border border-[#E01B22] bg-[#1A080A]/90 p-4 rounded-[2px] text-center shadow-[0_0_20px_rgba(224,27,34,0.25)] group flex flex-col justify-center items-center min-h-[90px] relative">
+                <p className="font-mono text-[9px] text-[#E01B22] font-black tracking-widest uppercase mb-1">SECRETARY</p>
+                <h3 className="font-display font-black text-xs sm:text-[13px] tracking-wide uppercase leading-snug text-[#F7F2F2] group-hover:text-[#E01B22] transition-colors">BARATHVIKRAMAN S K</h3>
+              </div>
+              <div className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">PLACEMENT REPRESENTATIVE</p>
+                <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">TINO BRITTY J</h3>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-stretch">
-            
-            {/* 3 - Far Left */}
-            <div className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
-              <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">
-                EXECUTIVE COORDINATOR
-              </p>
-              <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">
-                STEPHINA SMILY C
-              </h3>
+          {/* EXECUTIVE COORDINATORS */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-2 pt-6 border-t border-[#2A1A1D]/50">
+              <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+              <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
+                EXECUTIVE COORDINATORS
+              </span>
             </div>
-
-            {/* 2 - Immediate Left */}
-            <div className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
-              <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">
-                TREASURER
-              </p>
-              <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">
-                SWARNA RATHNA A
-              </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {['STEPHINA SMILY C', 'ARAVINDH KANNAN M S', 'MUGUNDHAN K P'].map((name) => (
+                <div key={name} className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                  <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">EXECUTIVE COORDINATOR</p>
+                  <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">{name}</h3>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* 1 - Centre Lead */}
-            <div className="border border-[#E01B22] bg-[#1A080A]/90 p-4 rounded-[2px] text-center shadow-[0_0_20px_rgba(224,27,34,0.25)] group flex flex-col justify-center items-center min-h-[90px] relative">
-              <p className="font-mono text-[9px] text-[#E01B22] font-black tracking-widest uppercase mb-1">
-                SECRETARY
-              </p>
-              <h3 className="font-display font-black text-xs sm:text-[13px] tracking-wide uppercase leading-snug text-[#F7F2F2] group-hover:text-[#E01B22] transition-colors">
-                BARATHVIKRAMAN S K
-              </h3>
+          {/* SPECIALIZED COORDINATORS */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-2 pt-6 border-t border-[#2A1A1D]/50">
+              <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+              <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
+                DEPARTMENT COORDINATORS
+              </span>
             </div>
-
-            {/* 4 - Immediate Right */}
-            <div className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
-              <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">
-                EXECUTIVE COORDINATOR
-              </p>
-              <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">
-                ARAVINDH KANNAN M S
-              </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { role: 'ALUMNI COORDINATOR', name: 'SAKTHIVEL MALLAIAH R G A' },
+                { role: 'TECHNICAL COORDINATOR', name: 'TAMILINI S' },
+                { role: 'PUBLIC RELATION', name: 'GAYATHRI S' },
+                { role: 'STUDENT DEVELOPMENT', name: 'DEEPIKAA B S' }
+              ].map((item) => (
+                <div key={item.name} className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                  <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">{item.role}</p>
+                  <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">{item.name}</h3>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* 5 - Far Right */}
-            <div className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
-              <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">
-                EXECUTIVE COORDINATOR
-              </p>
-              <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">
-                MUGUNDHAN K P
-              </h3>
+          {/* EXECUTIVE MEMBERS */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-2 pt-6 border-t border-[#2A1A1D]/50">
+              <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+              <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
+                EXECUTIVE MEMBERS
+              </span>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {['NITHEESH MUTHU KRISHNAN C', 'SURIYA G V', 'DIVYADHARSHINI K'].map((name) => (
+                <div key={name} className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                  <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">EXECUTIVE MEMBER</p>
+                  <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">{name}</h3>
+                </div>
+              ))}
+            </div>
+          </div>
 
+          {/* WEBSITE DEVELOPERS */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-2 pt-6 border-t border-[#2A1A1D]/50">
+              <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+              <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
+                WEBSITE DEVELOPERS
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {['NITHEESH MUTHU KRISHNAN C', 'CHINNAYA K', 'TAMILINI S', 'BARATHVIKRAMAN S K'].map((name) => (
+                <div key={name} className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                  <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">DEVELOPER</p>
+                  <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">{name}</h3>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* WEBSITE FACULTY COORDINATORS */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-2 pt-6 border-t border-[#2A1A1D]/50">
+              <ShieldCheck className="w-4 h-4 text-[#E01B22]" />
+              <span className="font-mono text-xs text-[#A79798] tracking-[0.2em] uppercase font-bold">
+                WEBSITE FACULTY COORDINATORS
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              {['MR. SUNDAR C', 'MS A MANORANJITHAM'].map((name) => (
+                <div key={name} className="border border-[#2A1A1D] bg-[#0A0607]/90 p-4 rounded-[2px] text-center hover:border-[#E01B22]/60 transition-colors group flex flex-col justify-center items-center min-h-[90px]">
+                  <p className="font-mono text-[9px] text-[#E01B22] font-bold tracking-widest uppercase mb-1">FACULTY COORDINATOR</p>
+                  <h3 className="font-display font-black text-xs sm:text-[13px] text-[#F7F2F2] tracking-wide uppercase leading-snug group-hover:text-[#E01B22] transition-colors">{name}</h3>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-
       </div>
     </section>
   );

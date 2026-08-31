@@ -3,20 +3,14 @@ const path = require("path");
 require("pg"); // Force Vercel bundler to include 'pg' module for Sequelize
 
 let sequelize;
+let neonSequelize;
 
-function createPostgresInstance() {
-  const dbConn = process.env.DATABASE_URL || process.env.DBCONN;
-
-  if (!dbConn) {
-    throw new Error(
-      "DATABASE_URL is not set. Provide a PostgreSQL connection string for Docker or local development."
-    );
-  }
-
-  return new Sequelize(dbConn, {
+function createPostgresInstance(connString) {
+  if (!connString) return null;
+  return new Sequelize(connString, {
     dialect: "postgres",
     logging: false,
-    dialectOptions: process.env.NODE_ENV === "production" && process.env.DATABASE_URL?.includes("localhost") === false ? {
+    dialectOptions: process.env.NODE_ENV === "production" && !connString.includes("localhost") ? {
       ssl: {
         require: true,
         rejectUnauthorized: false
@@ -36,20 +30,32 @@ function createSqliteInstance() {
 
 const forceSqlite = process.env.USE_SQLITE === "true";
 
-sequelize = forceSqlite ? createSqliteInstance() : createPostgresInstance();
+const localDbConn = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || process.env.DBCONN;
+const neonDbConn = process.env.NEON_DATABASE_URL;
+
+if (!localDbConn && !forceSqlite) {
+  throw new Error("LOCAL_DATABASE_URL or DATABASE_URL is not set.");
+}
+
+sequelize = forceSqlite ? createSqliteInstance() : createPostgresInstance(localDbConn);
+neonSequelize = createPostgresInstance(neonDbConn);
 
 const connectPostgres = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`Database connected successfully using ${sequelize.getDialect()}`);
+    console.log(`Local Database connected successfully using ${sequelize.getDialect()}`);
+    
+    if (neonSequelize) {
+      await neonSequelize.authenticate();
+      console.log(`Neon Database connected successfully using postgres`);
+    }
   } catch (error) {
     if (forceSqlite) {
       throw error;
     }
-
-    console.error("PostgreSQL connection failed. Check DATABASE_URL and container networking.");
+    console.error("PostgreSQL connection failed. Check LOCAL_DATABASE_URL / NEON_DATABASE_URL.");
     throw error;
   }
 };
 
-module.exports = { connectPostgres, sequelize };
+module.exports = { connectPostgres, sequelize, neonSequelize };

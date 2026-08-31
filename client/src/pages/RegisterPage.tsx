@@ -31,7 +31,7 @@ const alumniSchema = z.object({
   name: z.string().min(2, 'Full name is required'),
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().min(10, 'WhatsApp mobile number is required (min 10 digits)'),
-  batch_year: z.string().min(1, 'Batch / Passing year is required (e.g. 2015 or 25MX)'),
+  batch_year: z.string().min(1, 'Batch is required (e.g. 25MX)'),
   gender: z.string().min(1, 'Please select your gender'),
   place: z.string().optional(),
   current_organization: z.string().optional(),
@@ -460,7 +460,7 @@ END:VCALENDAR`;
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className={labelClass}>Batch / Year of Passing *</label>
+                    <label className={labelClass}>Batch *</label>
                     <input
                       type="text"
                       {...register('batch_year')}

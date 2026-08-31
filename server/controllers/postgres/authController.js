@@ -170,7 +170,7 @@ const registerUser = async (req, res) => {
     if (isAlumni && batch_year && !/^\d{2,4}(MX)?$/i.test(String(batch_year).trim())) {
       await transaction.rollback();
       return res.status(400).json({
-        message: "Please enter a valid batch or passing year (e.g. 2015, 15, or 25MX)",
+        message: "Please enter a valid batch (e.g. 25MX)",
       });
     }
 

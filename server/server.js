@@ -11,9 +11,10 @@ process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'super_secret_session
 process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const app = require("./app");
-const { connectPostgres, sequelize } = require("./config/db/postgres");
+const { connectPostgres, sequelize, neonSequelize } = require("./config/db/postgres");
 require("./models/postgres");
 const userModel = require("./models/postgres/userModel");
+const { startSyncCron, syncLocalToNeon } = require("./services/dbSync");
 
 const PORT = process.env.PORT || 5000;
 
@@ -120,6 +121,13 @@ const startServer = async () => {
       console.warn('Account seeding failed:', seedErr.message);
     }
     // ----------------------
+    
+    // Start Dual DB Synchronization (Local -> Neon) every 5 minutes (300000 ms)
+    if (neonSequelize) {
+       // Optional: do an initial sync on startup
+       syncLocalToNeon().catch(console.error);
+       startSyncCron(300000);
+    }
 
     app.listen(PORT, () => {
       console.log(`LOGIN 2026 Server running on port ${PORT}`);
