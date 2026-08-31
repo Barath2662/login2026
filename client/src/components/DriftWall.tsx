@@ -303,7 +303,6 @@ const DriftWall = ({
         <img
           src={item.image}
           alt={item.title ?? ''}
-          loading="lazy"
           decoding="async"
           draggable={false}
           className={imgClass}

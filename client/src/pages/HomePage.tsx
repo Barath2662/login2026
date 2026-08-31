@@ -57,7 +57,7 @@ export const HomePage: React.FC = () => {
 
       {/* 08b. LEADERSHIP / COORDINATORS */}
       <ScrollReveal direction="up" amount={0.2}>
-        <CoordinatorsSection />
+        <CoordinatorsSection isHomePage={true} />
       </ScrollReveal>
 
     </div>
