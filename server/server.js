@@ -32,90 +32,76 @@ const startServer = async () => {
       console.warn("enum_users_user_type update warning:", enumErr.message);
     }
 
-    await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "is_online" BOOLEAN NOT NULL DEFAULT FALSE;');
-    await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "coordinator_name" VARCHAR(255);');
-    await sequelize.query('ALTER TABLE "events" ADD COLUMN IF NOT EXISTS "coordinator_phone" VARCHAR(255);');
-    await sequelize.query('ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "accommodation_required" BOOLEAN NOT NULL DEFAULT FALSE;');
+    const queryInterface = sequelize.getQueryInterface();
+    const { DataTypes } = sequelize.Sequelize;
 
-    // Payment migrations
-    await sequelize.query('ALTER TABLE "payments" ADD COLUMN IF NOT EXISTS "payment_date" VARCHAR(255);');
-    await sequelize.query('ALTER TABLE "payments" ADD COLUMN IF NOT EXISTS "payment_method" VARCHAR(255) DEFAULT \'UPI\';');
+    // Helper to safely add column if not exists across dialects
+    const safeAddColumn = async (tableName, columnName, attributes) => {
+      try {
+        const tableDesc = await queryInterface.describeTable(tableName).catch(() => null);
+        if (tableDesc && !Object.prototype.hasOwnProperty.call(tableDesc, columnName)) {
+          await queryInterface.addColumn(tableName, columnName, attributes);
+        }
+      } catch (e) {
+        console.warn(`Column migration warning for ${tableName}.${columnName}:`, e.message);
+      }
+    };
 
-    // LOGIN ID system migrations
-    await sequelize.query('ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "login_id" VARCHAR(20) UNIQUE;');
-
-    // Team-Event association migrations
-    await sequelize.query('ALTER TABLE "teams" ADD COLUMN IF NOT EXISTS "event_id" INTEGER REFERENCES "events"("id") ON DELETE CASCADE;');
-    await sequelize.query('ALTER TABLE "teams" ADD COLUMN IF NOT EXISTS "status" VARCHAR(20) DEFAULT \'forming\';');
-
-    // Team member role migration
-    await sequelize.query('ALTER TABLE "team_members" ADD COLUMN IF NOT EXISTS "role" VARCHAR(20) DEFAULT \'member\';');
-
-    // Team invitation status enum (safe creation)
+    await safeAddColumn('events', 'is_online', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
+    await safeAddColumn('events', 'coordinator_name', { type: DataTypes.STRING(255) });
+    await safeAddColumn('events', 'coordinator_phone', { type: DataTypes.STRING(255) });
+    await safeAddColumn('users', 'accommodation_required', { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false });
+    await safeAddColumn('payments', 'payment_date', { type: DataTypes.STRING(255) });
+    await safeAddColumn('payments', 'payment_method', { type: DataTypes.STRING(255), defaultValue: 'UPI' });
+    await safeAddColumn('users', 'login_id', { type: DataTypes.STRING(20), unique: true });
+    
     try {
-      await sequelize.query("CREATE TYPE \"enum_team_invitations_status\" AS ENUM('pending', 'accepted', 'declined', 'expired');");
-    } catch (_) { /* type may already exist */ }
-
-    try {
-      const queryInterface = sequelize.getQueryInterface();
-      const teamsTable = await queryInterface.describeTable('teams').catch(() => null);
-      if (teamsTable && !Object.prototype.hasOwnProperty.call(teamsTable, 'member_emails')) {
-        await queryInterface.addColumn('teams', 'member_emails', {
-          type: sequelize.Sequelize.DataTypes.TEXT,
-          allowNull: true,
-          defaultValue: '[]',
+      const teamsDesc = await queryInterface.describeTable('teams').catch(() => null);
+      if (teamsDesc && !Object.prototype.hasOwnProperty.call(teamsDesc, 'event_id')) {
+        await queryInterface.addColumn('teams', 'event_id', {
+          type: DataTypes.INTEGER,
+          references: { model: 'events', key: 'id' },
+          onDelete: 'CASCADE'
         });
       }
-    } catch (columnError) {
-      console.warn('Member email column bootstrap warning:', columnError.message);
-    }
+    } catch(e) {}
+
+    await safeAddColumn('teams', 'status', { type: DataTypes.STRING(20), defaultValue: 'forming' });
+    await safeAddColumn('team_members', 'role', { type: DataTypes.STRING(20), defaultValue: 'member' });
+    await safeAddColumn('teams', 'member_emails', { type: DataTypes.TEXT, allowNull: true, defaultValue: '[]' });
 
     console.log("Database schema synchronized");
 
     // --- SEED ACCOUNTS ---
     try {
       const { Op } = require('sequelize');
-      const hashedAdminPw  = await bcrypt.hash('l0gin26', 10);
-      const hashedCoordPw  = await bcrypt.hash('l0gin26', 10);
+      const seeds = [
+        { email: 'login@psgtech.ac.in', name: "login'26", login_id: 'login26admin', pass: 'Admin@login26', role: 'super_admin' },
+        { email: '25mx103@psgtech.ac.in', name: 'Barathvikraman S K', login_id: '25mx103', pass: 'Barath2606#', role: 'super_admin' },
+        { email: '25mx336@psgtech.ac.in', name: 'nitheeshmuthukrishnan', login_id: '25mx336', pass: 'Admin@login26', role: 'super_admin' }
+      ];
 
-      // Admin — login with: ADMIN / l0gin26
-      const adminUser = await userModel.findOne({
-        where: { [Op.or]: [{ login_id: 'ADMIN' }, { email: '25mx336@psgtech.ac.in' }] },
-      });
-      if (!adminUser) {
-        await userModel.create({
-          name: 'Super Admin',
-          email: '25mx336@psgtech.ac.in',
-          password: hashedAdminPw,
-          role: 'super_admin',
-          user_type: 'STAFF',
-          login_id: 'ADMIN',
-          accommodation_required: false,
-        });
-        console.log('Seeded Super Admin (login_id: ADMIN, password: l0gin26)');
-      } else {
-        await adminUser.update({ login_id: 'ADMIN', password: hashedAdminPw });
-        console.log('Updated Super Admin seed → login_id: ADMIN, password: l0gin26');
-      }
+      // Remove old static seeds if they exist
+      await userModel.destroy({ where: { login_id: { [Op.in]: ['ADMIN', 'COORD'] } } }).catch(() => {});
 
-      // Registration Coordinator — login with: COORD / l0gin26
-      const coordUser = await userModel.findOne({
-        where: { [Op.or]: [{ login_id: 'COORD' }, { email: '25mx331@psgtech.ac.in' }] },
-      });
-      if (!coordUser) {
-        await userModel.create({
-          name: 'Registration Coordinator',
-          email: '25mx331@psgtech.ac.in',
-          password: hashedCoordPw,
-          role: 'event_coordinator',
-          user_type: 'STAFF',
-          login_id: 'COORD',
-          accommodation_required: false,
-        });
-        console.log('Seeded Coordinator (login_id: COORD, password: l0gin26)');
-      } else {
-        await coordUser.update({ login_id: 'COORD', password: hashedCoordPw });
-        console.log('Updated Coordinator seed → login_id: COORD, password: l0gin26');
+      for (const s of seeds) {
+        const hashedPw = await bcrypt.hash(s.pass, 10);
+        const user = await userModel.findOne({ where: { email: s.email } });
+        if (!user) {
+          await userModel.create({
+            name: s.name,
+            email: s.email,
+            password: hashedPw,
+            role: s.role,
+            user_type: 'STAFF',
+            login_id: s.login_id,
+            accommodation_required: false,
+          });
+          console.log(`Seeded account: ${s.login_id}`);
+        } else {
+          await user.update({ login_id: s.login_id, password: hashedPw, role: s.role, name: s.name });
+          console.log(`Updated seed account: ${s.login_id}`);
+        }
       }
     } catch (seedErr) {
       console.warn('Account seeding failed:', seedErr.message);
