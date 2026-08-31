@@ -75,11 +75,7 @@ const startServer = async () => {
     // --- SEED ACCOUNTS ---
     try {
       const { Op } = require('sequelize');
-      const seeds = [
-        { email: 'login@psgtech.ac.in', name: "login'26", login_id: 'login26admin', pass: 'Admin@login26', role: 'super_admin' },
-        { email: '25mx103@psgtech.ac.in', name: 'Barathvikraman S K', login_id: '25mx103', pass: 'Barath2606#', role: 'super_admin' },
-        { email: '25mx336@psgtech.ac.in', name: 'nitheeshmuthukrishnan', login_id: '25mx336', pass: 'Admin@login26', role: 'super_admin' }
-      ];
+
 
       // Remove old static seeds if they exist
       await userModel.destroy({ where: { login_id: { [Op.in]: ['ADMIN', 'COORD'] } } }).catch(() => {});
