@@ -8,7 +8,8 @@ const router = express.Router();
 
 // Ensure uploads directory exists
 const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
-const uploadDir = isVercel ? "/tmp/uploads/receipts" : path.join(__dirname, "../../public/uploads/receipts");
+const baseUploadDir = isVercel ? "/tmp/uploads" : path.join(__dirname, "../../public/uploads");
+const uploadDir = path.join(baseUploadDir, "receipts");
 if (!fs.existsSync(uploadDir)) {
   try {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -60,7 +61,7 @@ router.post("/receipt", verifyJwt, upload.single("receipt"), (req, res) => {
   });
 });
 
-const bonafideDir = isVercel ? "/tmp/uploads/bonafides" : path.join(__dirname, "../../public/uploads/bonafides");
+const bonafideDir = path.join(baseUploadDir, "bonafides");
 if (!fs.existsSync(bonafideDir)) {
   try {
     fs.mkdirSync(bonafideDir, { recursive: true });

@@ -1,11 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
 
 const app = express();
+const publicUploadsDir = path.join(__dirname, "public", "uploads");
+if (!fs.existsSync(publicUploadsDir)) {
+  fs.mkdirSync(publicUploadsDir, { recursive: true });
+}
+
 const allowedOrigins = new Set([
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
@@ -69,7 +75,7 @@ app.set("layout", "layouts/layout-ink");
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(publicUploadsDir));
 
 // MPA View Routes (Server-rendered HTML)
 app.use("/", require("./routes/views/index"));

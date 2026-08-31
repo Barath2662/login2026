@@ -21,6 +21,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
+    "login-2k26-client": "file:../client",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",
     "pg": "^8.23.0",

@@ -44,10 +44,14 @@ const connectPostgres = async () => {
   try {
     await sequelize.authenticate();
     console.log(`Local Database connected successfully using ${sequelize.getDialect()}`);
-    
+
     if (neonSequelize) {
-      await neonSequelize.authenticate();
-      console.log(`Neon Database connected successfully using postgres`);
+      try {
+        await neonSequelize.authenticate();
+        console.log(`Neon Database connected successfully using postgres`);
+      } catch (neonError) {
+        console.warn("Neon Database connection failed; continuing with local Docker Postgres.", neonError.message);
+      }
     }
   } catch (error) {
     if (forceSqlite) {

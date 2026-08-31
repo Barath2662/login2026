@@ -2,10 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY server/package*.json ./
-RUN npm install --no-fund --no-audit
+COPY package*.json ./
+RUN npm ci --no-fund --no-audit
 
-COPY server/ ./
+COPY . ./
 
 EXPOSE 5000
 

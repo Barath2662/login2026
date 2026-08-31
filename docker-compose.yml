@@ -1,66 +1,70 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
     container_name: login2026_db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: logindb
+      POSTGRES_DB: login2026
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d login2026"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
     container_name: login2026_server
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "5000:5000"
     environment:
-      - PORT=5000
-      - FRONTEND_URL=http://localhost:5173
-      # Uses local db container via docker network
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/logindb
-      - LOCAL_DATABASE_URL=postgres://postgres:postgres@db:5432/logindb
-      # Make sure to provide NEON_DATABASE_URL in server/.env or here if desired
+      PORT: "5000"
+      USE_SQLITE: "false"
+      FRONTEND_URL: http://localhost:5173
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/login2026
+      LOCAL_DATABASE_URL: postgresql://postgres:postgres@db:5432/login2026
+      NEON_DATABASE_URL: postgresql://neondb_owner:npg_1zF9ySCxZfAv@ep-small-waterfall-axaac8kn-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      JWT_SECRET: super_secret_jwt_key_login_2026
+      SESSION_SECRET: super_secret_session_key_login_2026
     env_file:
-      - ./server/.env
+      - ./.ENV
+    networks:
+      - default
+      - npm_default
 
   client:
     build:
       context: ./client
       dockerfile: Dockerfile.prod
       args:
-        # Defaults, can be overridden during build
-        VITE_API_BASE_URL: /api
-        VITE_API_URL: ''
+        VITE_API_BASE_URL: http://localhost:5000/api
+        VITE_API_URL: http://localhost:5000
     container_name: login2026_client
-    restart: always
+    restart: unless-stopped
+    depends_on:
+      - server
     ports:
-      # Expose on 5173 on the host, internally Nginx runs on 80
-      - "5173:80"
-    env_file:
-      - ./client/.env
+      - "5173:5173"
+    networks:
+      - default
+      - npm_default
 
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: login2026_npm
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-      - "81:81"
-    volumes:
-      - ./npm/data:/data
-      - ./npm/letsencrypt:/etc/letsencrypt
+networks:
+  default:
+  npm_default:
+    external: true
+    name: npm_default
 
 volumes:
   pgdata:
