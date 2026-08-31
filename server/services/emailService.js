@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
 
 const createTransporter = () => {
   if (process.env.SMTP_HOST && process.env.SMTP_USER) {
@@ -121,7 +122,7 @@ const sendEventChangeNotification = async (user, event, changes) => {
         <p style="margin: 4px 0;"><strong>Day:</strong> Day ${event.day} (18-19 September 2026)</p>
       </div>
 
-      <p style="color: #9A9AA2; font-size: 14px;">Log in to your Survivor Dossier at http://localhost:5000/dashboard for real-time venue maps and schedule updates.</p>
+      <p style="color: #9A9AA2; font-size: 14px;">Log in to your Survivor Dossier at ${frontendUrl}/dashboard for real-time venue maps and schedule updates.</p>
     </div>
   `;
   return sendEmail({ to: user.email, subject, html });

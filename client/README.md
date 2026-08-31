@@ -154,10 +154,10 @@ Wrap sensitive child routes in specialized protection guards (e.g., `ProtectedRo
 2. **Environment Configuration:**
    Create a `.env` file in the client directory and configure the backend endpoint:
    ```env
-   VITE_API_BASE_URL=http://localhost:5000/api
-   VITE_API_URL=http://localhost:5000
+   VITE_API_BASE_URL=/api
+   VITE_API_URL=
    ```
-   Use your deployed backend URL instead of `localhost:5000` when running in production.
+   Same-origin `/api` requests are used in production through the reverse proxy.
 3. **Run Development Server:**
    ```bash
    npm run dev

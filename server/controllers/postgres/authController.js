@@ -343,7 +343,10 @@ const loginUser = async (req, res) => {
     // Try LOGIN ID first
     if (loginId) {
       user = await userModel.findOne({
-        where: { login_id: loginId.toUpperCase().trim() },
+        where: sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("login_id")),
+          loginId.trim().toLowerCase()
+        ),
       });
     }
 

@@ -1,5 +1,6 @@
 const { EventChangeLog, Registration, User, EmailLog } = require('../models/postgres');
 const { sendEmail } = require('./emailService');
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
 
 const debounceTimers = new Map();
 
@@ -87,7 +88,7 @@ async function flushEventNotifications(eventId) {
             <div style="background: #E9E1D8; padding: 16px; border-left: 4px solid #E01B22; font-family: monospace; font-size: 13px;">
               ${changeSummary}
             </div>
-            <p>Please check your survivor dossier at <a href="http://localhost:5000/dashboard">LOGIN 2026 Dashboard</a>.</p>
+            <p>Please check your survivor dossier at <a href="${frontendUrl}/dashboard">LOGIN 2026 Dashboard</a>.</p>
           </div>
         `;
 

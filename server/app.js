@@ -15,6 +15,10 @@ if (!fs.existsSync(publicUploadsDir)) {
 const allowedOrigins = new Set([
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
+  "https://login.psgtech.ac.in",
+  "https://www.login.psgtech.ac.in",
+  "http://login.psgtech.ac.in",
+  "http://www.login.psgtech.ac.in",
   "https://login2026-client.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
@@ -27,10 +31,18 @@ const isAllowedOrigin = (origin) => {
   if (allowedOrigins.has(origin)) return true;
 
   return (
+    origin.includes("login.psgtech.ac.in") ||
     origin.includes("login2026-client") &&
     (origin.includes(".vercel.app") || origin.includes("localhost"))
   );
 };
+
+const isProductionRequest =
+  (process.env.APP_ENV || process.env.NODE_ENV || "").toLowerCase() === "production";
+
+if (isProductionRequest) {
+  app.set("trust proxy", 1);
+}
 
 app.use(
   cors({
@@ -60,8 +72,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // set true in HTTPS production
-      sameSite: "lax",
+      secure: isProductionRequest,
+      sameSite: isProductionRequest ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     },
   })

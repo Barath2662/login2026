@@ -31,7 +31,9 @@ services:
     environment:
       PORT: "5000"
       USE_SQLITE: "false"
-      FRONTEND_URL: http://localhost:5173
+      FRONTEND_URL: https://login.psgtech.ac.in
+      CLIENT_URL: https://login.psgtech.ac.in
+      APP_ENV: production
       DATABASE_URL: postgresql://postgres:postgres@db:5432/login2026
       LOCAL_DATABASE_URL: postgresql://postgres:postgres@db:5432/login2026
       NEON_DATABASE_URL: postgresql://neondb_owner:npg_1zF9ySCxZfAv@ep-small-waterfall-axaac8kn-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
@@ -48,8 +50,8 @@ services:
       context: ./client
       dockerfile: Dockerfile.prod
       args:
-        VITE_API_BASE_URL: http://localhost:5000/api
-        VITE_API_URL: http://localhost:5000
+        VITE_API_BASE_URL: /api
+        VITE_API_URL: https://login.psgtech.ac.in
     container_name: login2026_client
     restart: unless-stopped
     depends_on:
